@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/assets">
+        <file>assets/icon/icon.jpg</file>
+        <file>assets/shader/model.frag</file>
+        <file>assets/shader/model.vert</file>
+    </qresource>
+</RCC>
