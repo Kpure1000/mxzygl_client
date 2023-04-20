@@ -1,5 +1,12 @@
 QT += core gui widgets opengl
 
+major_version = $$QT_MAJOR_VERSION
+# 如果qt版本大于5,需要单独引入一些模块
+greaterThan(major_version, 5) {
+    message(include openglwidgets)
+    QT += openglwidgets
+}
+
 CONFIG += c++11
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.

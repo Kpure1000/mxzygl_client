@@ -19,6 +19,7 @@ void ConfigManager::setServer(const conf::ServerInfo &info)
     QSettings qst(m_filePath, QSettings::Format::IniFormat, this);
     qst.setValue("Server/Addr", QString(info.addr.c_str()));
     qst.setValue("Server/Port", info.port);
+    qDebug() << qst.fileName();
 
     //    emit onConfModified();
 }

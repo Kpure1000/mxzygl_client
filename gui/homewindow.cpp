@@ -30,6 +30,7 @@ HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QWidget(par
                 delete import_win;
                 import_win = new ImportWindow(this);
             }
+            import_win->showOnTop();
             import_win->show();
         }, QKeySequence("Ctrl+I"));
 
@@ -39,6 +40,7 @@ HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QWidget(par
                 delete option_win;
                 option_win = new OptionWindow(this);
             }
+            option_win->showOnTop();
             option_win->show();
         }, QKeySequence("Ctrl+O"));
 

@@ -15,7 +15,7 @@ public:
         if(parent->isMaximized()){
             this->showMaximized();
         }
-        this->setAttribute(Qt::WA_DeleteOnClose);
+//        this->setAttribute(Qt::WA_DeleteOnClose);
         this->setWindowTitle(title);
         this->resize(size);
 
@@ -24,9 +24,15 @@ public:
                              | Qt::WindowCloseButtonHint);
     }
 
+    void showOnTop()
+    {
+        setWindowFlag(Qt::WindowStaysOnTopHint,true);
+        setWindowFlag(Qt::WindowStaysOnTopHint,false);
+    }
+
     ~IFunctionWindow()
     {
-        qDebug() << "Function Window " << this->windowTitle() <<" Closed";
+        qDebug() << "Function Window " << this->windowTitle() <<" Decontrusct";
     }
 };
 
