@@ -94,7 +94,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="sb_port"/>
+             <widget class="QSpinBox" name="sb_port">
+              <property name="minimum">
+               <number>1000</number>
+              </property>
+              <property name="maximum">
+               <number>65535</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>

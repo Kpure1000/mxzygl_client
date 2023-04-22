@@ -874,7 +874,7 @@ static OptionalError<Property*> readTextProperty(Cursor* cursor, Allocator& allo
 
 	if (*cursor->current == ',') {
 		// https://github.com/nem0/OpenFBX/issues/85
-		prop->type = IElementProperty::VOID_;
+		prop->type = IElementProperty::VOID;
 		prop->value.begin = cursor->current;
 		prop->value.end = cursor->current;
 		return prop;

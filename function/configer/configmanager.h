@@ -23,7 +23,7 @@ public:
 //    void removeConfigListener(QObject *rec);
 
 public:
-    static ConfigManager* instance(const QString &filePath = "./conf.ini", QObject *parent = nullptr);
+    static ConfigManager* getInstance(const QString &filePath = "./conf.ini", QObject *parent = nullptr);
 
 signals:
     void onConfModified();

@@ -15,13 +15,17 @@ CONFIG += c++11
 SOURCES += \
         main.cpp
 
-INCLUDEPATH += 3rd_part/tinyobjloader \
-                3rd_part/openfbx \
+HEADERS += \
+        mxzygl.h
+
+INCLUDEPATH += 3rd_part \
                 .
 
 include(gui/gui.pri)
 include(function/function.pri)
 include(utils/utils.pri)
+include(resource/resource.pri)
+include(3rd_part/3rd_part.pri)
 
 
 # Default rules for deployment.

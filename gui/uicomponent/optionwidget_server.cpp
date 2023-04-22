@@ -12,10 +12,7 @@ OptionWidget_Server::OptionWidget_Server(QWidget *parent) : QWidget(parent), ui(
     ui->setupUi(this);
     ui->retranslateUi(this);
 
-    server_info = ConfigManager::instance()->getServer();
-
-    ui->sb_port->setMaximum(65535);
-    ui->sb_port->setMinimum(1000);
+    server_info = ConfigManager::getInstance()->getServer();
 
     ui->le_addr->setText(tr(server_info.addr.c_str()));
     ui->sb_port->setValue(server_info.port);
@@ -33,7 +30,7 @@ OptionWidget_Server::OptionWidget_Server(QWidget *parent) : QWidget(parent), ui(
     });
 
     connect(ui->bt_save, &QPushButton::clicked, this, [=](){
-        ConfigManager::instance()->setServer(server_info);
+        ConfigManager::getInstance()->setServer(server_info);
         ui->bt_save->setDisabled(true);
         qDebug() << "OptionWidget_Server>>Server Cnofig" << server_info.combined() << " Saved";
     });

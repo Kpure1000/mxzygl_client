@@ -43,7 +43,7 @@ conf::ServerInfo ConfigManager::getServer() const
 //    disconnect(ConfigManager::instance(),&ConfigManager::onConfModified, rec, 0);
 //}
 
-ConfigManager *ConfigManager::instance(const QString &filePath, QObject *parent)
+ConfigManager *ConfigManager::getInstance(const QString &filePath, QObject *parent)
 {
     static ConfigManager cm(filePath, parent);
     return &cm;

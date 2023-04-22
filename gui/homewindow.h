@@ -18,6 +18,9 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 private:
+    void makeMenu();
+
+private:
     QMenuBar* m_top_menubar = nullptr;
     QTabWidget * m_tabw = nullptr;
 

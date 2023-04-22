@@ -6,10 +6,21 @@
 class ImportWindow : public IFunctionWindow
 {
     Q_OBJECT
+
 public:
-    explicit ImportWindow(QWidget *parent = nullptr);
+    enum ImportType : int {
+        IM_MODEL = 0x1 << 0,
+        IM_BVH    = 0x1 << 1,
+        IM_EFFECT = 0x1 << 2,
+    };
+
+public:
+    explicit ImportWindow(const QString &title, ImportType type, QWidget *parent = nullptr);
 
 signals:
+
+private:
+    ImportType m_im_type;
 
 };
 
