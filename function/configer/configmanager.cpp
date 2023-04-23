@@ -6,42 +6,44 @@
 
 ConfigManager::ConfigManager(const QString &filePath, QObject *parent) : QObject(parent), m_filePath(filePath)
 {
-    int interval = 300;
-    timer.connect(&timer, &QTimer::timeout, this, [interval, this](){
+    m_setting_watcher = new QFileSystemWatcher({filePath}, this);
+    connect(m_setting_watcher, &QFileSystemWatcher::fileChanged, this, [this](){
         emit onConfModified();
-        timer.start(interval);
     });
-    timer.start(interval);
 }
 
-void ConfigManager::setServer(const conf::ServerInfo &info)
-{
-    QSettings qst(m_filePath, QSettings::Format::IniFormat, this);
-    qst.setValue("Server/Addr", QString(info.addr.c_str()));
-    qst.setValue("Server/Port", info.port);
-    qDebug() << qst.fileName();
-
-    //    emit onConfModified();
-}
-
-conf::ServerInfo ConfigManager::getServer() const
+void ConfigManager::setConfig(const QString &key, const QVariant &value)
 {
     QSettings qst(m_filePath, QSettings::Format::IniFormat, const_cast<ConfigManager*>(this));
-    return {
-        qst.value("Server/Addr").toString().toStdString(),
-        qst.value("Server/Port").toInt()
-    };
+    qst.setValue(key, value);
+//    emit onConfModified();
 }
 
-//void ConfigManager::addConfigListener(QObject *rec, std::function<void ()> &&func)
-//{
-//    connect(ConfigManager::instance(), &ConfigManager::onConfModified, rec, func);
-//}
+void ConfigManager::setConfigs(std::initializer_list<std::pair<QString, QVariant>> &&inList)
+{
+    QSettings qst(m_filePath, QSettings::Format::IniFormat, const_cast<ConfigManager*>(this));
+    for (auto &_p : inList) {
+        qst.setValue(_p.first, _p.second);
+    }
+//    emit onConfModified();
+}
 
-//void ConfigManager::removeConfigListener(QObject *rec)
-//{
-//    disconnect(ConfigManager::instance(),&ConfigManager::onConfModified, rec, 0);
-//}
+QVariant ConfigManager::getConfig(const QString &key) const
+{
+    QSettings qst(m_filePath, QSettings::Format::IniFormat, const_cast<ConfigManager*>(this));
+    return qst.value(key);
+}
+
+QVariantList ConfigManager::getConfigs(const QStringList &keys) const
+{
+    QSettings qst(m_filePath, QSettings::Format::IniFormat, const_cast<ConfigManager*>(this));
+    QVariantList ret;
+    ret.reserve(keys.size());
+    for (auto& key : keys) {
+        ret += qst.value(key);
+    }
+    return ret;
+}
 
 ConfigManager *ConfigManager::getInstance(const QString &filePath, QObject *parent)
 {
