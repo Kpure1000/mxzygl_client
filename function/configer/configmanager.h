@@ -3,8 +3,9 @@
 
 #include <QObject>
 #include <QTimer>
-
 #include <functional>
+#include <initializer_list>
+#include <QFileSystemWatcher>
 
 #include "config.h"
 
@@ -16,11 +17,11 @@ public:
 
     explicit ConfigManager(const QString &filePath = "./conf.ini", QObject *parent = nullptr);
 
-    void setServer(const conf::ServerInfo& info);
-    conf::ServerInfo getServer() const;
+    void setConfig(const QString &key, const QVariant &value);
+    void setConfigs(std::initializer_list<std::pair<QString, QVariant>> &&inList);
 
-//    void addConfigListener(QObject *rec, std::function<void()>&& func);
-//    void removeConfigListener(QObject *rec);
+    QVariant getConfig(const QString& key) const;
+    QVariantList getConfigs(const QStringList& keys) const;
 
 public:
     static ConfigManager* getInstance(const QString &filePath = "./conf.ini", QObject *parent = nullptr);
@@ -31,7 +32,9 @@ signals:
 private:
 
     QString m_filePath;
-    QTimer timer;
+//    QTimer m_timer;
+    QFileSystemWatcher *m_setting_watcher;
+
 
 };
 

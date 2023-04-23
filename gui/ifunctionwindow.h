@@ -6,6 +6,8 @@
 
 #include "utils/assetmanager.h"
 
+class FunctionWnidowManager;
+
 /**
  * @brief 功能弹窗接口
  */
@@ -13,12 +15,13 @@ class IFunctionWindow : public QDialog
 {
     Q_OBJECT
 public:
-    IFunctionWindow(const QString& title, QSize size = {800,600}, QWidget *parent = nullptr) : QDialog(parent)
+    IFunctionWindow(const QString& title, QSize size = {800,600}, bool recreate_when_open = true, QWidget *parent = nullptr)
+        : QDialog(parent), m_recreate_when_open(recreate_when_open)
     {
         if(parent->isMaximized()){
             this->showMaximized();
         }
-//        this->setAttribute(Qt::WA_DeleteOnClose);
+
         this->setWindowTitle(title);
         this->resize(size);
 
@@ -37,6 +40,11 @@ public:
     {
         qDebug() << "Function Window " << this->windowTitle() <<" Decontrusct";
     }
+
+private:
+    friend FunctionWnidowManager;
+    bool m_recreate_when_open;
+
 };
 
 class FunctionWnidowManager : public QObject, public IAssetManager<std::string, IFunctionWindow*>
@@ -56,7 +64,7 @@ public:
             return false;
         }
         auto win = this->get(title);
-        if (nullptr == win || win->isHidden()) {
+        if (win->m_recreate_when_open && (nullptr == win || win->isHidden())) {
             delete win;
             return false;
         }
