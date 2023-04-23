@@ -124,7 +124,8 @@ struct DataView
 	}
 };
 
-
+#undef VOID
+#define VOID VOID
 struct IElementProperty
 {
 	enum Type : unsigned char
@@ -152,7 +153,6 @@ struct IElementProperty
 	virtual bool getValues(u64* values, int max_size) const = 0;
 	virtual bool getValues(i64* values, int max_size) const = 0;
 };
-
 
 struct IElement
 {
