@@ -11,9 +11,9 @@ class ModelLoader : public QObject
 public:
     explicit ModelLoader(QObject *parent = nullptr);
 
-    std::shared_ptr<res::Model> loadFBX(const QString& filePath) const;
-    std::shared_ptr<res::Model> loadOBJ(const QString& filePath) const;
-    std::shared_ptr<res::Model> loadOFF(const QString& filePath) const;
+    std::shared_ptr<res::Model> loadFBX(const QString& filePath, const QString& modelName, bool doGlobalTransform = true) const;
+    std::shared_ptr<res::Model> loadOBJ(const QString& filePath, const QString& modelName) const;
+    std::shared_ptr<res::Model> loadOFF(const QString& filePath, const QString& modelName) const;
 
 public:
 
