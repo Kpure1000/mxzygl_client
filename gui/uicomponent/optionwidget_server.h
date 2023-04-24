@@ -20,7 +20,12 @@ public:
 
 private:
     Ui::OptionWidget_Server *ui;
-    conf::ServerInfo server_info;
+
+    struct ServerInfo {
+        QString addr;
+        int port;
+        QString combined() {return addr + ":" + std::to_string(port).c_str();}
+    } server_info;
 
 signals:
 

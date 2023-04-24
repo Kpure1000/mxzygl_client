@@ -2,6 +2,6 @@
 #define MX_UICOMPONENT_H
 
 #include "optionwidget_server.h"
-#include "renderpane.h"
+#include "renderwidget.h"
 
 #endif // MX_UICOMPONENT_H

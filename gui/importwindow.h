@@ -2,6 +2,7 @@
 #define MX_UPLOADWINDOW_H
 
 #include "ifunctionwindow.h"
+#include <QStringList>
 
 class ImportWindow : public IFunctionWindow
 {
@@ -21,6 +22,7 @@ signals:
 
 private:
     ImportType m_im_type;
+    QStringList m_selected_files;
 
 };
 

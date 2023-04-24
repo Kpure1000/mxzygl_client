@@ -1,13 +1,13 @@
-#ifndef MX_RENDERPANE_H
-#define MX_RENDERPANE_H
+#ifndef MX_RENDERWIDGET_H
+#define MX_RENDERWIDGET_H
 
 #include <QOpenGLWidget>
 
-class RenderPane : public QOpenGLWidget
+class RenderWidget : public QOpenGLWidget
 {
     Q_OBJECT
 public:
-    explicit RenderPane(QWidget *parent = nullptr);
+    explicit RenderWidget(QWidget *parent = nullptr);
 
 private:
     void initializeGL() override;
@@ -18,4 +18,4 @@ signals:
 
 };
 
-#endif // MX_RENDERPANE_H
+#endif // MX_RENDERWIDGET_H
