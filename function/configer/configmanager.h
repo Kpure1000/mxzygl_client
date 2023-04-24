@@ -5,9 +5,8 @@
 #include <QTimer>
 #include <functional>
 #include <initializer_list>
+#include <QVariant>
 #include <QFileSystemWatcher>
-
-#include "config.h"
 
 class ConfigManager : public QObject
 {
@@ -20,7 +19,7 @@ public:
     void setConfig(const QString &key, const QVariant &value);
     void setConfigs(std::initializer_list<std::pair<QString, QVariant>> &&inList);
 
-    QVariant getConfig(const QString& key) const;
+    QVariant getConfig(const QString &key, const QVariant &defaultValue = QVariant()) const;
     QVariantList getConfigs(const QStringList& keys) const;
 
 public:

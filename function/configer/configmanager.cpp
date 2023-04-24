@@ -28,10 +28,10 @@ void ConfigManager::setConfigs(std::initializer_list<std::pair<QString, QVariant
 //    emit onConfModified();
 }
 
-QVariant ConfigManager::getConfig(const QString &key) const
+QVariant ConfigManager::getConfig(const QString &key, const QVariant& defaultValue) const
 {
     QSettings qst(m_filePath, QSettings::Format::IniFormat, const_cast<ConfigManager*>(this));
-    return qst.value(key);
+    return qst.value(key, defaultValue);
 }
 
 QVariantList ConfigManager::getConfigs(const QStringList &keys) const
