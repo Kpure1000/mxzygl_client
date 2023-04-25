@@ -7,107 +7,106 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QSpacerItem>
+
+#include "uicomponent/previewwidget.h"
 
 ImportWindow::ImportWindow(const QString &title, ImportType type, QWidget *parent)
-    : IFunctionWindow(title, parent->size(), false, parent), m_im_type(type)
+    : IFunctionWindow(title, parent->size(), false, parent)
+    , m_im_type(type)
 {
-    auto ly_total = new QGridLayout(this);
-    this->setLayout(ly_total);
+    auto ly_top = new QHBoxLayout();
+    ly_top->addSpacerItem(new QSpacerItem(40, 20));
+    ly_top->setStretch(0, 4);
+    ly_top->setSpacing(2);
 
     auto bt_fileBrowse = new QPushButton(tr("浏览"), this);
     connect(bt_fileBrowse, &QPushButton::clicked, this, [type, this]() {
         switch (type) {
-        case ImportWindow::ImportType::IM_MODEL: {
+        case ImportWindow::ImportType::MODEL: {
             auto open_dir
-                = ConfigManager::getInstance()->getConfig("FileBrowser/IM_MODEL").toString();
+                = ConfigManager::getInstance()->getConfig("FileBrowser/ImportType::MODEL").toString();
             m_selected_files = QFileDialog::getOpenFileNames(this,
                                                                      tr("浏览模型文件"),
                                                                      open_dir,
                                                                      "*.obj;*.fbx");
             if (m_selected_files.size() == 0)
                 break;
-            ConfigManager::getInstance()->setConfig("FileBrowser/IM_MODEL", QFileInfo(m_selected_files[0]).absolutePath());
+            ConfigManager::getInstance()->setConfig("FileBrowser/ImportType::MODEL", QFileInfo(m_selected_files[0]).absolutePath());
 
-            for (auto& file : m_selected_files) {
+            for (auto &file : m_selected_files) {
                 auto base_name = QFileInfo(file).baseName();
-                auto extend_name = QFileInfo(file).fileName().split('.').back();
-                auto mfm = ModelFileManager::getInstance();
-                if (mfm->has(base_name.toStdString())) {
+                if (ModelFileManager::getInstance()->has(base_name.toStdString())) {
                     qDebug() << "Model" << base_name << "Exists in"
-                             << mfm->get(base_name.toStdString());
+                             << ModelFileManager::getInstance()->get(base_name.toStdString());
                 } else {
-                    mfm->add(base_name.toStdString(), file);
+                    ModelFileManager::getInstance()->add(base_name.toStdString(), file);
                 }
-
-//                auto mfm = ModelFileManager::getInstance();
-//                auto mm = ModelManager::getInstance();
-//                if (mm->has(base_name.toStdString())) {
-//                    qDebug() << "Model" << base_name << "exists";
-//                } else {
-//                    std::shared_ptr<res::Model> model;
-//                    if (extend_name == "fbx") {
-//                        model = ModelLoader::getInstance()->loadFBX(file, base_name);
-//                    } else if (extend_name == "obj") {
-//                        model = ModelLoader::getInstance()->loadOBJ(file, base_name);
-//                    }
-//                    if (model != nullptr) {
-//                        qDebug() << "Loaded Model" << model->name;
-//                        mm->add(model->name.toStdString(), model);
-//                    } else {
-//                        qDebug() << "Model" << base_name << "is null";
-//                    }
-//                }
-
             }
-
             break;
         }
-        case ImportWindow::ImportType::IM_BVH: {
+        case ImportWindow::ImportType::BVH: {
             auto open_dir
-                = ConfigManager::getInstance()->getConfig("FileBrowser/IM_BVH").toString();
+                = ConfigManager::getInstance()->getConfig("FileBrowser/ImportType::BVH").toString();
             m_selected_files = QFileDialog::getOpenFileNames(this,
                                                                      tr("浏览骨骼动画文件"),
                                                                      open_dir,
                                                                      "*.bvh");
             if (m_selected_files.size() == 0)
                 break;
-            ConfigManager::getInstance()->setConfig("FileBrowser/IM_BVH", QFileInfo(m_selected_files[0]).absolutePath());
+            ConfigManager::getInstance()->setConfig("FileBrowser/ImportType::BVH", QFileInfo(m_selected_files[0]).absolutePath());
             break;
         }
-        case ImportWindow::ImportType::IM_EFFECT: {
+        case ImportWindow::ImportType::EFFECT: {
             auto open_dir
-                = ConfigManager::getInstance()->getConfig("FileBrowser/IM_EFFECT").toString();
+                = ConfigManager::getInstance()->getConfig("FileBrowser/ImportType::EFFECT").toString();
             m_selected_files = QFileDialog::getOpenFileNames(this,
                                                                      tr("浏览特效文件"),
                                                                      open_dir,
                                                                      "*.obj;*.fbx;*.bvh");
             if (m_selected_files.size() == 0)
                 break;
-            ConfigManager::getInstance()->setConfig("FileBrowser/IM_EFFECT", QFileInfo(m_selected_files[0]).absolutePath());
+            ConfigManager::getInstance()->setConfig("FileBrowser/ImportType::EFFECT", QFileInfo(m_selected_files[0]).absolutePath());
             break;
         }
         }
-        // TODO 直接开始预览
+
         if (m_selected_files.size() == 0) {
             qDebug() << "m_selected_files.size()==0";
             return;
         }
 
+        // 设置要预览的资源文件
+        std::vector<res::AssetInfo> assetInfos;
+        assetInfos.reserve(m_selected_files.size());
+        for (const auto &file : m_selected_files) {
+            assetInfos.emplace_back(m_im_type, file);
+        }
+        m_previewWidget->setPreviewInfo(assetInfos);
     });
 
-    auto ly_bottom = new QHBoxLayout(this);
+    ly_top->addWidget(bt_fileBrowse, 1);
 
     auto bt_clear = new QPushButton(tr("清空"), this);
     connect(bt_clear, &QPushButton::clicked, this, [type, this](){
         // TODO 清空预览与表格
         m_selected_files.clear();
     });
+    ly_top->addWidget(bt_clear, 1);
 
     auto bt_upload = new QPushButton(tr("上传"), this);
     connect(bt_upload, &QPushButton::clicked, this, [type, this]() {
         // TODO 连接服务器 上传 m_selected_files
     });
+    ly_top->addWidget(bt_upload, 1);
 
-    ly_total->addLayout(ly_bottom, ly_total->rowCount(), 0);
-    ly_bottom->addWidget(bt_fileBrowse);
+    auto ly_total = new QVBoxLayout(this);
+
+    ly_total->addLayout(ly_top, 0);
+
+    m_previewWidget = new PreviewWidget(2, 3, static_cast<PreviewWidget::PreviewType>(type), parent);
+
+    ly_total->addWidget(m_previewWidget, 1);
+
+    this->setLayout(ly_total);
 }

@@ -6,7 +6,7 @@
 #include "mxzygl.h"
 
 OptionWindow::OptionWindow(QWidget *parent)
-    : IFunctionWindow("选项", {800,600}, true, parent)
+    : IFunctionWindow("选项", {600,500}, true, parent)
 {
     this->setLayout(new QGridLayout(this));
     auto tabw = new QTabWidget(this);

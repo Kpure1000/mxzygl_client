@@ -19,7 +19,7 @@ HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QWidget(par
 
     m_tabw = new QTabWidget(this);
 
-    this->resize(1000, 800);
+    this->resize(800, 600);
 
 }
 
@@ -52,7 +52,7 @@ void HomeWindow::makeMenu()
             auto winName = "模型导入";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName)) {
-                fm->create(winName, new ImportWindow(winName, ImportWindow::IM_MODEL, this));
+                fm->create(winName, new ImportWindow(winName, ImportWindow::ImportType::MODEL, this));
             }
         });
 
@@ -61,7 +61,7 @@ void HomeWindow::makeMenu()
             auto winName = "骨骼动画导入";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName)) {
-                fm->create(winName, new ImportWindow(winName, ImportWindow::IM_BVH, this));
+                fm->create(winName, new ImportWindow(winName, ImportWindow::ImportType::BVH, this));
             }
         });
 
@@ -70,7 +70,7 @@ void HomeWindow::makeMenu()
             auto winName = "特效导入";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName)) {
-                fm->create(winName, new ImportWindow(winName, ImportWindow::IM_EFFECT, this));
+                fm->create(winName, new ImportWindow(winName, ImportWindow::ImportType::EFFECT, this));
             }
         });
 
