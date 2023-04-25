@@ -3,5 +3,6 @@
 
 #include "configer/configer.h"
 #include "renderer/renderer.h"
+#include "assetloader/assetloader.h"
 
 #endif // MX_FUNCTION_H
