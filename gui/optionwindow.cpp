@@ -3,7 +3,7 @@
 #include <QGridLayout>
 #include <QTabWidget>
 
-#include "mxzygl.h"
+#include "gui/uicomponent/optionwidget_server.h"
 
 OptionWindow::OptionWindow(QWidget *parent)
     : IFunctionWindow("选项", {600,500}, true, parent)

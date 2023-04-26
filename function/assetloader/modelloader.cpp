@@ -3,11 +3,11 @@
 #include <QRunnable>
 #include <QThreadPool>
 #include <QMatrix4x4>
+#include <QFileInfo>
 
 #include <fstream>
 
-#include "mxzygl.h"
-
+#include "utils/jobsystem.h"
 #include "3rd_part/openfbx/ofbx.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -17,10 +17,12 @@ using namespace res;
 
 ModelLoader::ModelLoader(QObject *parent) : QObject(parent)
 {
-
+    connect(this, &ModelLoader::onModelLoaded, this, [this](const QString& modelName) {
+        cacheStart(modelName);
+    });
 }
 
-std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, const QString& modelName, bool doGlobalTransform) const
+std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, const QString& modelName, bool doGlobalTransform)
 {
     FILE *fp = fopen(filePath.toStdString().c_str(), "rb");
 
@@ -201,7 +203,7 @@ std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, const QStri
     return model;
 }
 
-std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath, const QString& modelName) const
+std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath, const QString& modelName)
 {
     tinyobj::ObjReaderConfig reader_config;
     reader_config.mtl_search_path = "./"; // Path to material files
@@ -297,7 +299,61 @@ std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath, const QStri
     return model;
 }
 
-std::shared_ptr<Model> ModelLoader::loadOFF(const QString &filePath, const QString& modelName) const
+std::shared_ptr<Model> ModelLoader::loadOFF(const QString &filePath, const QString& modelName)
 {
+    return nullptr;
+}
 
+void ModelLoader::asyncLoad(const QString &filePath, const QString& modelName, std::function<void()> loadCallBack)
+{
+//    this->cacheStart(modelName);
+    if (!ModelManager::getInstance()->has(modelName.toStdString())) {
+        // load FBX file in async Job
+        JobSystem::getInstance()->submit([filePath, loadCallBack, modelName, this]() {
+            auto fileExt = filePath.split('.').back();
+            std::shared_ptr<res::Model> model;
+            if (fileExt == "fbx") {
+                model = ModelLoader::getInstance()->loadFBX(filePath, modelName);
+            } else if (fileExt == "obj") {
+                model = ModelLoader::getInstance()->loadOBJ(filePath, modelName);
+            } else if (fileExt == "off") {
+                model = ModelLoader::getInstance()->loadOFF(filePath, modelName);
+            }
+            if (model == nullptr) {
+                qDebug() << "ModelLoader::asyncLoad>> Load Model " << modelName << "Failed";
+            }
+            ModelManager::getInstance()->add(modelName.toStdString(), model);
+            emit onModelLoaded(modelName);
+            loadCallBack();
+        });
+    } else {
+        emit onModelLoaded(modelName);
+        loadCallBack();
+    }
+}
+
+void ModelLoader::cacheStart(const QString &modelName)
+{
+    auto modelName_std = modelName.toStdString();
+    QTimer *timer;
+    if (this->has(modelName_std)) {
+        timer = this->get(modelName_std).get();
+    } else {
+        timer = this->add(modelName_std, std::make_shared<QTimer>()).get();
+        connect(timer, &QTimer::timeout, this, [timer, modelName_std, this]() {
+            auto model_asset = ModelManager::getInstance()->get(modelName_std);
+            if (model_asset.use_count() <= 2) {
+                qDebug() << "ModelLoader::cacheStart>> Timeout and Not Referenced, Remove Model Cache"
+                         << modelName_std.c_str();
+                ModelManager::getInstance()->remove(modelName_std);
+                this->remove(modelName_std);
+            } else {
+                // 尝试重新清理
+                qDebug() << "ModelLoader::cacheStart>> Model" << modelName_std.c_str()
+                         << "use_count=" << model_asset.use_count() << ", Try To Remove Again...";
+                timer->start(m_used_try_timeout);
+            }
+        });
+    }
+    timer->start(m_cache_timeout);
 }

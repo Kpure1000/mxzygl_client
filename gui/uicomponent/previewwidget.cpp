@@ -10,9 +10,10 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
-#include "mxzygl.h"
+#include "gui/uicomponent/previewpane.h"
+#include "gui/uicomponent/infotablewidget.h"
 
-PreviewWidget::PreviewWidget(int row, int column, PreviewType type, QWidget *parent)
+PreviewWidget::PreviewWidget(int row, int column, PreviewType type, Qt::Orientation split_orientation, QWidget *parent)
     : QWidget{parent}, m_previewNum(row * column), m_type(type)
 {
     auto ly_total = new QVBoxLayout(this);
@@ -35,50 +36,54 @@ PreviewWidget::PreviewWidget(int row, int column, PreviewType type, QWidget *par
     }
 
     auto splitter = new QSplitter(this);
-    splitter->setOrientation(Qt::Orientation::Vertical);
-    splitter->addWidget(panesWidget);
-    splitter->setStretchFactor(0, 2);
+    splitter->setOrientation(split_orientation);
     splitter->addWidget(m_infoTable);
-    splitter->setStretchFactor(1, 1);
+    splitter->setStretchFactor(0, 1);
+    splitter->addWidget(panesWidget);
+    splitter->setStretchFactor(1, 2);
 
     ly_total->addWidget(splitter);
 
-    connect(m_infoTable, &InfoTableWidget::onSelectGroupToPreview, this, &PreviewWidget::doPreview);
+    connect(m_infoTable, &InfoTableWidget::onSelectGroupToPreview, this, &PreviewWidget::doPreviewPrepare);
 }
 
-void PreviewWidget::setPreviewInfo(const std::vector<res::AssetInfo> &assets)
+void PreviewWidget::setInfos(const QJsonObject &info)
 {
-    QJsonObject info;
-    QJsonArray headers;
-    auto header_names = assets[0].getInfoNameList();
-    for (auto& header : header_names) {
-        headers.append(header);
-    }
-    QJsonArray data;
-    for (auto& asset : assets) {
-        data.append(*asset.getJsonObject());
-    }
-    info.insert("headers", headers);
-    info.insert("data", data);
-    m_infoTable->setInfo(info);
+    m_infoTable->setInfos(info);
 }
 
-void PreviewWidget::doPreview(const std::vector<QTableWidgetItem *> &items, const QStringList &assetNames)
+void PreviewWidget::clearInfos()
 {
-    for (size_t i = 0; i < static_cast<size_t>(m_previewNum); i++) {
-        disconnect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, 0);
-        m_previewPanes[i]->doClear();
-        if (i < m_previewPanes.size() && i < items.size()) {
+    m_infoTable->clearInfos();
+}
+
+void PreviewWidget::PreviewFiles(const QStringList &filePaths, const QStringList &assetNames)
+{
+    for (int i = 0; i < m_previewNum; i++) {
+        if (i < filePaths.size()) {
             if (m_type == PreviewType::MODEL) {
-                m_previewPanes[i]->doPreviewModel(assetNames[i]);
+                m_previewPanes[i]->doPreviewModel(filePaths[i], assetNames[i]);
             } else if (m_type == PreviewType::BVH) {
-                m_previewPanes[i]->doPreviewBVH(assetNames[i]);
+                m_previewPanes[i]->doPreviewBVH(filePaths[i], assetNames[i]);
             } else if (m_type == PreviewType::EFFECT) {
                 // TODO: preview effect
             }
+        }
+    }
+}
+
+void PreviewWidget::doPreviewPrepare(const std::vector<QTableWidgetItem *> &items)
+{
+    std::vector<int> index;
+    for (size_t i = 0; i < static_cast<size_t>(m_previewNum); i++) {
+        disconnect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, 0);
+        m_previewPanes[i]->doClear();
+        if (i < items.size()) {
             connect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, [items, i, this]() {
                 m_infoTable->jumpTo(items[i]);
             });
+            index.push_back(items[i]->row());
         }
     }
+    emit onPreview(index);
 }

@@ -8,8 +8,7 @@
 #include <QHBoxLayout>
 
 #include "optionwindow.h"
-
-#include "mxzygl.h"
+#include "importwindow.h"
 
 HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QWidget(parent)
 {
@@ -52,7 +51,7 @@ void HomeWindow::makeMenu()
             auto winName = "模型导入";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName)) {
-                fm->create(winName, new ImportWindow(winName, ImportWindow::ImportType::MODEL, this));
+                fm->create(winName, new ImportWindow(winName, AssetImporter::ImportType::MODEL, this));
             }
         });
 
@@ -61,7 +60,7 @@ void HomeWindow::makeMenu()
             auto winName = "骨骼动画导入";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName)) {
-                fm->create(winName, new ImportWindow(winName, ImportWindow::ImportType::BVH, this));
+                fm->create(winName, new ImportWindow(winName, AssetImporter::ImportType::BVH, this));
             }
         });
 
@@ -70,7 +69,7 @@ void HomeWindow::makeMenu()
             auto winName = "特效导入";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName)) {
-                fm->create(winName, new ImportWindow(winName, ImportWindow::ImportType::EFFECT, this));
+                fm->create(winName, new ImportWindow(winName, AssetImporter::ImportType::EFFECT, this));
             }
         });
 

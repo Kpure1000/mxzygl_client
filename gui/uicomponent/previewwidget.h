@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTableWidgetItem>
+#include <QJsonObject>
 
 #include "resource/assetinfo.h"
 
@@ -18,14 +19,20 @@ public:
     explicit PreviewWidget(int row,
                            int column,
                            PreviewType type,
+                           Qt::Orientation split_orientation = Qt::Orientation::Horizontal,
                            QWidget *parent = nullptr);
 
-    void setPreviewInfo(const std::vector<res::AssetInfo> &assets);
+    void setInfos(const QJsonObject &assets);
+
+    void clearInfos();
+
+    void PreviewFiles(const QStringList &filePaths, const QStringList &assetNames);
 
 signals:
+    void onPreview(const std::vector<int> &index);
 
 private slots:
-    void doPreview(const std::vector<QTableWidgetItem *> &items, const QStringList &assetNames);
+    void doPreviewPrepare(const std::vector<QTableWidgetItem *> &items);
 
 private:
     InfoTableWidget *m_infoTable;

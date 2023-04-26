@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QTimerEvent>
 
+#include "resource/model.h"
+#include "resource/bvh.h"
+
 RenderWidget::RenderWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
     m_timer.start(16, this);
@@ -36,10 +39,10 @@ void RenderWidget::timerEvent(QTimerEvent *event)
     start_time = std::chrono::steady_clock::now();
     update();
 }
-
+std::shared_ptr<res::Model> g_model;
 void RenderWidget::doModelRendering(const QString &assetName)
 {
-    auto model = ModelManager::getInstance()->get(assetName.toStdString());
+    g_model = ModelManager::getInstance()->get(assetName.toStdString());
 //    qDebug() << "RenderWidget::doModelRendering>> Render Model" << model->name;
     // TODO render model
 }

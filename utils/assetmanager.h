@@ -33,10 +33,12 @@ public:
     inline assetT get(const keyT &key) { return m_data[key]; }
     inline assetT get(const keyT &key) const { return m_data[key]; }
 
-    inline void add(const keyT &key, assetT asset) { m_data.insert({key, asset}); }
-    inline void addAny(const keyT &key, assetT asset) { m_data[key] = asset; }
+    inline assetT add(const keyT &key, assetT asset) { m_data.insert({key, asset}); return asset; }
+    inline assetT addAny(const keyT &key, assetT asset) { m_data[key] = asset; return asset; }
 
-    inline bool has(const keyT &key) { return m_data.find(key) != m_data.end(); }
+    inline void remove(const keyT &key) { m_data.erase(m_data.find(key)); }
+
+    inline bool has(const keyT &key) { return m_data.find(key) != m_data.end(); }    
 
     inline size_t size() const { return m_data.size(); }
 
@@ -67,8 +69,10 @@ public:
     inline assetT get(keyT key) { return m_data[key]; }
     inline assetT get(keyT key) const { return m_data[key]; }
 
-    inline void add(keyT key, assetT asset) { m_data.insert({key, asset}); }
-    inline void addAny(keyT key, assetT asset) { m_data[key] = asset; }
+    inline assetT add(keyT key, assetT asset) { m_data.insert({key, asset}); return asset; }
+    inline assetT addAny(keyT key, assetT asset) { m_data[key] = asset; return asset; }
+
+    inline void remove(keyT key) { m_data.erase(m_data.find(key)); }
 
     inline bool has(keyT key) { return m_data.find(key) != m_data.end(); }
 

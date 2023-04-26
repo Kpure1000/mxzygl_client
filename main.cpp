@@ -2,7 +2,9 @@
 
 #include <memory>
 
-#include "mxzygl.h"
+#include "function/configer/configer.h"
+#include "utils/jobsystem.h"
+#include "gui/homewindow.h"
 
 int main(int argc, char *argv[])
 {

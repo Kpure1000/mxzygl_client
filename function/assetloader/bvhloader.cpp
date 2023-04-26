@@ -1,7 +1,5 @@
 #include "bvhloader.h"
 
-#include "mxzygl.h"
-
 BVHLoader::BVHLoader(QObject *parent)
 {
 

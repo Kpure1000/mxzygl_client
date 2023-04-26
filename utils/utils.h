@@ -3,5 +3,6 @@
 
 #include "assetmanager.h"
 #include "jobsystem.h"
+#include "qstring_hash.h"
 
 #endif // MX_UTILS_H

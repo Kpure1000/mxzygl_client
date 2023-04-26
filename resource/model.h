@@ -59,22 +59,22 @@ signals:
 };
 
 
-class ModelFileManager : public QObject, public IAssetManager<std::string, QString>
-{
-    Q_OBJECT
-public:
-    explicit ModelFileManager(QObject *parent = nullptr) : QObject(parent) {}
+//class ModelFileManager : public QObject, public IAssetManager<std::string, QString>
+//{
+//    Q_OBJECT
+//public:
+//    explicit ModelFileManager(QObject *parent = nullptr) : QObject(parent) {}
 
-public:
+//public:
 
-    static ModelFileManager *getInstance(QObject *parent = nullptr)
-    {
-        static ModelFileManager instance_am(parent);
-        return &instance_am;
-    }
+//    static ModelFileManager *getInstance(QObject *parent = nullptr)
+//    {
+//        static ModelFileManager instance_am(parent);
+//        return &instance_am;
+//    }
 
-signals:
-};
+//signals:
+//};
 
 
 

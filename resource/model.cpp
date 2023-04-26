@@ -1,7 +1,5 @@
 #include "model.h"
 
-#include "mxzygl.h"
-
 using namespace res;
 
 std::shared_ptr<Mesh> Mesh::batchMesh(const std::vector<std::shared_ptr<Mesh> > &meshes)

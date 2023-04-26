@@ -11,21 +11,19 @@ InfoTableWidget::InfoTableWidget(QWidget *parent, int spanNum)
     horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
     connect(this, &QTableWidget::itemDoubleClicked, this, [this](QTableWidgetItem *item) {
         std::vector<QTableWidgetItem*> previewItems;
-        QStringList assetNames;
         if (item->column() == 0) {
             int groupEnd = item->row() + m_spanNum;
             for (int r = item->row(); r < this->rowCount() && r < groupEnd; r++) {
                 auto realPreviewItem = this->item(r, 1);
                 previewItems.push_back(realPreviewItem);
-                assetNames.append(realPreviewItem->text());
             }
         }
         if (previewItems.size() > 0)
-            emit this->onSelectGroupToPreview(previewItems, assetNames);
+            emit this->onSelectGroupToPreview(previewItems);
     });
 }
 
-void InfoTableWidget::setInfo(const QJsonObject &info)
+void InfoTableWidget::setInfos(const QJsonObject &info)
 {
     auto headers = info["headers"].toArray();
     if (headers.size() == 0) {
@@ -52,7 +50,7 @@ void InfoTableWidget::setInfo(const QJsonObject &info)
             qDebug() << "InfoTableWidget::addInfo>> element.size()==0";
             return;
         }
-        auto previewItem = new QTableWidgetItem(std::to_string(row / 6 + 1).c_str());
+        auto previewItem = new QTableWidgetItem(std::to_string(row / m_spanNum + 1).c_str());
         previewItem->setToolTip(tr("双击以预览组"));
         previewItem->setFlags(previewItem->flags() ^= Qt::ItemIsEditable);
         setItem(row, 0, previewItem);
@@ -70,6 +68,11 @@ void InfoTableWidget::setInfo(const QJsonObject &info)
             setSpan(i, 0, spanOffset, 1);
         }
     }
+
+    // 默认双击第一组预览并选中
+    auto firstGroupItem = item(0, 0);
+    emit itemDoubleClicked(firstGroupItem);
+    setCurrentItem(firstGroupItem);
 }
 
 void InfoTableWidget::jumpTo(QTableWidgetItem *item)
@@ -77,6 +80,13 @@ void InfoTableWidget::jumpTo(QTableWidgetItem *item)
     selectRow(item->row());
     this->item(item->row(), 0)->setSelected(false);
     scrollToItem(item);
+}
+
+void InfoTableWidget::clearInfos()
+{
+    this->clearContents();
+    std::vector<QTableWidgetItem*>emptyItem;
+    emit onSelectGroupToPreview(emptyItem);
 }
 
 void InfoTableWidget::doPreviewPaneSelected()

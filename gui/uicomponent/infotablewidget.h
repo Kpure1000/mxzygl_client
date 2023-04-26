@@ -11,13 +11,14 @@ class InfoTableWidget : public QTableWidget
 public:
     InfoTableWidget(QWidget *parent = nullptr, int spanNum = 6);
     
-    void setInfo(const QJsonObject& info);
+    void setInfos(const QJsonObject& info);
 
     void jumpTo(QTableWidgetItem* item);
+    
+    void clearInfos();
 
 signals:
-    void onSelectGroupToPreview(const std::vector<QTableWidgetItem *> &items,
-                                const QStringList &assetNames);
+    void onSelectGroupToPreview(const std::vector<QTableWidgetItem *> &items);
 
 public slots:
     void doPreviewPaneSelected();

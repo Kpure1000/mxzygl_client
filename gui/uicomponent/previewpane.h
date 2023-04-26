@@ -22,8 +22,8 @@ signals:
     void onBVHLoaded(const QString& bvhName);
 
 public slots:
-    void doPreviewModel(const QString &assetName);
-    void doPreviewBVH(const QString &assetName);
+    void doPreviewModel(const QString &filePath, const QString& assetName);
+    void doPreviewBVH(const QString &filePath, const QString& assetName);
     void doClear();
 
 private slots:

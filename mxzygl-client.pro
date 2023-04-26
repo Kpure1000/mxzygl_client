@@ -15,8 +15,7 @@ CONFIG += c++11
 SOURCES += \
         main.cpp
 
-HEADERS += \
-        mxzygl.h
+HEADERS +=
 
 INCLUDEPATH += 3rd_part \
                 .
