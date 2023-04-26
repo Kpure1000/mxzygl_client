@@ -1,12 +1,13 @@
-#ifndef PREVIEWWIDGET_H
-#define PREVIEWWIDGET_H
+#ifndef MX_PREVIEWWIDGET_H
+#define MX_PREVIEWWIDGET_H
 
 #include <QWidget>
+#include <QTableWidgetItem>
+
 #include "resource/assetinfo.h"
 
 class PreviewPane;
 class InfoTableWidget;
-class QTableWidgetItem;
 
 class PreviewWidget : public QWidget
 {
@@ -34,4 +35,4 @@ private:
 
 };
 
-#endif // PREVIEWWIDGET_H
+#endif // MX_PREVIEWWIDGET_H

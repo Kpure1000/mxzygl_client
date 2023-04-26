@@ -1,5 +1,5 @@
-#ifndef CSUGL_THREAD_POOL_H
-#define CSUGL_THREAD_POOL_H
+#ifndef MX_JOBSYSTEM_H
+#define MX_JOBSYSTEM_H
 
 #include <vector>
 #include <queue>
@@ -109,4 +109,4 @@ inline decltype(auto) JobSystem::submit(F&& f, Args && ...args) {
     return result;
 }
 
-#endif // !CSUGL_THREAD_POOL_H
+#endif // MX_JOBSYSTEM_H

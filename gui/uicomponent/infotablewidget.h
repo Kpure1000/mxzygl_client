@@ -1,5 +1,5 @@
-#ifndef INFOTABLEWIDGET_H
-#define INFOTABLEWIDGET_H
+#ifndef MX_INFOTABLEWIDGET_H
+#define MX_INFOTABLEWIDGET_H
 
 #include <QTableWidget>
 #include <vector>
@@ -26,4 +26,4 @@ private:
     int m_spanNum;
 };
 
-#endif // INFOTABLEWIDGET_H
+#endif // MX_INFOTABLEWIDGET_H

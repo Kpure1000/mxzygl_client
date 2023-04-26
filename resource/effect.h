@@ -8,4 +8,4 @@ struct Effect
 };
 }
 
-#endif // EFFEECT_H
+#endif // MX_EFFEECT_H

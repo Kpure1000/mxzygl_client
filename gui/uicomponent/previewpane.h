@@ -1,5 +1,5 @@
-#ifndef PREVIEWPANE_H
-#define PREVIEWPANE_H
+#ifndef MX_PREVIEWPANE_H
+#define MX_PREVIEWPANE_H
 
 #include <QWidget>
 #include <QLabel>
@@ -41,4 +41,4 @@ private:
 
 };
 
-#endif // PREVIEWPANE_H
+#endif // MX_PREVIEWPANE_H
