@@ -12,7 +12,7 @@
 #include "uicomponent/previewwidget.h"
 
 ImportWindow::ImportWindow(const QString &title, ImportType type, QWidget *parent)
-    : IFunctionWindow(title, parent->size(), false, parent)
+    : IFunctionWindow(title, parent ? parent->size() : QSize{800, 600}, false, parent)
     , m_im_type(type)
 {
     auto ly_top = new QHBoxLayout();
@@ -104,7 +104,7 @@ ImportWindow::ImportWindow(const QString &title, ImportType type, QWidget *paren
 
     ly_total->addLayout(ly_top, 0);
 
-    m_previewWidget = new PreviewWidget(2, 3, static_cast<PreviewWidget::PreviewType>(type), parent);
+    m_previewWidget = new PreviewWidget(2, 3, static_cast<PreviewWidget::PreviewType>(type), this);
 
     ly_total->addWidget(m_previewWidget, 1);
 
