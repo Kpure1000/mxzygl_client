@@ -44,17 +44,18 @@ PreviewWidget::PreviewWidget(int row, int column, PreviewType type, Qt::Orientat
 
     ly_total->addWidget(splitter);
 
-    connect(m_infoTable, &InfoTableWidget::onSelectGroupToPreview, this, &PreviewWidget::doPreviewPrepare);
 }
 
 void PreviewWidget::setInfos(const QJsonObject &info)
 {
+    connect(m_infoTable, &InfoTableWidget::onSelectGroupToPreview, this, &PreviewWidget::doPreviewPrepare);
     m_infoTable->setInfos(info);
 }
 
 void PreviewWidget::clearInfos()
 {
     m_infoTable->clearInfos();
+    disconnect(m_infoTable, &InfoTableWidget::onSelectGroupToPreview, this, 0);
 }
 
 void PreviewWidget::PreviewFiles(const QStringList &filePaths, const QStringList &assetNames)
