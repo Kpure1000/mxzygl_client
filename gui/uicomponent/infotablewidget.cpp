@@ -3,6 +3,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QHeaderView>
+#include <QDebug>
 
 InfoTableWidget::InfoTableWidget(QWidget *parent, int spanNum)
     : QTableWidget(parent), m_spanNum(spanNum)
