@@ -1,6 +1,8 @@
-SOURCES += $$PWD/*.c $$PWD/*.cpp
-HEADERS += $$PWD/*.h
+SOURCES += \
+    $$PWD/ofbx.cpp \
+    $$PWD/miniz.c
+HEADERS += \
+    $$PWD/ofbx.h \
+    $$PWD/miniz.h
 
 CONFIG += c++17
-
-#INCLUDEPATH += $$PWD/*.h

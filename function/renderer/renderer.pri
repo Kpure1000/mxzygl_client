@@ -1,2 +1,5 @@
-SOURCES += $$PWD/*.cpp
-HEADERS += $$PWD/*.h
+SOURCES += \
+    $$PWD/shadermanager.cpp
+HEADERS += \
+    $$PWD/renderer.h \
+    $$PWD/shadermanager.h

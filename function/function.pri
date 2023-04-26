@@ -1,5 +1,5 @@
-#SOURCES += $$PWD/*.cpp
-HEADERS += $$PWD/*.h
+HEADERS += \
+    $$PWD/function.h
 
 include(configer/configer.pri)
 include(renderer/renderer.pri)

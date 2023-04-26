@@ -1,2 +1,2 @@
-#SOURCES += $$PWD/*.cpp
-HEADERS += $$PWD/*.h
+HEADERS += \
+    $$PWD/tiny_obj_loader.h
