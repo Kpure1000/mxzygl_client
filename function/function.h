@@ -3,6 +3,7 @@
 
 #include "configer/configer.h"
 #include "renderer/renderer.h"
-#include "assetloader/assetloader.h"
+#include "assetloader/modelloader.h"
+#include "assetloader/bvhloader.h"
 
 #endif // MX_FUNCTION_H

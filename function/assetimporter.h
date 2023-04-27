@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "resource/assetinfo.h"
+#include "utils/qstring_hash.h"
 
 class AssetImporter : public QObject
 {

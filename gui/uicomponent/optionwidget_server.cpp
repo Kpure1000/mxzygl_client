@@ -5,8 +5,6 @@
 #include <QDebug>
 #include <QKeyEvent>
 
-#include "mxzygl.h"
-
 OptionWidget_Server::OptionWidget_Server(QWidget *parent) : QWidget(parent), ui(new Ui::OptionWidget_Server)
 {
     ui->setupUi(this);

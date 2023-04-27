@@ -5,7 +5,8 @@
 
 #include <QMouseEvent>
 
-#include "function/assetloader/assetloader.h"
+#include "function/assetloader/modelloader.h"
+#include "function/assetloader/bvhloader.h"
 
 PreviewPane::PreviewPane(QWidget *parent, bool linkTableItem)
     : QWidget(parent), m_linkTableItem(linkTableItem)
@@ -31,8 +32,9 @@ PreviewPane::PreviewPane(QWidget *parent, bool linkTableItem)
     doClear();
 
     connect(this, &PreviewPane::onModelLoaded, m_renderWidget, &RenderWidget::doModelRendering);
-    connect(this, &PreviewPane::onModelLoaded, this,           &PreviewPane::doShowRenderer);
-    connect(this, &PreviewPane::onBVHLoaded,   this,           &PreviewPane::doShowRenderer);
+    connect(this, &PreviewPane::onBVHLoaded, m_renderWidget, &RenderWidget::doBVHRendering);
+
+    connect(this, &PreviewPane::onPreviewPrepared, this, &PreviewPane::doShowRenderer);
 
 }
 
@@ -74,28 +76,10 @@ void PreviewPane::doShowDefault()
 void PreviewPane::doPreviewModel(const QString &filePath, const QString& assetName)
 {
     doShowPreparing(assetName);
-    ModelLoader::getInstance()->asyncLoad(filePath, assetName, [assetName, this]() {
-        emit onModelLoaded(assetName);
+    ModelLoader::getInstance()->asyncLoad(filePath, assetName, [filePath, assetName, this]() {
+        emit onModelLoaded(filePath);
+        emit onPreviewPrepared(assetName);
     });
-    //    if (!ModelManager::getInstance()->has(assetName.toStdString())) {
-    //        // load FBX file in async Job
-    //        JobSystem::getInstance()->submit([assetName, this]() {
-    //            auto filePath = ModelFileManager::getInstance()->get(assetName.toStdString());
-    //            auto fileExt = filePath.split('.').back();
-    //            std::shared_ptr<res::Model> model;
-    //            if (fileExt == "fbx") {
-    //                model = ModelLoader::getInstance()->loadFBX(filePath, assetName);
-    //            } else if (fileExt == "obj") {
-    //                model = ModelLoader::getInstance()->loadOBJ(filePath, assetName);
-    //            }
-    //            ModelManager::getInstance()->add(assetName.toStdString(), model);
-    ////            qDebug() << "PreviewPane::doPreviewModel>> Model" << model->name << "Load Successed";
-    //            emit onModelLoaded(assetName);
-    //        });
-    //    } else {
-    ////        qDebug() << "PreviewPane::doPreviewModel>> Model" << assetName << "exist";
-    //        emit onModelLoaded(assetName);
-    //    }
 }
 
 void PreviewPane::doPreviewBVH(const QString &filePath, const QString &assetName)

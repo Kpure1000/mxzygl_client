@@ -23,8 +23,8 @@ signals:
 
 
 public slots:
-    void doModelRendering(const QString &assetName);
-    void doBVHRendering(const QString &assetName);
+    void doModelRendering(const QString &filePath);
+    void doBVHRendering(const QString &filePath);
     void stopRendering();
 
 private:

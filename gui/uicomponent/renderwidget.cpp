@@ -1,6 +1,5 @@
 #include "renderwidget.h"
 
-#include "mxzygl.h"
 #include <QOpenGLContext>
 #include <QDebug>
 #include <QTimerEvent>
@@ -40,14 +39,14 @@ void RenderWidget::timerEvent(QTimerEvent *event)
     update();
 }
 std::shared_ptr<res::Model> g_model;
-void RenderWidget::doModelRendering(const QString &assetName)
+void RenderWidget::doModelRendering(const QString &filePath)
 {
-    g_model = ModelManager::getInstance()->get(assetName.toStdString());
+    g_model = ModelManager::getInstance()->get(filePath.toStdString());
 //    qDebug() << "RenderWidget::doModelRendering>> Render Model" << model->name;
     // TODO render model
 }
 
-void RenderWidget::doBVHRendering(const QString &assetName)
+void RenderWidget::doBVHRendering(const QString &filePath)
 {
     // TODO render BVH asset
 }

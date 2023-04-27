@@ -15,10 +15,20 @@
 
 using namespace res;
 
-ModelLoader::ModelLoader(QObject *parent) : QObject(parent)
+ModelLoader::ModelLoader(QObject *parent) : AssetCache(parent)
 {
-    connect(this, &ModelLoader::onModelLoaded, this, [this](const QString& modelName) {
-        cacheStart(modelName);
+    connect(this, &AssetCache::onCacheTimeout, this, [this](const QString& filePath) {
+        auto filePath_std = filePath.toStdString();
+        auto model_asset = ModelManager::getInstance()->get(filePath_std);
+        if (model_asset.use_count() <= 2) {
+//            qDebug() << "ModelLoader::cacheStart>> Timeout and Not Referenced, Remove Model Cache" << filePath_std.c_str();
+            ModelManager::getInstance()->remove(filePath_std);
+            this->removeCache(filePath);
+        } else {
+            // 尝试重新清理
+//            qDebug() << "ModelLoader::cacheStart>> Model" << filePath << "use_count=" << model_asset.use_count() << ", Try To Remove Again...";
+            this->restartCache(filePath);
+        }
     });
 }
 
@@ -307,7 +317,7 @@ std::shared_ptr<Model> ModelLoader::loadOFF(const QString &filePath, const QStri
 void ModelLoader::asyncLoad(const QString &filePath, const QString& modelName, std::function<void()> loadCallBack)
 {
 //    this->cacheStart(modelName);
-    if (!ModelManager::getInstance()->has(modelName.toStdString())) {
+    if (!ModelManager::getInstance()->has(filePath.toStdString())) {
         // load FBX file in async Job
         JobSystem::getInstance()->submit([filePath, loadCallBack, modelName, this]() {
             auto fileExt = filePath.split('.').back();
@@ -322,38 +332,12 @@ void ModelLoader::asyncLoad(const QString &filePath, const QString& modelName, s
             if (model == nullptr) {
                 qDebug() << "ModelLoader::asyncLoad>> Load Model " << modelName << "Failed";
             }
-            ModelManager::getInstance()->add(modelName.toStdString(), model);
-            emit onModelLoaded(modelName);
+            ModelManager::getInstance()->add(filePath.toStdString(), model);
+            emit onAssetLoaded(filePath);
             loadCallBack();
         });
     } else {
-        emit onModelLoaded(modelName);
+        emit onAssetLoaded(filePath);
         loadCallBack();
     }
-}
-
-void ModelLoader::cacheStart(const QString &modelName)
-{
-    auto modelName_std = modelName.toStdString();
-    QTimer *timer;
-    if (this->has(modelName_std)) {
-        timer = this->get(modelName_std).get();
-    } else {
-        timer = this->add(modelName_std, std::make_shared<QTimer>()).get();
-        connect(timer, &QTimer::timeout, this, [timer, modelName_std, this]() {
-            auto model_asset = ModelManager::getInstance()->get(modelName_std);
-            if (model_asset.use_count() <= 2) {
-                qDebug() << "ModelLoader::cacheStart>> Timeout and Not Referenced, Remove Model Cache"
-                         << modelName_std.c_str();
-                ModelManager::getInstance()->remove(modelName_std);
-                this->remove(modelName_std);
-            } else {
-                // 尝试重新清理
-                qDebug() << "ModelLoader::cacheStart>> Model" << modelName_std.c_str()
-                         << "use_count=" << model_asset.use_count() << ", Try To Remove Again...";
-                timer->start(m_used_try_timeout);
-            }
-        });
-    }
-    timer->start(m_cache_timeout);
 }

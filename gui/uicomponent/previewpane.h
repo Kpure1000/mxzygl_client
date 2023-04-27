@@ -17,6 +17,7 @@ private:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 signals:
+    void onPreviewPrepared(const QString& assetName);
     void onSelectedPane();
     void onModelLoaded(const QString& modelName);
     void onBVHLoaded(const QString& bvhName);
@@ -26,7 +27,7 @@ public slots:
     void doPreviewBVH(const QString &filePath, const QString& assetName);
     void doClear();
 
-private slots:
+private:
     void doShowRenderer(const QString& assetName);
     void doShowPreparing(const QString& assetName);
     void doShowDefault();
