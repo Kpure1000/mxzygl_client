@@ -8,7 +8,6 @@
 OptionWidget_Server::OptionWidget_Server(QWidget *parent) : QWidget(parent), ui(new Ui::OptionWidget_Server)
 {
     ui->setupUi(this);
-    ui->retranslateUi(this);
 
     auto server_info_raw = ConfigManager::getInstance()->getConfigs({"Server/Addr", "Server/Port"});
     server_info = {server_info_raw[0].toString(), server_info_raw[1].toInt()};
@@ -40,4 +39,9 @@ OptionWidget_Server::OptionWidget_Server(QWidget *parent) : QWidget(parent), ui(
         ui->bt_save->setDisabled(true);
         qDebug() << "OptionWidget_Server>>Server Cnofig" << server_info.combined() << " Saved";
     });
+}
+
+OptionWidget_Server::~OptionWidget_Server()
+{
+    delete ui;
 }

@@ -3,9 +3,16 @@
 
 AssetCache::AssetCache(QObject *parent) : QObject(parent)
 {
-    m_cache_timeout = ConfigManager::getInstance()->getConfig("Asset/CacheTimeout").toInt();
-    m_cache_timeout_retry = ConfigManager::getInstance()->getConfig("Asset/CacheTimeoutRetry").toInt();
+    m_cache_timeout = 1000 * 60 * ConfigManager::getInstance()->getConfig("Asset/CacheTimeout").toInt();
+    m_cache_timeout_retry = 1000 * 60 * ConfigManager::getInstance()->getConfig("Asset/CacheTimeoutRetry").toInt();
+
     connect(this, &AssetCache::onAssetLoaded, this, &AssetCache::cacheStart);
+
+    connect(ConfigManager::getInstance(), &ConfigManager::onConfModified, this, [this](){
+        m_cache_timeout = 1000 * 60 * ConfigManager::getInstance()->getConfig("Asset/CacheTimeout").toInt();
+        m_cache_timeout_retry = 1000 * 60 * ConfigManager::getInstance()->getConfig("Asset/CacheTimeoutRetry").toInt();
+    });
+
 }
 
 void AssetCache::removeCache(const QString &filePath)

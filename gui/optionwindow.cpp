@@ -4,6 +4,7 @@
 #include <QTabWidget>
 
 #include "gui/uicomponent/optionwidget_server.h"
+#include "gui/uicomponent/optionwidget_asset.h"
 
 OptionWindow::OptionWindow(QWidget *parent)
     : IFunctionWindow("选项", {600,500}, true, parent)
@@ -15,5 +16,7 @@ OptionWindow::OptionWindow(QWidget *parent)
     auto w_server = new OptionWidget_Server(this);
     tabw->addTab(w_server, "服务器");
 
-    tabw->addTab(new QWidget, "其他");
+    auto w_asset = new OptionWidget_Asset(this);
+    tabw->addTab(w_asset, "资源");
+    // TODO: 资源缓存时间设置
 }

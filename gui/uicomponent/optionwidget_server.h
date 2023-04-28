@@ -17,6 +17,7 @@ class OptionWidget_Server : public QWidget
     Q_OBJECT
 public:
     explicit OptionWidget_Server(QWidget *parent = nullptr);
+    ~OptionWidget_Server();
 
 private:
     Ui::OptionWidget_Server *ui;

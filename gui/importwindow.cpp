@@ -32,19 +32,19 @@ ImportWindow::ImportWindow(const QString &title, AssetImporter::ImportType type,
         QString config_key, open_title, open_option;
         switch (m_assetImporter->type()) {
         case AssetImporter::ImportType::MODEL: {
-            config_key = "FileBrowser/ImportType::MODEL";
+            config_key = "FileBrowser/ImportType_MODEL";
             open_title = tr("浏览模型文件");
             open_option = "*.obj;*.fbx";
             break;
         }
         case AssetImporter::ImportType::BVH: {
-            config_key = "FileBrowser/ImportType::BVH";
+            config_key = "FileBrowser/ImportType_BVH";
             open_title = tr("浏览骨骼动画文件");
             open_option = "*.bvh";
             break;
         }
         case AssetImporter::ImportType::EFFECT: {
-            config_key = "FileBrowser/ImportType::EFFECT";
+            config_key = "FileBrowser/ImportType_EFFECT";
             open_title = tr("浏览特效文件");
             open_option = "*.obj;*.fbx;*.bvh";
             break;

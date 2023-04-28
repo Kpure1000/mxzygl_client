@@ -1,11 +1,13 @@
 SOURCES += \
     $$PWD/infotablewidget.cpp \
+    $$PWD/optionwidget_asset.cpp \
     $$PWD/optionwidget_server.cpp \
     $$PWD/previewpane.cpp \
     $$PWD/previewwidget.cpp \
     $$PWD/renderwidget.cpp
 HEADERS += \
     $$PWD/infotablewidget.h \
+    $$PWD/optionwidget_asset.h \
     $$PWD/optionwidget_server.h \
     $$PWD/previewpane.h \
     $$PWD/previewwidget.h \
@@ -13,4 +15,5 @@ HEADERS += \
     $$PWD/uicomponent.h
 
 FORMS += \
-    $$PWD/option_server.ui
+    $$PWD/option_server.ui \
+    $$PWD/optionwidget_asset.ui
