@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "resource/assetinfo.h"
-//#include "utils/qstring_hash.h"
 
 class AssetImporter : public QObject
 {
@@ -24,7 +23,7 @@ public:
 
     void clear();
 
-    inline bool has(const QString &filePath) const { return m_filePathDict.find(filePath) != m_filePathDict.end(); }
+    inline bool has(const QString &filePath) const { return m_filePathDict.find(filePath.toStdString()) != m_filePathDict.end(); }
 
     inline size_t size() const { return m_filePaths.size(); }
 
@@ -46,7 +45,7 @@ signals:
     void onClear();
 
 private:
-    std::unordered_set<QString> m_filePathDict;
+    std::unordered_set<std::string> m_filePathDict;
     QStringList m_filePaths;
     ImportType m_type;
 

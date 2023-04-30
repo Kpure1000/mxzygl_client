@@ -16,7 +16,7 @@ AssetImporter::~AssetImporter()
 
 void AssetImporter::add(const QString &filePath)
 {
-    m_filePathDict.insert(filePath);
+    m_filePathDict.insert(filePath.toStdString());
     m_filePaths << filePath;
     emit onAddPath();
 }
@@ -26,7 +26,7 @@ void AssetImporter::addPathsNotExist(const QStringList &filePaths)
     int addition_count = 0;
     for (const auto &filePath : filePaths) {
         if (!has(filePath)) {
-            m_filePathDict.insert(filePath);
+            m_filePathDict.insert(filePath.toStdString());
             m_filePaths << filePath;
             addition_count++;
         }
