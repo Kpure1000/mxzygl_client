@@ -84,6 +84,7 @@ ImportWindow::ImportWindow(const QString &title, AssetImporter::ImportType type,
                                         3,
                                         static_cast<PreviewWidget::PreviewType>(type),
                                         Qt::Orientation::Horizontal,
+                                        true,
                                         this);
 
     connect(m_previewWidget, &PreviewWidget::onPreview, this, [this](const std::vector<int> &index){

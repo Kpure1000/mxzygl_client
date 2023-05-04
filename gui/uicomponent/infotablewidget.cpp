@@ -5,8 +5,8 @@
 #include <QHeaderView>
 #include <QDebug>
 
-InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, QWidget *parent)
-    : QTableWidget(parent), m_spanNum(spanNum), m_info(info)
+InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_editable, QWidget *parent)
+    : QTableWidget(parent), m_spanNum(spanNum), m_info(info), m_info_editable(info_editable)
 {
     horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
     connect(this, &QTableWidget::itemDoubleClicked, this, [this](QTableWidgetItem *item) {
@@ -21,24 +21,26 @@ InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, QWidget *parent
         if (previewItems.size() > 0)
             emit this->onSelectGroupToPreview(previewItems);
     });
-    connect(this, &QTableWidget::itemChanged, this, [this](QTableWidgetItem *cur) {
-        auto newText = cur->text();
-        auto R = cur->row();
-        auto C = cur->column();
-        if (C <= 0 )
-            return;
-        auto headerName = this->horizontalHeaderItem(C)->text();
-        auto vals = (*this->m_info)["data"].toArray();
-        auto row = vals[R].toObject();
-        auto preText = row[headerName].toString();// 去除预览组一列
-        row[headerName] = newText;
-        vals[R] = row;
-        (*this->m_info)["data"]=vals;
-//        qDebug() << "InfoTableWidget>>QTableWidget::itemChanged>>, "
-//                 << "from" << preText
-//                 << "to" << newText
-//                 << ", in table[" << R <<", " << C << "]";
-    });
+    if (m_info_editable) {
+        connect(this, &QTableWidget::itemChanged, this, [this](QTableWidgetItem *cur) {
+            auto newText = cur->text();
+            auto R = cur->row();
+            auto C = cur->column();
+            if (C <= 0 )
+                return;
+            auto headerName = this->horizontalHeaderItem(C)->text();
+            auto vals = (*this->m_info)["data"].toArray();
+            auto row = vals[R].toObject();
+            auto preText = row[headerName].toString();// 去除预览组一列
+            row[headerName] = newText;
+            vals[R] = row;
+            (*this->m_info)["data"]=vals;
+//            qDebug() << "InfoTableWidget>>QTableWidget::itemChanged>>, "
+//                     << "from" << preText
+//                     << "to" << newText
+//                     << ", in table[" << R <<", " << C << "]";
+        });
+    }
 }
 
 void InfoTableWidget::refresh()
@@ -74,7 +76,10 @@ void InfoTableWidget::refresh()
         setItem(row, 0, previewItem);
         int col = 1;
         for (const auto &header_name : headers) {
-            setItem(row, col, new QTableWidgetItem(key2value[header_name.toString()].toString()));
+            auto dataItem = new QTableWidgetItem(key2value[header_name.toString()].toString());
+            if (!m_info_editable)
+                dataItem->setFlags(dataItem->flags() ^= Qt::ItemIsEditable);
+            setItem(row, col, dataItem);
             col++;
         }
     }

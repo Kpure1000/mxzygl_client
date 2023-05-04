@@ -20,7 +20,8 @@ public:
                            int row,
                            int column,
                            PreviewType type,
-                           Qt::Orientation split_orientation = Qt::Orientation::Horizontal,
+                           Qt::Orientation split_orientation,
+                           bool info_editable,
                            QWidget *parent = nullptr);
 
     void refreshInfos();
@@ -40,6 +41,7 @@ private:
     std::vector<PreviewPane *> m_previewPanes;
     int m_previewNum;
     PreviewType m_type;
+//    bool m_info_editable;
 
 };
 
