@@ -9,9 +9,9 @@ class InfoTableWidget : public QTableWidget
 {
     Q_OBJECT
 public:
-    InfoTableWidget(QWidget *parent = nullptr, int spanNum = 6);
+    InfoTableWidget(QJsonObject &info, int spanNum = 6, QWidget *parent = nullptr);
     
-    void setInfos(const QJsonObject& info);
+    void refresh();
 
     void jumpTo(QTableWidgetItem* item);
     
@@ -25,6 +25,7 @@ public slots:
 
 private:
     int m_spanNum;
+    QJsonObject &m_info;
 };
 
 #endif // MX_INFOTABLEWIDGET_H

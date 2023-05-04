@@ -13,7 +13,7 @@
 #include "gui/uicomponent/previewpane.h"
 #include "gui/uicomponent/infotablewidget.h"
 
-PreviewWidget::PreviewWidget(int row, int column, PreviewType type, Qt::Orientation split_orientation, QWidget *parent)
+PreviewWidget::PreviewWidget(QJsonObject &info, int row, int column, PreviewType type, Qt::Orientation split_orientation, QWidget *parent)
     : QWidget{parent}, m_previewNum(row * column), m_type(type)
 {
     auto ly_total = new QVBoxLayout(this);
@@ -25,7 +25,7 @@ PreviewWidget::PreviewWidget(int row, int column, PreviewType type, Qt::Orientat
     panesWidget->setStyleSheet("border:1px solid #8f8f8f;");
     panesWidget->setLayout(ly_pane);
 
-    m_infoTable = new InfoTableWidget(this, m_previewNum);
+    m_infoTable = new InfoTableWidget(info, m_previewNum, this);
 
     for (int r = 0; r < row; r++) {
         for (int c = 0; c < column; c++) {
@@ -46,10 +46,10 @@ PreviewWidget::PreviewWidget(int row, int column, PreviewType type, Qt::Orientat
 
 }
 
-void PreviewWidget::setInfos(const QJsonObject &info)
+void PreviewWidget::refreshInfos()
 {
     connect(m_infoTable, &InfoTableWidget::onSelectGroupToPreview, this, &PreviewWidget::doPreviewPrepare);
-    m_infoTable->setInfos(info);
+    m_infoTable->refresh();
 }
 
 void PreviewWidget::clearInfos()

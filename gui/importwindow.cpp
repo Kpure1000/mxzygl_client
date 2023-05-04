@@ -16,8 +16,7 @@ ImportWindow::ImportWindow(const QString &title, AssetImporter::ImportType type,
 {
     m_assetImporter = new AssetImporter(type, this);
     connect(m_assetImporter, &AssetImporter::onAddPaths, this, [this]() {
-        // 设置要预览的资源格式
-        m_previewWidget->setInfos(m_assetImporter->getAssets_JsonObject());
+        m_previewWidget->refreshInfos();
     });
     connect(m_assetImporter, &AssetImporter::onClear, this, [this]() {
         m_previewWidget->clearInfos();
@@ -80,7 +79,8 @@ ImportWindow::ImportWindow(const QString &title, AssetImporter::ImportType type,
 
     ly_total->addLayout(ly_top, 0);
 
-    m_previewWidget = new PreviewWidget(2,
+    m_previewWidget = new PreviewWidget(m_assetImporter->getInfoRef(),
+                                        2,
                                         3,
                                         static_cast<PreviewWidget::PreviewType>(type),
                                         Qt::Orientation::Horizontal,

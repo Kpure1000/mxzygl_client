@@ -6,7 +6,15 @@
 AssetImporter::AssetImporter(ImportType type, QObject *parent)
     : QObject{parent}, m_type(type)
 {
-
+    QJsonArray headers;
+    // 由于在addPathsNotExist中有addition_count检测，m_filePaths一定有元素
+    auto header_names = res::AssetInfo::getInfoNameList();
+    for (auto& header : header_names) {
+        headers.append(header);
+    }
+    QJsonArray data;
+    m_info.insert("headers", headers);
+    m_info.insert("data", data);
 }
 
 AssetImporter::~AssetImporter()
@@ -18,6 +26,9 @@ void AssetImporter::add(const QString &filePath)
 {
     m_filePathDict.insert(filePath.toStdString());
     m_filePaths << filePath;
+    auto data = m_info["data"].toArray();
+    data.append(*(res::AssetInfo(m_type, filePath).getJsonObject()));
+    m_info["data"] = data;
     emit onAddPath();
 }
 
@@ -28,6 +39,9 @@ void AssetImporter::addPathsNotExist(const QStringList &filePaths)
         if (!has(filePath)) {
             m_filePathDict.insert(filePath.toStdString());
             m_filePaths << filePath;
+            auto data = m_info["data"].toArray();
+            data.append(*(res::AssetInfo(m_type, filePath).getJsonObject()));
+            m_info["data"] = data;
             addition_count++;
         }
     }
@@ -39,6 +53,7 @@ void AssetImporter::clear()
 {
     m_filePathDict.clear();
     m_filePaths.clear();
+    m_info["data"] = QJsonArray();
     emit onClear();
 }
 
@@ -75,7 +90,7 @@ QJsonObject AssetImporter::getAssets_JsonObject() const
     QJsonObject info;
     QJsonArray headers;
     // 由于在addPathsNotExist中有addition_count检测，m_filePaths一定有元素
-    auto header_names = res::AssetInfo(m_type, m_filePaths[0]).getInfoNameList();
+    auto header_names = res::AssetInfo::getInfoNameList();
     for (auto& header : header_names) {
         headers.append(header);
     }

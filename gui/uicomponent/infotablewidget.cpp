@@ -5,8 +5,8 @@
 #include <QHeaderView>
 #include <QDebug>
 
-InfoTableWidget::InfoTableWidget(QWidget *parent, int spanNum)
-    : QTableWidget(parent), m_spanNum(spanNum)
+InfoTableWidget::InfoTableWidget(QJsonObject &info, int spanNum, QWidget *parent)
+    : QTableWidget(parent), m_spanNum(spanNum), m_info(info)
 {
     horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
     connect(this, &QTableWidget::itemDoubleClicked, this, [this](QTableWidgetItem *item) {
@@ -21,20 +21,38 @@ InfoTableWidget::InfoTableWidget(QWidget *parent, int spanNum)
         if (previewItems.size() > 0)
             emit this->onSelectGroupToPreview(previewItems);
     });
+    connect(this, &QTableWidget::itemChanged, this, [this](QTableWidgetItem *cur) {
+        auto newText = cur->text();
+        auto R = cur->row();
+        auto C = cur->column();
+        if (C <= 0 )
+            return;
+        auto headerName = this->horizontalHeaderItem(C)->text();
+        auto vals = this->m_info["data"].toArray();
+        auto row = vals[R].toObject();
+        auto preText = row[headerName].toString();// 去除预览组一列
+        row[headerName] = newText;
+        vals[R] = row;
+        this->m_info["data"]=vals;
+//        qDebug() << "InfoTableWidget>>QTableWidget::itemChanged>>, "
+//                 << "from" << preText
+//                 << "to" << newText
+//                 << ", in table[" << R <<", " << C << "]";
+    });
 }
 
-void InfoTableWidget::setInfos(const QJsonObject &info)
+void InfoTableWidget::refresh()
 {
-    auto headers = info["headers"].toArray();
+    auto headers = m_info["headers"].toArray();
     if (headers.size() == 0) {
-        qDebug() << "InfoTableWidget::addInfo>> headers.size()==0";
+        qDebug() << "InfoTableWidget::refresh>> headers.size()==0";
         return;
     }
     setColumnCount(headers.size() + 1);
 
-    auto rows = info["data"].toArray();
+    auto rows = m_info["data"].toArray();
     if (rows.size() == 0) {
-        qDebug() << "InfoTableWidget::addInfo>> data.size()==0";
+        qDebug() << "InfoTableWidget::refresh>> data.size()==0";
         return;
     }
     setRowCount(rows.size());
@@ -47,7 +65,7 @@ void InfoTableWidget::setInfos(const QJsonObject &info)
     for (int row = 0; row < rows.size(); row++) {
         auto key2value = rows[row].toObject();
         if (key2value.size() == 0) {
-            qDebug() << "InfoTableWidget::addInfo>> element.size()==0";
+            qDebug() << "InfoTableWidget::refresh>> element.size()==0";
             return;
         }
         auto previewItem = new QTableWidgetItem(std::to_string(row / m_spanNum + 1).c_str());
@@ -70,9 +88,9 @@ void InfoTableWidget::setInfos(const QJsonObject &info)
     }
 
     // 默认双击第一组预览并选中
-    auto firstGroupItem = item(0, 0);
-    emit itemDoubleClicked(firstGroupItem);
-    setCurrentItem(firstGroupItem);
+//    auto firstGroupItem = item(0, 0);
+//    emit itemDoubleClicked(firstGroupItem);
+//    setCurrentItem(firstGroupItem);
 }
 
 void InfoTableWidget::jumpTo(QTableWidgetItem *item)

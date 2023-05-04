@@ -39,6 +39,8 @@ public:
 
     ImportType type() const { return m_type; }
 
+    QJsonObject &getInfoRef() { return m_info; }
+
 signals:
     void onAddPath();
     void onAddPaths();
@@ -48,6 +50,7 @@ private:
     std::unordered_set<std::string> m_filePathDict;
     QStringList m_filePaths;
     ImportType m_type;
+    QJsonObject m_info;
 
 };
 

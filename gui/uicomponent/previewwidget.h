@@ -16,13 +16,14 @@ class PreviewWidget : public QWidget
 public:
     using PreviewType = res::AssetInfo::AssetType;
 
-    explicit PreviewWidget(int row,
+    explicit PreviewWidget(QJsonObject &info,
+                           int row,
                            int column,
                            PreviewType type,
                            Qt::Orientation split_orientation = Qt::Orientation::Horizontal,
                            QWidget *parent = nullptr);
 
-    void setInfos(const QJsonObject &assets);
+    void refreshInfos();
 
     void clearInfos();
 

@@ -37,7 +37,7 @@ struct AssetInfo {
     std::shared_ptr<QJsonObject>    getJsonObject()     const;
 
     QStringList                     getInfoValueList()  const;
-    QStringList                     getInfoNameList()   const;
+    static QStringList              getInfoNameList()   ;
 
 };
 

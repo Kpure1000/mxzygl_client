@@ -64,7 +64,7 @@ public:
             return false;
         }
         auto win = this->get(title);
-        if (win->m_recreate_when_open && (nullptr == win || win->isHidden())) {
+        if (win->m_recreate_when_open && win->isHidden()) {
             delete win;
             return false;
         }

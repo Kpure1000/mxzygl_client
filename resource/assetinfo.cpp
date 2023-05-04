@@ -45,7 +45,7 @@ QStringList res::AssetInfo::getInfoValueList() const
                            << path;
 }
 
-QStringList res::AssetInfo::getInfoNameList() const
+QStringList res::AssetInfo::getInfoNameList()
 {
     return QStringList()
 //                           << "catagory"
