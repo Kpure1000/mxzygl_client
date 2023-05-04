@@ -13,7 +13,7 @@
 #include "gui/uicomponent/previewpane.h"
 #include "gui/uicomponent/infotablewidget.h"
 
-PreviewWidget::PreviewWidget(QJsonObject &info, int row, int column, PreviewType type, Qt::Orientation split_orientation, QWidget *parent)
+PreviewWidget::PreviewWidget(QJsonObject *info, int row, int column, PreviewType type, Qt::Orientation split_orientation, QWidget *parent)
     : QWidget{parent}, m_previewNum(row * column), m_type(type)
 {
     auto ly_total = new QVBoxLayout(this);
@@ -80,8 +80,10 @@ void PreviewWidget::doPreviewPrepare(const std::vector<QTableWidgetItem *> &item
         disconnect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, 0);
         m_previewPanes[i]->doClear();
         if (i < items.size()) {
-            connect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, [items, i, this]() {
-                m_infoTable->jumpTo(items[i]);
+            auto row = items[i]->row();
+            // 注意: refresh后,items里面的item被deleted了,因此不能在lambda里面捕获item
+            connect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, [row, this]() {
+                m_infoTable->jumpTo(row);
             });
             index.push_back(items[i]->row());
         }

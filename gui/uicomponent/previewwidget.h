@@ -16,7 +16,7 @@ class PreviewWidget : public QWidget
 public:
     using PreviewType = res::AssetInfo::AssetType;
 
-    explicit PreviewWidget(QJsonObject &info,
+    explicit PreviewWidget(QJsonObject *info,
                            int row,
                            int column,
                            PreviewType type,

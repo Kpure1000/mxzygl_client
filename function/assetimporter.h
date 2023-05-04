@@ -39,7 +39,7 @@ public:
 
     ImportType type() const { return m_type; }
 
-    QJsonObject &getInfoRef() { return m_info; }
+    QJsonObject *getInfoRef() { return &m_info; }
 
 signals:
     void onAddPath();

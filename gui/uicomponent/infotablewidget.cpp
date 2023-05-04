@@ -5,7 +5,7 @@
 #include <QHeaderView>
 #include <QDebug>
 
-InfoTableWidget::InfoTableWidget(QJsonObject &info, int spanNum, QWidget *parent)
+InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, QWidget *parent)
     : QTableWidget(parent), m_spanNum(spanNum), m_info(info)
 {
     horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
@@ -28,12 +28,12 @@ InfoTableWidget::InfoTableWidget(QJsonObject &info, int spanNum, QWidget *parent
         if (C <= 0 )
             return;
         auto headerName = this->horizontalHeaderItem(C)->text();
-        auto vals = this->m_info["data"].toArray();
+        auto vals = (*this->m_info)["data"].toArray();
         auto row = vals[R].toObject();
         auto preText = row[headerName].toString();// 去除预览组一列
         row[headerName] = newText;
         vals[R] = row;
-        this->m_info["data"]=vals;
+        (*this->m_info)["data"]=vals;
 //        qDebug() << "InfoTableWidget>>QTableWidget::itemChanged>>, "
 //                 << "from" << preText
 //                 << "to" << newText
@@ -43,14 +43,14 @@ InfoTableWidget::InfoTableWidget(QJsonObject &info, int spanNum, QWidget *parent
 
 void InfoTableWidget::refresh()
 {
-    auto headers = m_info["headers"].toArray();
+    auto headers = (*this->m_info)["headers"].toArray();
     if (headers.size() == 0) {
         qDebug() << "InfoTableWidget::refresh>> headers.size()==0";
         return;
     }
     setColumnCount(headers.size() + 1);
 
-    auto rows = m_info["data"].toArray();
+    auto rows = (*this->m_info)["data"].toArray();
     if (rows.size() == 0) {
         qDebug() << "InfoTableWidget::refresh>> data.size()==0";
         return;
@@ -93,11 +93,11 @@ void InfoTableWidget::refresh()
 //    setCurrentItem(firstGroupItem);
 }
 
-void InfoTableWidget::jumpTo(QTableWidgetItem *item)
+void InfoTableWidget::jumpTo(int row)
 {
-    selectRow(item->row());
-    this->item(item->row(), 0)->setSelected(false);
-    scrollToItem(item);
+    selectRow(row);
+    this->item(row, 0)->setSelected(false);
+    scrollToItem(item(row, 0));
 }
 
 void InfoTableWidget::clearInfos()

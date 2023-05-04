@@ -25,7 +25,7 @@ ImportWindow::ImportWindow(const QString &title, AssetImporter::ImportType type,
     auto ly_top = new QHBoxLayout();
     ly_top->setSpacing(2);
 
-    auto bt_fileBrowse = new QPushButton(tr("浏览"), this);
+    auto bt_fileBrowse = new QPushButton(tr("添加资源"), this);
     connect(bt_fileBrowse, &QPushButton::clicked, this, [this]() {
         QStringList selectedFiles;
         QString config_key, open_title, open_option;
