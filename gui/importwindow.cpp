@@ -16,10 +16,10 @@ ImportWindow::ImportWindow(const QString &title, AssetImporter::ImportType type,
 {
     m_assetImporter = new AssetImporter(type, this);
     connect(m_assetImporter, &AssetImporter::onAddPaths, this, [this]() {
-        m_previewWidget->refreshInfos();
+        m_previewWidget->refreshInfo();
     });
     connect(m_assetImporter, &AssetImporter::onClear, this, [this]() {
-        m_previewWidget->clearInfos();
+        m_previewWidget->clearInfo();
     });
 
     auto ly_top = new QHBoxLayout();
@@ -88,7 +88,7 @@ ImportWindow::ImportWindow(const QString &title, AssetImporter::ImportType type,
                                         this);
 
     connect(m_previewWidget, &PreviewWidget::onPreview, this, [this](const std::vector<int> &index){
-        m_previewWidget->PreviewFiles(m_assetImporter->getFilePaths(index), m_assetImporter->getFileNames(index));
+        m_previewWidget->previewFiles(m_assetImporter->getFilePaths(index), m_assetImporter->getFileNames(index));
     });
 
     ly_total->addWidget(m_previewWidget, 1);

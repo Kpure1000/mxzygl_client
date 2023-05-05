@@ -2,7 +2,6 @@
 #define MX_PREVIEWWIDGET_H
 
 #include <QWidget>
-#include <QTableWidgetItem>
 #include <QJsonObject>
 
 #include "resource/assetinfo.h"
@@ -24,17 +23,19 @@ public:
                            bool info_editable,
                            QWidget *parent = nullptr);
 
-    void refreshInfos();
+    void refreshInfo();
 
-    void clearInfos();
+    void clearInfo();
 
-    void PreviewFiles(const QStringList &filePaths, const QStringList &assetNames);
+    void selectGroup(int group);
+
+    void previewFiles(const QStringList &filePaths, const QStringList &assetNames);
 
 signals:
     void onPreview(const std::vector<int> &index);
 
 private slots:
-    void doPreviewPrepare(const std::vector<QTableWidgetItem *> &items);
+    void doPreviewPrepare(const std::vector<int> &index);
 
 private:
     InfoTableWidget *m_infoTable;

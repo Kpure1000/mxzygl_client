@@ -37,28 +37,40 @@ PreviewWidget::PreviewWidget(QJsonObject *info, int row, int column, PreviewType
 
     auto splitter = new QSplitter(this);
     splitter->setOrientation(split_orientation);
-    splitter->addWidget(m_infoTable);
-    splitter->setStretchFactor(0, 1);
-    splitter->addWidget(panesWidget);
-    splitter->setStretchFactor(1, 2);
+    if (split_orientation == Qt::Orientation::Horizontal) {
+        splitter->addWidget(m_infoTable);
+        splitter->setStretchFactor(0, 1);
+        splitter->addWidget(panesWidget);
+        splitter->setStretchFactor(1, 2);
+    } else if (split_orientation == Qt::Orientation::Vertical) {
+        splitter->addWidget(panesWidget);
+        splitter->setStretchFactor(0, 1);
+        splitter->addWidget(m_infoTable);
+        splitter->setStretchFactor(1, 1);
+    }
 
     ly_total->addWidget(splitter);
 
 }
 
-void PreviewWidget::refreshInfos()
+void PreviewWidget::refreshInfo()
 {
     connect(m_infoTable, &InfoTableWidget::onSelectGroupToPreview, this, &PreviewWidget::doPreviewPrepare);
     m_infoTable->refresh();
 }
 
-void PreviewWidget::clearInfos()
+void PreviewWidget::clearInfo()
 {
     m_infoTable->clearInfos();
     disconnect(m_infoTable, &InfoTableWidget::onSelectGroupToPreview, this, 0);
 }
 
-void PreviewWidget::PreviewFiles(const QStringList &filePaths, const QStringList &assetNames)
+void PreviewWidget::selectGroup(int group)
+{
+    m_infoTable->selectGroup(group);
+}
+
+void PreviewWidget::previewFiles(const QStringList &filePaths, const QStringList &assetNames)
 {
     for (int i = 0; i < m_previewNum; i++) {
         if (i < filePaths.size()) {
@@ -73,19 +85,16 @@ void PreviewWidget::PreviewFiles(const QStringList &filePaths, const QStringList
     }
 }
 
-void PreviewWidget::doPreviewPrepare(const std::vector<QTableWidgetItem *> &items)
+void PreviewWidget::doPreviewPrepare(const std::vector<int> &index)
 {
-    std::vector<int> index;
     for (size_t i = 0; i < static_cast<size_t>(m_previewNum); i++) {
         disconnect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, 0);
         m_previewPanes[i]->doClear();
-        if (i < items.size()) {
-            auto row = items[i]->row();
-            // 注意: refresh后,items里面的item被deleted了,因此不能在lambda里面捕获item
+        if (i < index.size()) {
+            auto row = index[i];
             connect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, [row, this]() {
                 m_infoTable->jumpTo(row);
             });
-            index.push_back(items[i]->row());
         }
     }
     emit onPreview(index);

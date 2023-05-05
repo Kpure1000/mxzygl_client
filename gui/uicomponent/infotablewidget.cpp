@@ -10,16 +10,15 @@ InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_edita
 {
     horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
     connect(this, &QTableWidget::itemDoubleClicked, this, [this](QTableWidgetItem *item) {
-        std::vector<QTableWidgetItem*> previewItems;
+        std::vector<int> rows;
         if (item->column() == 0) {
             int groupEnd = item->row() + m_spanNum;
             for (int r = item->row(); r < this->rowCount() && r < groupEnd; r++) {
-                auto realPreviewItem = this->item(r, 1);
-                previewItems.push_back(realPreviewItem);
+                rows.push_back(r);
             }
         }
-        if (previewItems.size() > 0)
-            emit this->onSelectGroupToPreview(previewItems);
+        if (rows.size() > 0)
+            emit this->onSelectGroupToPreview(rows);
     });
     if (m_info_editable) {
         connect(this, &QTableWidget::itemChanged, this, [this](QTableWidgetItem *cur) {
@@ -30,7 +29,14 @@ InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_edita
                 return;
             auto headerName = this->horizontalHeaderItem(C)->text();
             auto vals = (*this->m_info)["data"].toArray();
+            if (R >= vals.size()) {
+                return;
+            }
             auto row = vals[R].toObject();
+            if (!row.contains(headerName)) {
+                qDebug() << "InfoTableWidget>>QTableWidget::itemChanged>> m_info doesn't contain header " << headerName;
+                return;
+            }
             auto preText = row[headerName].toString();// 去除预览组一列
             row[headerName] = newText;
             vals[R] = row;
@@ -105,14 +111,14 @@ void InfoTableWidget::jumpTo(int row)
     scrollToItem(item(row, 0));
 }
 
+void InfoTableWidget::selectGroup(int group)
+{
+    emit itemDoubleClicked(item(std::min(group * m_spanNum, rowCount()), 0));
+}
+
 void InfoTableWidget::clearInfos()
 {
     this->clearContents();
-    std::vector<QTableWidgetItem*>emptyItem;
-    emit onSelectGroupToPreview(emptyItem);
-}
-
-void InfoTableWidget::doPreviewPaneSelected()
-{
-
+    std::vector<int> empty_row;
+    emit onSelectGroupToPreview(empty_row);
 }

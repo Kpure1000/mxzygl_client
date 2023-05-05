@@ -47,18 +47,18 @@ void PreviewPane::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void PreviewPane::doShowRenderer(const QString& assetName)
+void PreviewPane::doShowRenderer(const QString& previewInfo)
 {
-    m_info->setText(assetName);
+    m_info->setText(previewInfo);
 
     m_default->hide();
     m_renderWidget->show();
 }
 
-void PreviewPane::doShowPreparing(const QString& assetName)
+void PreviewPane::doShowPreparing(const QString& previewInfo)
 {
     m_default->setText(tr("资源正在载入..."));
-    m_info->setText(assetName);
+    m_info->setText(previewInfo);
 
     m_renderWidget->hide();
     m_default->show();
@@ -73,18 +73,18 @@ void PreviewPane::doShowDefault()
     m_default->show();
 }
 
-void PreviewPane::doPreviewModel(const QString &filePath, const QString& assetName)
+void PreviewPane::doPreviewModel(const QString &filePath, const QString& previewInfo)
 {
-    doShowPreparing(assetName);
-    ModelLoader::getInstance()->asyncLoad(filePath, assetName, [filePath, assetName, this]() {
+    doShowPreparing(previewInfo);
+    ModelLoader::getInstance()->asyncLoad(filePath, [filePath, previewInfo, this]() {
         emit onModelLoaded(filePath);
-        emit onPreviewPrepared(assetName);
+        emit onPreviewPrepared(previewInfo);
     });
 }
 
-void PreviewPane::doPreviewBVH(const QString &filePath, const QString &assetName)
+void PreviewPane::doPreviewBVH(const QString &filePath, const QString &previewInfo)
 {
-    doShowPreparing(assetName);
+    doShowPreparing(previewInfo);
     // TODO load BVH file
 }
 

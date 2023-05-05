@@ -14,14 +14,15 @@ public:
     void refresh();
 
     void jumpTo(int row);
+
+    void selectGroup(int group);
     
     void clearInfos();
 
 signals:
-    void onSelectGroupToPreview(const std::vector<QTableWidgetItem *> &items);
+    void onSelectGroupToPreview(const std::vector<int> &rows);
 
 public slots:
-    void doPreviewPaneSelected();
 
 private:
     int m_spanNum;
