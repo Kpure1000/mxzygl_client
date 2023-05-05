@@ -32,7 +32,7 @@ ModelLoader::ModelLoader(QObject *parent) : AssetCache(parent)
     });
 }
 
-std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, const QString& modelName, bool doGlobalTransform)
+std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, bool doGlobalTransform)
 {
     FILE *fp = fopen(filePath.toStdString().c_str(), "rb");
 
@@ -65,155 +65,133 @@ std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, const QStri
 //		ofbx::LoadFlags::IGNORE_MESHES |
         ofbx::LoadFlags::IGNORE_ANIMATIONS;
 
-    auto jobProcessor = [](ofbx::JobFunction jfn, void *, void *data, ofbx::u32 size, ofbx::u32 count) {
-        std::vector<std::future<void>> vresult;
-        for (ofbx::u32 i = 0; i < count; i++) {
-            vresult.push_back(JobSystem::getInstance()->submit([i, jfn, data, size]() {
-//                qDebug() << "ModelLoader::loadFBX>> Start Loading Job" << i;
-                ofbx::u8 *ptr = (ofbx::u8 *) data;
-                jfn(ptr + i * size);
-//                qDebug() << "ModelLoader::loadFBX>> Loading Job" << i << "Done";
-                return;
-            }));
-        }
-//        qDebug() << "ModelLoader::loadFBX>> Waiting for" << count << "loading jobs...";
-        for (auto &res : vresult) {
-            res.wait();
-        }
-//        qDebug() << "ModelLoader::loadFBX>> All Loading Jobs Done";
-    };
+//    auto jobProcessor = [](ofbx::JobFunction jfn, void *, void *data, ofbx::u32 size, ofbx::u32 count) {
+//        std::vector<std::future<void>> vresult;
+//        qDebug() << "count: " << count;
+//        for (ofbx::u32 i = 0; i < count; i++) {
+//            vresult.push_back(JobSystem::getInstance()->submit([i, jfn, data, size]() {
+//                ofbx::u8 *ptr = (ofbx::u8 *) data;
+//                jfn(ptr + i * size);
+//                return;
+//            }));
+//        }
+//        for (auto &res : vresult) {
+//            res.wait();
+//        }
+//    };
 
-//    qDebug() << "ModelLoader::loadFBX>> Loading get ready";
-    ofbx::IScene *fbxscene = ofbx::load((ofbx::u8 *) content, file_size, (ofbx::u16) flags, jobProcessor);
-//    qDebug() << "ModelLoader::loadFBX>> FBX Scene Load Successed";
+    ofbx::IScene *fbxscene = ofbx::load((ofbx::u8 *) content, file_size, (ofbx::u16) flags);
 
     if (nullptr == fbxscene) {
         qDebug() << "ModelLoader::loadFBX>> FBX Scene Load Failed";
         return nullptr;
     }
 
-//    qDebug() << "ModelLoader::loadFBX>> Start Meshes Processing";
-
-    std::vector<std::future<std::shared_ptr<Mesh>>>mesh_processing;
-    auto nMeshes = fbxscene->getMeshCount();
-    for (int i = 0; i < nMeshes; i++) {
-        mesh_processing.push_back(JobSystem::getInstance()->submit([i, fbxscene, doGlobalTransform] {
-//            qDebug() << "ModelLoader::loadFBX>> Start Processing Job[" << i << "]";
-
-            auto mesh = std::make_shared<Mesh>();
-            mesh->name = fbxscene->getMesh(i)->name;
-
-            auto geom = fbxscene->getMesh(i)->getGeometry();
-
-            bool has_normal = !(nullptr == geom->getNormals());
-            bool has_uvs = !(nullptr == geom->getUVs());
-
-            auto nVert = geom->getVertexCount();
-            auto nIndi = geom->getIndexCount();
-
-            mesh->vertices.reserve(nVert);
-            mesh->normals.reserve(nVert);
-            mesh->uvs.reserve(nVert);
-            mesh->indices.reserve(nIndi);
-
-            float minLim = std::numeric_limits<float>::min();
-            float maxLim = std::numeric_limits<float>::max();
-            QVector3D max(minLim, minLim, minLim);
-            QVector3D min(maxLim, maxLim, maxLim);
-
-            QMatrix4x4 localMatV, localMatN;
-            if (doGlobalTransform) {
-                auto localTrans = geom->getGlobalTransform();
-                for (int i = 0; i < 4; i++) {
-                    for (int j = 0; j < 4; j++) {
-                        float mv = static_cast<float>(localTrans.m[i * 4 + j]);
-                        localMatV.data()[i * 4 + j] = mv;
-                        if (i < 3 && j < 3)
-                            localMatN.data()[i * 4 + j] = mv;
-                    }
-                }
-            }
-
-            auto indi =  geom->getFaceIndices();
-            auto vert = geom->getVertices();
-            auto norm = geom->getNormals();
-            auto uvs = geom->getUVs();
-
-            for (int index = 0; index < nIndi; index++) {
-                auto vid_current = indi[index] >= 0 ? indi[index] : -indi[index] - 1;
-
-                // vertices
-                auto v = vert[vid_current];
-                float vx = static_cast<float>(v.x);
-                float vy = static_cast<float>(v.y);
-                float vz = static_cast<float>(v.z);
-                mesh->vertices[vid_current] = localMatV * QVector3D{vx,vy,vz};
-                auto rv = mesh->vertices[vid_current];
-                vx=rv.x();
-                vy=rv.y();
-                vz=rv.z();
-
-                max.setX(qMax(max.x(), vx));
-                max.setY(qMax(max.y(), vy));
-                max.setZ(qMax(max.z(), vz));
-                min.setX(qMin(min.x(), vx));
-                min.setY(qMin(min.y(), vy));
-                min.setZ(qMin(min.z(), vz));
-
-                // normals
-                if (has_normal) {
-                    if (nullptr != norm){
-                        auto vn = norm[vid_current];
-                        mesh->normals[vid_current] += localMatN * QVector3D{
-                                                          static_cast<float>(vn.x),
-                                                          static_cast<float>(vn.y),
-                                                          static_cast<float>(vn.z)
-                                                      };
-                    }
-                }
-
-                // texCoords
-                if (has_uvs) {
-                    if (nullptr != uvs) {
-                        auto vt = uvs[vid_current];
-                        mesh->uvs[vid_current] = {
-                            static_cast<float>(vt.x),
-                            static_cast<float>(vt.y)
-                        };
-                    }
-                }
-                mesh->indices[index] = vid_current;
-            }
-
-            if (has_normal) {
-                for (int i = 0; i < nVert; i++) {
-                    mesh->normals[i].normalize();
-                }
-            }
-
-            mesh->centroid = (max + min) * .5f;
-            mesh->diagonal = (max - min).length();
-
-//            qDebug() << "ModelLoader::loadFBX>> Processing Job[" << i << "]Done";
-
-            return mesh;
-        }));
-    }
-
     auto model = std::make_shared<Model>();
-    model->name = modelName;
 
-//    qDebug() << "ModelLoader::loadFBX>> Waiting For Processing Jobs";
-    for (auto& mesh_result : mesh_processing) {
-        mesh_result.wait();
-        model->meshes.push_back(mesh_result.get());
+    auto nMeshes = fbxscene->getMeshCount();
+
+    for (int i = 0; i < nMeshes; i++) {
+        auto mesh = std::make_shared<Mesh>();
+
+        auto geom = fbxscene->getMesh(i)->getGeometry();
+
+        bool has_normal = !(nullptr == geom->getNormals());
+        bool has_uvs = !(nullptr == geom->getUVs());
+
+        auto nVert = geom->getVertexCount();
+        auto nIndi = geom->getIndexCount();
+
+        mesh->vertices.reserve(nVert);
+        mesh->normals.reserve(nVert);
+        mesh->uvs.reserve(nVert);
+        mesh->indices.reserve(nIndi);
+
+        float minLim = std::numeric_limits<float>::min();
+        float maxLim = std::numeric_limits<float>::max();
+        QVector3D max(minLim, minLim, minLim);
+        QVector3D min(maxLim, maxLim, maxLim);
+
+        QMatrix4x4 localMatV, localMatN;
+        if (doGlobalTransform) {
+            auto localTrans = geom->getGlobalTransform();
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    float mv = static_cast<float>(localTrans.m[i * 4 + j]);
+                    localMatV.data()[i * 4 + j] = mv;
+                    if (i < 3 && j < 3)
+                        localMatN.data()[i * 4 + j] = mv;
+                }
+            }
+        }
+
+        auto indi =  geom->getFaceIndices();
+        auto vert = geom->getVertices();
+        auto norm = geom->getNormals();
+        auto uvs = geom->getUVs();
+
+        for (int index = 0; index < nIndi; index++) {
+            auto vid_current = indi[index] >= 0 ? indi[index] : -indi[index] - 1;
+
+            // vertices
+            auto v = vert[vid_current];
+            float vx = static_cast<float>(v.x);
+            float vy = static_cast<float>(v.y);
+            float vz = static_cast<float>(v.z);
+            mesh->vertices[vid_current] = localMatV * QVector3D{vx,vy,vz};
+            auto rv = mesh->vertices[vid_current];
+            vx=rv.x();
+            vy=rv.y();
+            vz=rv.z();
+
+            max.setX(qMax(max.x(), vx));
+            max.setY(qMax(max.y(), vy));
+            max.setZ(qMax(max.z(), vz));
+            min.setX(qMin(min.x(), vx));
+            min.setY(qMin(min.y(), vy));
+            min.setZ(qMin(min.z(), vz));
+
+            // normals
+            if (has_normal) {
+                if (nullptr != norm){
+                    auto vn = norm[vid_current];
+                    mesh->normals[vid_current] += localMatN * QVector3D{
+                                                      static_cast<float>(vn.x),
+                                                      static_cast<float>(vn.y),
+                                                      static_cast<float>(vn.z)
+                                                  };
+                }
+            }
+
+            // texCoords
+            if (has_uvs) {
+                if (nullptr != uvs) {
+                    auto vt = uvs[vid_current];
+                    mesh->uvs[vid_current] = {
+                        static_cast<float>(vt.x),
+                        static_cast<float>(vt.y)
+                    };
+                }
+            }
+            mesh->indices[index] = vid_current;
+        }
+
+        if (has_normal) {
+            for (int i = 0; i < nVert; i++) {
+                mesh->normals[i].normalize();
+            }
+        }
+
+        mesh->centroid = (max + min) * .5f;
+        mesh->diagonal = (max - min).length();
+
+        model->meshes.push_back(mesh);
     }
-//    qDebug() << "ModelLoader::loadFBX>> All Processing Jobs Done";
 
     return model;
 }
 
-std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath, const QString& modelName)
+std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath)
 {
     tinyobj::ObjReaderConfig reader_config;
     reader_config.mtl_search_path = "./"; // Path to material files
@@ -232,7 +210,6 @@ std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath, const QStri
     }
 
     auto mesh = std::make_shared<Mesh>();
-    mesh->name = modelName;
 
     auto &attrib = reader.GetAttrib();
     auto &shapes = reader.GetShapes();
@@ -304,33 +281,35 @@ std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath, const QStri
 
     auto model = std::make_shared<Model>();
     model->meshes.push_back(mesh);
-    model->name = mesh->name;
 
     return model;
 }
 
-std::shared_ptr<Model> ModelLoader::loadOFF(const QString &filePath, const QString& modelName)
+std::shared_ptr<Model> ModelLoader::loadOFF(const QString &filePath)
 {
     return nullptr;
 }
 
-void ModelLoader::asyncLoad(const QString &filePath, const QString& modelName, std::function<void()> loadCallBack)
+void ModelLoader::asyncLoad(const QString &filePath, std::function<void()> loadCallBack)
 {
-//    this->cacheStart(modelName);
     if (!ModelManager::getInstance()->has(filePath.toStdString())) {
         // load FBX file in async Job
-        JobSystem::getInstance()->submit([filePath, loadCallBack, modelName, this]() {
+        JobSystem::getInstance()->submit([filePath, loadCallBack, this]() {
             auto fileExt = filePath.split('.').back();
             std::shared_ptr<res::Model> model;
             if (fileExt == "fbx") {
-                model = ModelLoader::getInstance()->loadFBX(filePath, modelName);
+                model = ModelLoader::getInstance()->loadFBX(filePath);
             } else if (fileExt == "obj") {
-                model = ModelLoader::getInstance()->loadOBJ(filePath, modelName);
+                model = ModelLoader::getInstance()->loadOBJ(filePath);
             } else if (fileExt == "off") {
-                model = ModelLoader::getInstance()->loadOFF(filePath, modelName);
+                model = ModelLoader::getInstance()->loadOFF(filePath);
+            } else {
+                qDebug() << "ModelLoader::asyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .off is Legal)";
+                return;
             }
             if (model == nullptr) {
-                qDebug() << "ModelLoader::asyncLoad>> Load Model " << modelName << "Failed";
+                qDebug() << "ModelLoader::asyncLoad>> Model" << filePath << "Load Failed";
+                return;
             }
             ModelManager::getInstance()->add(filePath.toStdString(), model);
             emit onAssetLoaded(filePath);
