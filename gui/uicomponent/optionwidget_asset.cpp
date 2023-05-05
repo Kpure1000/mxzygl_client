@@ -3,6 +3,8 @@
 
 #include "function/configer/configmanager.h"
 
+#include <QDebug>
+
 OptionWidget_Asset::OptionWidget_Asset(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::OptionWidget_Asset)

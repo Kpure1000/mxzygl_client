@@ -1,13 +1,13 @@
 #ifndef MX_HOMEWINDOW_H
 #define MX_HOMEWINDOW_H
 
-#include <QWidget>
+#include <QMainWindow>
 #include <QMenuBar>
 #include <QTabWidget>
 
 #include "function/function.h"
 
-class HomeWindow : public QWidget
+class HomeWindow : public QMainWindow
 {
     Q_OBJECT
 public:

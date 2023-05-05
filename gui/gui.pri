@@ -10,3 +10,5 @@ HEADERS += \
     $$PWD/optionwindow.h
 
 include(uicomponent/uicomponent.pri)
+
+FORMS +=

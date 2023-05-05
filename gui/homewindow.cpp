@@ -1,6 +1,6 @@
 #include "homewindow.h"
 
-#include <QGridLayout>
+#include <QHBoxLayout>
 #include <QApplication>
 #include <QDebug>
 #include <QDialog>
@@ -11,22 +11,25 @@
 #include "importwindow.h"
 #include "gui/uicomponent/modelsearchwidget.h"
 
-HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QWidget(parent)
+HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow(parent)
 {
     setWindowIcon(QIcon(":/assets/assets/icon/icon.jpg"));
 
+    auto centerWidget = new QWidget(this);
+    this->setCentralWidget(centerWidget);
+
+    auto ly_total = new QHBoxLayout(centerWidget);
+
     makeMenu();
 
-    m_tabw = new QTabWidget(this);
-    auto ly_total = new QGridLayout(this);
+    m_tabw = new QTabWidget(centerWidget);
     ly_total->addWidget(m_tabw);
 
-    m_tabw->addTab(new ModelSearchWidget(ModelSearch::SearchType::CONTENT,this), "模型内容检索");
-    m_tabw->addTab(new ModelSearchWidget(ModelSearch::SearchType::TAG,this), "模型标签检索");
-    m_tabw->addTab(new ModelSearchWidget(ModelSearch::SearchType::TYPE,this), "模型类型检索");
+    m_tabw->addTab(new ModelSearchWidget(ModelSearch::SearchType::CONTENT,centerWidget), "模型内容检索");
+    m_tabw->addTab(new ModelSearchWidget(ModelSearch::SearchType::TAG,centerWidget), "模型标签检索");
+    m_tabw->addTab(new ModelSearchWidget(ModelSearch::SearchType::TYPE,centerWidget), "模型类型检索");
 
     this->resize(800, 600);
-    this->setLayout(ly_total);
 
 }
 
@@ -110,5 +113,7 @@ void HomeWindow::makeMenu()
         menu_version->addAction(tr("版本管理"));
         m_top_menubar->addMenu(menu_version);
     }
+
+    this->setMenuBar(m_top_menubar);
 
 }
