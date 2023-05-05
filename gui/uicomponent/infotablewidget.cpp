@@ -8,6 +8,7 @@
 InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_editable, QWidget *parent)
     : QTableWidget(parent), m_spanNum(spanNum), m_info(info), m_info_editable(info_editable)
 {
+    this->setStyleSheet("border:1px solid #8f8f8f;");
     horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
     connect(this, &QTableWidget::itemDoubleClicked, this, [this](QTableWidgetItem *item) {
         std::vector<int> rows;

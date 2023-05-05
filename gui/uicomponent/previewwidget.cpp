@@ -29,7 +29,7 @@ PreviewWidget::PreviewWidget(QJsonObject *info, int row, int column, PreviewType
 
     for (int r = 0; r < row; r++) {
         for (int c = 0; c < column; c++) {
-            auto previewPane = new PreviewPane(this);
+            auto previewPane = new PreviewPane(panesWidget);
             ly_pane->addWidget(previewPane, r, c);
             m_previewPanes.push_back(previewPane);
         }
