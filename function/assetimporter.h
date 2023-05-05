@@ -23,6 +23,8 @@ public:
 
     void clear();
 
+    void upload();
+
     inline bool has(const QString &filePath) const { return m_filePathDict.find(filePath.toStdString()) != m_filePathDict.end(); }
 
     inline size_t size() const { return m_filePaths.size(); }

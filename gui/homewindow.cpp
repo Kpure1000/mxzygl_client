@@ -56,33 +56,13 @@ void HomeWindow::makeMenu()
         m_top_menubar->addMenu(menu_file);
 
         // ----------------导入----------------
-        auto submenu_import = menu_file->addMenu(tr("导入...(&I)"));
-        // 模型导入
-        submenu_import->addAction(tr("模型导入(.obj;.fbx)"), this, [this]() {
-            auto winName = "模型导入";
+        menu_file->addAction(tr("资源导入(&I)"), this, [this](){
+            auto winName = "资源导入";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName)) {
-                fm->create(winName, new ImportWindow(winName, AssetImporter::ImportType::MODEL, this));
+                fm->create(winName, new ImportWindow("", this));
             }
-        });
-
-        // 骨骼动画导入
-        submenu_import->addAction(tr("骨骼动画导入(.bvh)"), this, [this]() {
-            auto winName = "骨骼动画导入";
-            auto fm = FunctionWnidowManager::getInstance();
-            if (!fm->show(winName)) {
-                fm->create(winName, new ImportWindow(winName, AssetImporter::ImportType::BVH, this));
-            }
-        });
-
-        // 特效导入
-        submenu_import->addAction(tr("特效导入(.bvh)"), this, [this]() {
-            auto winName = "特效导入";
-            auto fm = FunctionWnidowManager::getInstance();
-            if (!fm->show(winName)) {
-                fm->create(winName, new ImportWindow(winName, AssetImporter::ImportType::EFFECT, this));
-            }
-        });
+        }, QKeySequence("Ctrl+I"));
 
         // ----------------选项----------------
         menu_file->addAction(tr("选项(&O)"), this, [this](){

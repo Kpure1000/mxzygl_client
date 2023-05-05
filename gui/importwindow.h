@@ -3,7 +3,7 @@
 
 #include "ifunctionwindow.h"
 #include <QStringList>
-
+#include <QWidget>
 #include "function/assetimporter.h"
 
 class PreviewWidget;
@@ -15,14 +15,14 @@ class ImportWindow : public IFunctionWindow
 {
     Q_OBJECT
 public:
-    explicit ImportWindow(const QString &title, AssetImporter::ImportType type, QWidget *parent = nullptr);
+    explicit ImportWindow(const QString &title, QWidget *parent = nullptr);
+
+private:
+    static QWidget *setupImportWidget(QWidget *parent, AssetImporter *importer);
 
 signals:
 
 private:
-    AssetImporter *m_assetImporter;
-
-    PreviewWidget *m_previewWidget;
 
 };
 

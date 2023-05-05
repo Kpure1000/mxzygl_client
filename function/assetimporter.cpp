@@ -57,6 +57,11 @@ void AssetImporter::clear()
     emit onClear();
 }
 
+void AssetImporter::upload()
+{
+
+}
+
 QStringList AssetImporter::getFilePaths(const std::vector<int> &index) const
 {
     QStringList filePaths;
