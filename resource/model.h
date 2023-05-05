@@ -23,8 +23,6 @@ struct Mesh
     QVector3D centroid;
     float diagonal;
 
-    QString name;
-
     inline int verticesNum() const { return static_cast<int>(vertices.size()); }
     inline int facesNum() const { return static_cast<int>(indices.size()) / 3; }
 
@@ -34,7 +32,6 @@ struct Mesh
 struct Model
 {
     std::vector<std::shared_ptr<Mesh>> meshes;
-    QString name;
 
     inline int meshesNum() const { return static_cast<int>(meshes.size()); }
 };

@@ -4,7 +4,6 @@
 namespace res {
 struct Effect
 {
-    QString name;
 };
 }
 

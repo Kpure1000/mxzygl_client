@@ -6,7 +6,6 @@ namespace res
 {
     struct BVH
     {
-        QString name;
     };
 
 } // namespace res
