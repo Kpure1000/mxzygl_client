@@ -9,6 +9,7 @@
 
 #include "optionwindow.h"
 #include "importwindow.h"
+#include "gui/uicomponent/modelsearchwidget.h"
 
 HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QWidget(parent)
 {
@@ -17,8 +18,15 @@ HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QWidget(par
     makeMenu();
 
     m_tabw = new QTabWidget(this);
+    auto ly_total = new QGridLayout(this);
+    ly_total->addWidget(m_tabw);
+
+    m_tabw->addTab(new ModelSearchWidget(ModelSearch::SearchType::CONTENT,this), "模型内容检索");
+    m_tabw->addTab(new ModelSearchWidget(ModelSearch::SearchType::TAG,this), "模型标签检索");
+    m_tabw->addTab(new ModelSearchWidget(ModelSearch::SearchType::TYPE,this), "模型类型检索");
 
     this->resize(800, 600);
+    this->setLayout(ly_total);
 
 }
 
