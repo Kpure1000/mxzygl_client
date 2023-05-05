@@ -33,11 +33,11 @@ struct AssetInfo {
     AssetInfo() = default;
     AssetInfo(AssetType asset_type, const QString &filePath);
 
-    std::shared_ptr<QJsonDocument>  getJsonDoc()        const;
-    std::shared_ptr<QJsonObject>    getJsonObject()     const;
+    virtual std::shared_ptr<QJsonDocument>  getJsonDoc()        const;
+    virtual std::shared_ptr<QJsonObject>    getJsonObject()     const;
 
-    QStringList                     getInfoValueList()  const;
-    static QStringList              getInfoNameList()   ;
+    virtual QStringList                     getInfoValueList()  const;
+    static QStringList                      getInfoNameList()   ;
 
 };
 

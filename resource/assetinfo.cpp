@@ -7,7 +7,8 @@ res::AssetInfo::AssetInfo(AssetType asset_type, const QString &filePath)
 {
     auto fileInfo = QFileInfo(filePath);
     name = fileInfo.baseName();
-    tag = type = fileInfo.baseName().split('_')[0];
+//    tag = type = fileInfo.baseName().split('_')[0];
+    tag = type = "";
     if (assetType == AssetType::MODEL || assetType == AssetType::BVH) {
         fileType = fileInfo.filePath().split('.').back();
     } else {
