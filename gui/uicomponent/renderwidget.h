@@ -6,6 +6,8 @@
 
 #include <chrono>
 
+class Renderer;
+
 class RenderWidget : public QOpenGLWidget
 {
     Q_OBJECT
@@ -35,6 +37,7 @@ private:
     const float m_dt = 16.0f;
     QBasicTimer m_timer;
 
+    Renderer *m_renderer;
 };
 
 #endif // MX_RENDERWIDGET_H

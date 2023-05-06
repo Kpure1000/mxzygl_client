@@ -5,6 +5,7 @@
 
 #include "gui/uicomponent/optionwidget_server.h"
 #include "gui/uicomponent/optionwidget_asset.h"
+#include "gui/uicomponent/optionwidget_render.h"
 
 OptionWindow::OptionWindow(QWidget *parent)
     : IFunctionWindow("选项", {600,500}, true, parent)
@@ -18,5 +19,7 @@ OptionWindow::OptionWindow(QWidget *parent)
 
     auto w_asset = new OptionWidget_Asset(this);
     tabw->addTab(w_asset, "资源");
-    // TODO: 资源缓存时间设置
+
+    auto w_render = new OptionWidget_Render(this);
+    tabw->addTab(w_render, "渲染");
 }

@@ -7,10 +7,14 @@
 #include "resource/model.h"
 #include "resource/bvh.h"
 
+#include "function/renderer/renderer.h"
+
 RenderWidget::RenderWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
     m_timer.start(16, this);
     start_time = std::chrono::steady_clock::now();
+
+    m_renderer = new Renderer(this);
 }
 
 void RenderWidget::initializeGL()
@@ -28,8 +32,7 @@ void RenderWidget::paintGL()
     auto currentContext = QOpenGLContext::currentContext();
     auto deltaTime = m_dt;
     // TODO: render api
-//    f.glClearColor(.18f, .18f, .18f, 1.f);
-//    f.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_renderer->render(currentContext, deltaTime);
 }
 
 void RenderWidget::timerEvent(QTimerEvent *event)
@@ -54,4 +57,5 @@ void RenderWidget::doBVHRendering(const QString &filePath)
 void RenderWidget::stopRendering()
 {
     // TODO clear rendering context
+    m_renderer->stopRendering();
 }

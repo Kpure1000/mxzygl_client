@@ -71,12 +71,14 @@ void ModelSearchWidget::on_bt_browser_clicked()
 {
     QString open_dir = ConfigManager::getInstance()->getConfig("FileBrowser/ModelSearch").toString();
     m_selectedFile = QFileDialog::getOpenFileName(this, tr("浏览模型文件"), open_dir, "*.obj;*.fbx");
-    ConfigManager::getInstance()->setConfig("FileBrowser/ModelSearch", QFileInfo(m_selectedFile).absolutePath());
-    ui->le_input->setText(m_selectedFile);
+    if (m_selectedFile == "")
+        return;
     if (nullptr == m_single_preview) {
         qDebug() << "ModelSearchWidget::on_bt_browser_clicked>> m_single_preview is null";
         return;
     }
+    ui->le_input->setText(m_selectedFile);
+    ConfigManager::getInstance()->setConfig("FileBrowser/ModelSearch", QFileInfo(m_selectedFile).absolutePath());
     // 设置搜索信息
     m_modelSearch->setSearchInfo(m_selectedFile);
     m_single_preview->clearInfo();
