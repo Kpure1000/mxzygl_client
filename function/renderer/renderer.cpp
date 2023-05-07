@@ -5,12 +5,6 @@
 #include "resource/model.h"
 #include "resource/bvh.h"
 #include "shadermanager.h"
-#include "utils/jobsystem.h"
-#include <cmath>
-
-#ifndef PIf
-#define PIf 3.1415926f
-#endif
 
 TriangleData::TriangleData(std::shared_ptr<res::Mesh> mesh)
 {
@@ -132,6 +126,7 @@ void Renderer::render(QOpenGLContext *context, float dt)
             sprog->setUniformValue("_model", tri_data->o2w);
             sprog->setUniformValue("_view", viewMat);
             sprog->setUniformValue("_proj", projMat);
+            sprog->setUniformValue("_normal", projMat.inverted().transposed());
             // 材质
             sprog->setUniformValue("_material.albedo", {0.7, 0.7, 0.7});
             sprog->setUniformValue("_material.diffuse", {1.0, 1.0, 1.0});

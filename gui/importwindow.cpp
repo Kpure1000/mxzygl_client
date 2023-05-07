@@ -13,7 +13,7 @@
 #include "function/configer/configmanager.h"
 
 ImportWindow::ImportWindow(QWidget *parent)
-    : IFunctionWindow("", parent ? parent->size() : QSize{800, 600}, true, false, parent)
+    : IFunctionWindow("", parent ? parent->size() : QSize{800, 600}, false, false, parent)
 {
     auto ly_total = new QVBoxLayout(this);
     this->setLayout(ly_total);

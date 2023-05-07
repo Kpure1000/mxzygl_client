@@ -32,10 +32,10 @@ PreviewPane::PreviewPane(QWidget *parent, bool linkTableItem)
 
     doShowDefault();
 
-    connect(this, &PreviewPane::onModelLoaded, m_renderWidget, &RenderWidget::doModelRendering);
-    connect(this, &PreviewPane::onBVHLoaded, m_renderWidget, &RenderWidget::doBVHRendering);
+    connect(this, &PreviewPane::onModelLoaded, m_renderWidget, &RenderWidget::doModelRendering, Qt::QueuedConnection);
+    connect(this, &PreviewPane::onBVHLoaded, m_renderWidget, &RenderWidget::doBVHRendering, Qt::QueuedConnection);
 
-    connect(this, &PreviewPane::onPreviewPrepared, this, &PreviewPane::doShowRenderer);
+    connect(this, &PreviewPane::onPreviewPrepared, this, &PreviewPane::doShowRenderer, Qt::QueuedConnection);
 
 }
 
