@@ -32,7 +32,7 @@ void main()
     float NdotL = dot(normalDir, lightDir);
 
     vec3 diffuse = _material.diffuse * max(NdotL, 0.0);
-    vec3 specular = (NdotL < 0.0) ? 0.0 : _material.specular * pow(max(dot(viewDir, reflectDir), 0.0), _material.shininess);
+    vec3 specular = (NdotL < 0.0) ? vec3(0.0) : _material.specular * pow(max(dot(viewDir, reflectDir), 0.0), _material.shininess);
     vec3 ambient = _material.albedo * _light.ambient;
 
     gl_FragColor = vec4((ambient + diffuse + specular) * _light.intensity, 1.0);
