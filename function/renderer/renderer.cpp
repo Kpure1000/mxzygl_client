@@ -126,18 +126,18 @@ void Renderer::render(QOpenGLContext *context, float dt)
             sprog->setUniformValue("_model", tri_data->o2w);
             sprog->setUniformValue("_view", viewMat);
             sprog->setUniformValue("_proj", projMat);
-            sprog->setUniformValue("_normal", projMat.inverted().transposed());
+            sprog->setUniformValue("_normal", tri_data->o2w.normalMatrix());
             // 材质
             sprog->setUniformValue("_material.albedo", {0.7, 0.7, 0.7});
             sprog->setUniformValue("_material.diffuse", {1.0, 1.0, 1.0});
             sprog->setUniformValue("_material.specular", {0.7, 0.7, 0.7});
-            sprog->setUniformValue("_material.shininess", 16);
+            sprog->setUniformValue("_material.shininess", 16.f);
             // 直射光
             sprog->setUniformValue("_light.intensity", 0.5f);
             sprog->setUniformValue("_light.ambient", {0.3f, 0.3f, 0.3f});
             sprog->setUniformValue("_light.diffuse", {1.0f, 1.0f, 1.0f});
             sprog->setUniformValue("_light.specular", {0.6f, 0.6f, 0.6f});
-            sprog->setUniformValue("_light.direction", {0.7f, 0.8f, 0.5f});
+            sprog->setUniformValue("_light.direction", {0.5f, 0.5f, 0.5f});
 
             tri_data->bind(sprog);
         });

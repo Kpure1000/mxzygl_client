@@ -6,7 +6,7 @@ struct Material
     vec3 albedo;
     vec3 diffuse;
     vec3 specular;
-    int shininess;
+    float shininess;
 };
 uniform Material _material;
 
@@ -26,14 +26,14 @@ void main()
 {
     vec3 normalDir = normalize(fragNor);
     vec3 viewDir = normalize(-fragPos);
-    if(dot(normalDir, viewDir) < 0.0)
-        normalDir = -normalDir;
     vec3 lightDir = normalize (_light.direction);
     vec3 reflectDir = reflect(-lightDir, normalDir);
 
-    vec4 diffuse = vec4(_material.diffuse * max(dot(normalDir, lightDir), 0.0), 1.0);
-    vec4 specular = vec4(_material.specular * pow(max(dot(viewDir, reflectDir), 0.0), float(_material.shininess)), 1.0);
-    vec4 ambient = vec4(_material.albedo, 1.0);
+    float NdotL = dot(normalDir, lightDir);
 
-    gl_FragColor = (ambient + diffuse + specular) * _light.intensity;
+    vec3 diffuse = _material.diffuse * max(NdotL, 0.0);
+    vec3 specular = (NdotL < 0.0) ? 0.0 : _material.specular * pow(max(dot(viewDir, reflectDir), 0.0), _material.shininess);
+    vec3 ambient = _material.albedo * _light.ambient;
+
+    gl_FragColor = vec4((ambient + diffuse + specular) * _light.intensity, 1.0);
 }
