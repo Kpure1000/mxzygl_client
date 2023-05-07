@@ -10,6 +10,8 @@
 
 #include "utils/assetmanager.h"
 
+class ModelLoader;
+
 namespace res {
 
 struct Mesh
@@ -19,9 +21,6 @@ struct Mesh
     std::vector<QVector2D> uvs;
 
     std::vector<unsigned int> indices;
-
-    QVector3D centroid;
-    float diagonal;
 
     inline int verticesNum() const { return static_cast<int>(vertices.size()); }
     inline int facesNum() const { return static_cast<int>(indices.size()) / 3; }
@@ -33,7 +32,12 @@ struct Model
 {
     std::vector<std::shared_ptr<Mesh>> meshes;
 
+    QVector3D centroid;
+    float diagonal;
+
     inline int meshesNum() const { return static_cast<int>(meshes.size()); }
+
+    void normalize();
 };
 
 } // namespace res

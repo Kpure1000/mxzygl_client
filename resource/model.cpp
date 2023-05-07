@@ -11,3 +11,13 @@ std::shared_ptr<Mesh> Mesh::batchMesh(const std::vector<std::shared_ptr<Mesh> > 
     }
     return ret_mesh;
 }
+
+void Model::normalize()
+{
+    float invDiag = 1.0f / diagonal;
+    for (auto mesh : meshes) {
+        for (auto& vert : mesh->vertices) {
+            vert = (vert - centroid) * invDiag;
+        }
+    }
+}

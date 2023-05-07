@@ -91,6 +91,11 @@ std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, bool doGlob
 
     auto nMeshes = fbxscene->getMeshCount();
 
+    float minLim = std::numeric_limits<float>::min();
+    float maxLim = std::numeric_limits<float>::max();
+    QVector3D max(minLim, minLim, minLim);
+    QVector3D min(maxLim, maxLim, maxLim);
+
     for (int i = 0; i < nMeshes; i++) {
         auto mesh = std::make_shared<Mesh>();
 
@@ -102,15 +107,10 @@ std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, bool doGlob
         auto nVert = geom->getVertexCount();
         auto nIndi = geom->getIndexCount();
 
-        mesh->vertices.reserve(nVert);
-        mesh->normals.reserve(nVert);
-        mesh->uvs.reserve(nVert);
-        mesh->indices.reserve(nIndi);
-
-        float minLim = std::numeric_limits<float>::min();
-        float maxLim = std::numeric_limits<float>::max();
-        QVector3D max(minLim, minLim, minLim);
-        QVector3D min(maxLim, maxLim, maxLim);
+        mesh->vertices = std::vector<QVector3D>(nVert);
+        mesh->normals = std::vector<QVector3D>(nVert);
+        mesh->uvs = std::vector<QVector2D>(nVert);
+        mesh->indices = std::vector<unsigned int>(nIndi);
 
         QMatrix4x4 localMatV, localMatN;
         if (doGlobalTransform) {
@@ -182,11 +182,11 @@ std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, bool doGlob
             }
         }
 
-        mesh->centroid = (max + min) * .5f;
-        mesh->diagonal = (max - min).length();
-
         model->meshes.push_back(mesh);
     }
+
+    model->centroid = (max + min) * .5f;
+    model->diagonal = (max - min).length();
 
     return model;
 }
@@ -276,11 +276,11 @@ std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath)
         index_offset_shape += index_offset;
     }
 
-    mesh->centroid = (max + min) * .5f;
-    mesh->diagonal = (max - min).length();
-
     auto model = std::make_shared<Model>();
     model->meshes.push_back(mesh);
+
+    model->centroid = (max + min) * .5f;
+    model->diagonal = (max - min).length();
 
     return model;
 }
@@ -311,6 +311,7 @@ void ModelLoader::asyncLoad(const QString &filePath, std::function<void()> loadC
                 qDebug() << "ModelLoader::asyncLoad>> Model" << filePath << "Load Failed";
                 return;
             }
+            model->normalize();
             ModelManager::getInstance()->add(filePath.toStdString(), model);
             emit onAssetLoaded(filePath);
             loadCallBack();
