@@ -1,6 +1,5 @@
 HEADERS += \
     $$PWD/assetimporter.h \
-    $$PWD/function.h \
     $$PWD/modelsearch.h
 
 include(configer/configer.pri)

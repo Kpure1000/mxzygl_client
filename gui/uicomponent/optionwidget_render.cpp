@@ -16,14 +16,14 @@ OptionWidget_Render::OptionWidget_Render(QWidget *parent) : QWidget(parent), ui(
 
     if (!val.canConvert<QVector3D>()) {
         qDebug() << "OptionWidget_Render::on_bt_color_clicked>> ClearColor " << val << "is not Vec3";
-        return;
+        val = QVector3D{.0f, .0f, .0f};
     }
 
     auto colorv3 = val.value<QVector3D>();
 
     m_clearColor = QColor::fromRgbF(colorv3.x(), colorv3.y(), colorv3.z());
 
-    ui->bt_color->setStyleSheet(QString().sprintf("background-color: #%04X", m_clearColor.rgb()));
+    ui->bt_color->setStyleSheet(QString().asprintf("background-color: #%04X", m_clearColor.rgb()));
 }
 
 OptionWidget_Render::~OptionWidget_Render()
@@ -33,18 +33,15 @@ OptionWidget_Render::~OptionWidget_Render()
 
 void OptionWidget_Render::on_bt_color_clicked()
 {
-    auto val = ConfigManager::getInstance()->getConfig("Render/ClearColor");
+    auto colorDialog = new QColorDialog(m_clearColor, this);
+    colorDialog->setWindowTitle(tr("选择清屏颜色"));
+    colorDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
-    if (!val.canConvert<QVector3D>()) {
-        qDebug() << "OptionWidget_Render::on_bt_color_clicked>> ClearColor " << val << "is not Vec3";
-        return;
-    }
-
-    auto colorv3 = val.value<QVector3D>();
-
-    m_clearColor = QColorDialog::getColor(QColor::fromRgbF(colorv3.x(), colorv3.y(), colorv3.z()), nullptr, tr("选取颜色"));
-
-    ui->bt_color->setStyleSheet(QString().sprintf("background-color: #%04X", m_clearColor.rgb()));
+    connect(colorDialog, &QColorDialog::accepted, this, [colorDialog, this](){
+        m_clearColor = colorDialog->currentColor();
+        ui->bt_color->setStyleSheet(QString().asprintf("background-color: #%04X", m_clearColor.rgb()));
+    });
+    colorDialog->exec();
 }
 
 

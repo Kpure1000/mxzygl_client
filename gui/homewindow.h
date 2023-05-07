@@ -5,8 +5,6 @@
 #include <QMenuBar>
 #include <QTabWidget>
 
-#include "function/function.h"
-
 class HomeWindow : public QMainWindow
 {
     Q_OBJECT

@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "function/configer/configer.h"
+#include "function/configer/configmanager.h"
 #include "function/renderer/renderapi.h"
 #include "utils/jobsystem.h"
 #include "gui/homewindow.h"

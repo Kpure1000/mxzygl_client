@@ -3,6 +3,7 @@
 
 #include <QFileDialog>
 #include <QSplitter>
+#include <QDebug>
 
 #include "gui/uicomponent/previewwidget.h"
 #include "function/configer/configmanager.h"
@@ -51,7 +52,7 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
         ui->ly_preview->addWidget(m_preview);
         ui->le_input->setEnabled(true);
     }
-    emit m_preview->onPreview({0});
+//    emit m_preview->onPreview({0});
 
 }
 

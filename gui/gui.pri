@@ -1,5 +1,6 @@
 SOURCES += \
     $$PWD/homewindow.cpp \
+    $$PWD/ifunctionwindow.cpp \
     $$PWD/importwindow.cpp \
     $$PWD/optionwindow.cpp
 HEADERS += \

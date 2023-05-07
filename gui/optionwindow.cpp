@@ -6,9 +6,10 @@
 #include "gui/uicomponent/optionwidget_server.h"
 #include "gui/uicomponent/optionwidget_asset.h"
 #include "gui/uicomponent/optionwidget_render.h"
+#include "function/configer/configmanager.h"
 
 OptionWindow::OptionWindow(QWidget *parent)
-    : IFunctionWindow("选项", {600,500}, true, parent)
+    : IFunctionWindow("选项", {600,500}, true, false, parent)
 {
     this->setLayout(new QGridLayout(this));
     auto tabw = new QTabWidget(this);
@@ -22,4 +23,12 @@ OptionWindow::OptionWindow(QWidget *parent)
 
     auto w_render = new OptionWidget_Render(this);
     tabw->addTab(w_render, "渲染");
+
+    // 持久化上次打开时候的tab index
+    connect(tabw, &QTabWidget::currentChanged, this, [](int curIndex){
+        ConfigManager::getInstance()->setConfig("OptionWindow/lastTabIndex", curIndex);
+    });
+    auto lastTabIndex = ConfigManager::getInstance()->getConfig("OptionWindow/lastTabIndex", 0).toInt();
+    tabw->setCurrentIndex(lastTabIndex);
+
 }

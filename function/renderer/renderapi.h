@@ -13,6 +13,8 @@ public:
 
     void clear(QOpenGLContext *context);
 
+    void drawTriangle(QOpenGLContext *context, int triangleNums);
+
 public:
     static RenderAPI* getInstance(QObject *parent = nullptr)
     {

@@ -35,7 +35,7 @@ HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow
 
 HomeWindow::~HomeWindow()
 {
-    qDebug() << "HomeWindow Closed";
+//    qDebug() << "HomeWindow Closed";
 }
 
 void HomeWindow::keyPressEvent(QKeyEvent *ev)
@@ -59,8 +59,8 @@ void HomeWindow::makeMenu()
         menu_file->addAction(tr("资源导入(&I)"), this, [this](){
             auto winName = "资源导入";
             auto fm = FunctionWnidowManager::getInstance();
-            if (!fm->show(winName)) {
-                fm->create(winName, new ImportWindow("", this));
+            if (!fm->show(winName, true)) {
+                fm->create(winName, new ImportWindow(this));
             }
         }, QKeySequence("Ctrl+I"));
 
@@ -68,7 +68,7 @@ void HomeWindow::makeMenu()
         menu_file->addAction(tr("选项(&O)"), this, [this](){
                 auto winName = "选项";
                 auto fm = FunctionWnidowManager::getInstance();
-                if (!fm->show(winName)) {
+                if (!fm->show(winName, true)) {
                     fm->create(winName, new OptionWindow(this));
                 }
         }, QKeySequence("Ctrl+O"));

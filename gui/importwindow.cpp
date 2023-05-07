@@ -10,10 +10,10 @@
 #include <QTabWidget>
 
 #include "uicomponent/previewwidget.h"
-#include "function/configer/configer.h"
+#include "function/configer/configmanager.h"
 
-ImportWindow::ImportWindow(const QString &title, QWidget *parent)
-    : IFunctionWindow(title, parent ? parent->size() : QSize{800, 600}, false, parent)
+ImportWindow::ImportWindow(QWidget *parent)
+    : IFunctionWindow("", parent ? parent->size() : QSize{800, 600}, true, false, parent)
 {
     auto ly_total = new QVBoxLayout(this);
     this->setLayout(ly_total);

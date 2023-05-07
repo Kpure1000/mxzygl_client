@@ -2,9 +2,6 @@
 #define MX_OPTIONWIDGET_SERVER_H
 
 #include <QWidget>
-#include "function/function.h"
-
-#include "gui/optionwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

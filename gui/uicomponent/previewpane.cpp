@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 
 #include <QMouseEvent>
+#include <QDebug>
 
 #include "function/assetloader/modelloader.h"
 #include "function/assetloader/bvhloader.h"
@@ -29,7 +30,7 @@ PreviewPane::PreviewPane(QWidget *parent, bool linkTableItem)
     ly_v->addWidget(m_info, 0);
     this->setLayout(ly_v);
 
-    doClear();
+    doShowDefault();
 
     connect(this, &PreviewPane::onModelLoaded, m_renderWidget, &RenderWidget::doModelRendering);
     connect(this, &PreviewPane::onBVHLoaded, m_renderWidget, &RenderWidget::doBVHRendering);
@@ -77,8 +78,8 @@ void PreviewPane::doPreviewModel(const QString &filePath, const QString& preview
 {
     doShowPreparing(previewInfo);
     ModelLoader::getInstance()->asyncLoad(filePath, [filePath, previewInfo, this]() {
-        emit onModelLoaded(filePath);
         emit onPreviewPrepared(previewInfo);
+        emit onModelLoaded(filePath);
     });
 }
 

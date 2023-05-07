@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/assets">
         <file>assets/icon/icon.jpg</file>
-        <file>assets/shader/model.frag</file>
-        <file>assets/shader/model.vert</file>
+        <file>assets/shader/phong.frag</file>
+        <file>assets/shader/phong.vert</file>
     </qresource>
 </RCC>

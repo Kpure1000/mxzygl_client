@@ -1,6 +1,7 @@
 #include "optionwidget_server.h"
 
 #include "ui_option_server.h"
+#include "function/configer/configmanager.h"
 
 #include <QDebug>
 #include <QKeyEvent>

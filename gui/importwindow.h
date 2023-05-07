@@ -15,7 +15,7 @@ class ImportWindow : public IFunctionWindow
 {
     Q_OBJECT
 public:
-    explicit ImportWindow(const QString &title, QWidget *parent = nullptr);
+    explicit ImportWindow(QWidget *parent = nullptr);
 
 private:
     static QWidget *setupImportWidget(QWidget *parent, AssetImporter *importer);

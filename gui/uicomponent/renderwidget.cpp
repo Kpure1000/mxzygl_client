@@ -11,14 +11,17 @@
 
 RenderWidget::RenderWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
-    m_timer.start(16, this);
-    start_time = std::chrono::steady_clock::now();
 
-    m_renderer = new Renderer(this);
 }
 
 void RenderWidget::initializeGL()
 {
+    makeCurrent();
+//    qDebug() << "initializeGL";
+    m_renderer = new Renderer(this);
+    m_timer.start(16, this);
+    start_time = std::chrono::steady_clock::now();
+    doneCurrent();
 }
 
 void RenderWidget::resizeGL(int w, int h)
@@ -28,11 +31,10 @@ void RenderWidget::resizeGL(int w, int h)
 
 void RenderWidget::paintGL()
 {
-    makeCurrent();
     auto currentContext = QOpenGLContext::currentContext();
     auto deltaTime = m_dt;
-    // TODO: render api
-    m_renderer->render(currentContext, deltaTime);
+    if (m_renderer)
+        m_renderer->render(currentContext, deltaTime);
 }
 
 void RenderWidget::timerEvent(QTimerEvent *event)
@@ -41,12 +43,12 @@ void RenderWidget::timerEvent(QTimerEvent *event)
     start_time = std::chrono::steady_clock::now();
     update();
 }
-std::shared_ptr<res::Model> g_model;
+
 void RenderWidget::doModelRendering(const QString &filePath)
 {
-    g_model = ModelManager::getInstance()->get(filePath.toStdString());
-//    qDebug() << "RenderWidget::doModelRendering>> Render Model" << model->name;
-    // TODO render model
+    auto model = ModelManager::getInstance()->get(filePath.toStdString());
+//    qDebug() << "RenderWidget::doModelRendering>> Render Model" << filePath;
+    m_renderer->setRenderData(std::make_shared<RenderData>(model));
 }
 
 void RenderWidget::doBVHRendering(const QString &filePath)
@@ -56,6 +58,7 @@ void RenderWidget::doBVHRendering(const QString &filePath)
 
 void RenderWidget::stopRendering()
 {
-    // TODO clear rendering context
-    m_renderer->stopRendering();
+    if (m_renderer) {
+        m_renderer->clearRenderData();
+    }
 }

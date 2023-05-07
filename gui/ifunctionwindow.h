@@ -2,7 +2,6 @@
 #define MX_IFUNCTIONWINDOW_H
 
 #include <QDialog>
-#include <QDebug>
 
 #include "utils/assetmanager.h"
 
@@ -15,35 +14,20 @@ class IFunctionWindow : public QDialog
 {
     Q_OBJECT
 public:
-    IFunctionWindow(const QString& title, QSize size = {800,600}, bool recreate_when_open = true, QWidget *parent = nullptr)
-        : QDialog(parent), m_recreate_when_open(recreate_when_open)
-    {
-        if(parent->isMaximized()){
-            this->showMaximized();
-        }
 
-        this->setWindowTitle(title);
-        this->resize(size);
+    IFunctionWindow(const   QString     &title,
+                            QSize       size                = {800, 600},
+                            bool        delete_when_close   = true,
+                            bool        showModel           = false,
+                            QWidget     *parent             = nullptr);
 
-        this->setWindowFlags(Qt::Dialog
-                             | Qt::WindowMinMaxButtonsHint
-                             | Qt::WindowCloseButtonHint);
-    }
+    void showOnTop();
 
-    void showOnTop()
-    {
-        setWindowFlag(Qt::WindowStaysOnTopHint,true);
-        setWindowFlag(Qt::WindowStaysOnTopHint,false);
-    }
-
-    ~IFunctionWindow()
-    {
-        qDebug() << "Function Window " << this->windowTitle() <<" Decontrusct";
-    }
+    ~IFunctionWindow();
 
 private:
     friend FunctionWnidowManager;
-    bool m_recreate_when_open;
+    bool m_delete_when_close;
 
 };
 
@@ -56,29 +40,11 @@ public:
     /**
      * @brief show
      * @param title
-     * @return true if window is created, else false
+     * @return if window is created, return true
      */
-    bool show(const std::string& title, bool onTop = true)
-    {
-        if (!this->has(title)){
-            return false;
-        }
-        auto win = this->get(title);
-        if (win->m_recreate_when_open && win->isHidden()) {
-            delete win;
-            return false;
-        }
-        if (onTop)
-            win->showOnTop();
-        win->show();
-        return true;
-    }
+    bool show(const std::string& title, bool onTop = true);
 
-    void create(const std::string& title, IFunctionWindow* newWindow) {
-        this->addAny(title, newWindow);
-        newWindow->showOnTop();
-        newWindow->show();
-    }
+    void create(const std::string& title, IFunctionWindow* newWindow);
 
     static FunctionWnidowManager *getInstance(QObject *parent = nullptr)
     {

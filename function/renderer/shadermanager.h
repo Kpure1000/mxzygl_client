@@ -12,10 +12,10 @@ class ShaderManager : public QObject, public IAssetManager<std::string, QOpenGLS
 public:
     explicit ShaderManager(QObject *parent = nullptr);
 
-    QOpenGLShaderProgram *load(const QString &vShaderFileName, const QString &fShaderFileName);
+    QOpenGLShaderProgram *load(const std::string &shaderName, const QString &vShaderFileName, const QString &fShaderFileName);
 
 signals:
-    void onShaderLoaded(QOpenGLShaderProgram *);
+    void onShaderLoaded(const std::string &shaderName, QOpenGLShaderProgram *);
 
 public:
     static ShaderManager* getInstance(QObject *parent = nullptr)
