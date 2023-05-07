@@ -1,8 +1,5 @@
-#version 330 core
-#extension GL_ARB_separate_shader_objects : enable
-in vec3 fragPos;
-in vec3 fragNor;
-out vec4 FragColor;
+varying vec3 fragPos;
+varying vec3 fragNor;
 
 struct Material
 {
@@ -29,14 +26,14 @@ void main()
 {
     vec3 normalDir = normalize(fragNor);
     vec3 viewDir = normalize(-fragPos);
-    if(dot(normalDir, viewDir) < 0)
+    if(dot(normalDir, viewDir) < 0.0)
         normalDir = -normalDir;
     vec3 lightDir = normalize (_light.direction);
     vec3 reflectDir = reflect(-lightDir, normalDir);
 
     vec4 diffuse = vec4(_material.diffuse * max(dot(normalDir, lightDir), 0.0), 1.0);
-    vec4 specular = vec4(_material.specular * pow(max(dot(viewDir, reflectDir), 0.0), _material.shininess), 1.0);
+    vec4 specular = vec4(_material.specular * pow(max(dot(viewDir, reflectDir), 0.0), float(_material.shininess)), 1.0);
     vec4 ambient = vec4(_material.albedo, 1.0);
 
-    FragColor = (ambient + diffuse + specular) * _light.intensity;
+    gl_FragColor = (ambient + diffuse + specular) * _light.intensity;
 }
