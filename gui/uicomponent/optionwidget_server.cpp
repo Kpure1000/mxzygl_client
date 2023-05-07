@@ -1,6 +1,6 @@
 #include "optionwidget_server.h"
 
-#include "ui_option_server.h"
+#include "ui_optionwidget_server.h"
 #include "function/configer/configmanager.h"
 
 #include <QDebug>

@@ -16,12 +16,14 @@ RenderWidget::RenderWidget(QWidget *parent) : QOpenGLWidget(parent)
 
 void RenderWidget::initializeGL()
 {
-    makeCurrent();
 //    qDebug() << "initializeGL";
-    m_renderer = new Renderer(this);
-    m_timer.start(16, this);
-    start_time = std::chrono::steady_clock::now();
-    doneCurrent();
+    if (!m_renderer) {
+        makeCurrent();
+        m_renderer = new Renderer(this);
+        m_timer.start(16, this);
+        start_time = std::chrono::steady_clock::now();
+        doneCurrent();
+    }
 }
 
 void RenderWidget::resizeGL(int w, int h)
@@ -48,7 +50,9 @@ void RenderWidget::doModelRendering(const QString &filePath)
 {
     auto model = ModelManager::getInstance()->get(filePath.toStdString());
 //    qDebug() << "RenderWidget::doModelRendering>> Render Model" << filePath;
-    m_renderer->setRenderData(std::make_shared<RenderData>(model));
+    if (m_renderer) {
+        m_renderer->setRenderData(std::make_shared<RenderData>(model));
+    }
 }
 
 void RenderWidget::doBVHRendering(const QString &filePath)
