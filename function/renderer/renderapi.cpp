@@ -19,15 +19,47 @@ RenderAPI::RenderAPI(QObject *parent) : QObject(parent)
     doRendererConfigModified();
 }
 
-void RenderAPI::clear(QOpenGLContext *context)
+void RenderAPI::resize(QOpenGLContext *context, int w, int h)
 {
     QOpenGLFunctions f(context);
-    f.glEnable(GL_DEPTH_TEST);
-    f.glEnable(GL_BLEND);
-    f.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    f.glClearColor(m_clearColor.x(), m_clearColor.y(), m_clearColor.z(), 1.0f);
+    f.glViewport(0, 0, w, h);
+}
 
+void RenderAPI::clearAll(QOpenGLContext *context)
+{
+    QOpenGLFunctions f(context);
+    f.glClearColor(m_clearColor.x(), m_clearColor.y(), m_clearColor.z(), 1.0f);
     f.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void RenderAPI::clearColor(QOpenGLContext *context)
+{
+    QOpenGLFunctions f(context);
+    f.glClearColor(m_clearColor.x(), m_clearColor.y(), m_clearColor.z(), 1.0f);
+    f.glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void RenderAPI::clearDepth(QOpenGLContext *context)
+{
+    QOpenGLFunctions f(context);
+    f.glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void RenderAPI::enableDepth(QOpenGLContext *context, bool on)
+{
+    QOpenGLFunctions f(context);
+    on ? f.glEnable(GL_DEPTH_TEST) : f.glDisable(GL_DEPTH_TEST);
+}
+
+void RenderAPI::enableBlend(QOpenGLContext *context, bool on)
+{
+    QOpenGLFunctions f(context);
+    if (on) {
+        f.glEnable(GL_BLEND);
+        f.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    } else {
+        f.glDisable(GL_BLEND);
+    }
 }
 
 void RenderAPI::drawTriangle(QOpenGLContext *context, int triangleNums)

@@ -11,74 +11,44 @@
 #include <memory>
 #include <functional>
 
-namespace res {
-struct Mesh;
-struct Model;
-struct BVH;
-struct Effect;
-}
+#include "renderdata.h"
 
-struct TriangleData {
-    std::shared_ptr<QOpenGLBuffer> vbo_v, vbo_n, vbo_u, ibo;
-
-    /**
-     * @brief Transform from Object to World
-     */
-    QMatrix4x4 o2w;
-
-    int triangle_nums;
-
-    explicit TriangleData(std::shared_ptr<res::Mesh> mesh);
-
-    void bind(QOpenGLShaderProgram *sprog);
-
-    ~TriangleData();
-};
-
-struct RenderData {
-    std::vector<std::shared_ptr<TriangleData>> triangleDatas;
-
-    explicit RenderData(std::shared_ptr<res::Model> model);
-    explicit RenderData(std::shared_ptr<res::BVH> bvh);
-
-    ~RenderData();
-
-};
-
-struct IShader : public QObject {
-    std::shared_ptr<QOpenGLShaderProgram> sprog;
-    std::string name;
-
-    explicit IShader(const std::string &name);
-
-    ~IShader();
-
-    virtual void use(std::function<void(QOpenGLShaderProgram *)> func) = 0;
-};
-
-struct PhongShader : public IShader {
-    explicit PhongShader(const std::string &name = "Phong");
-
-    void use(std::function<void(QOpenGLShaderProgram*)> func) override;
-};
+#include "arcball.h"
 
 class Renderer : public QObject, public QOpenGLFunctions
 {
     Q_OBJECT
 public:
-    explicit Renderer(QObject *parent = nullptr);
+    explicit Renderer(int sw, int sh, QObject *parent = nullptr);
 
     ~Renderer();
 
-    void render(QOpenGLContext *context, float dt);
+    void resize(QOpenGLContext *context, int w, int h);
 
-    void setRenderData(std::shared_ptr<RenderData> renderData);
+    void push_input(const InputData &input);
+    void logic_tick(float dt);
+    void render_tick(QOpenGLContext *context);
+    void pop_input();
+
+
+    void setRenderData(std::shared_ptr<res::Model> model);
+    void setRenderData(std::shared_ptr<res::BVH> bvh);
     void clearRenderData();
 
 private:
-    std::shared_ptr<RenderData> m_renderData;
-    std::shared_ptr<PhongShader> m_shader;
+    std::shared_ptr<RenderData> m_meshesData;
+    std::shared_ptr<SkyData> m_skyData;
+
+    std::shared_ptr<PhongShader> m_phongShader;
+    std::shared_ptr<SkyShader> m_skyShader;
+
+    std::shared_ptr<ArcBall> m_arcBall;
+
     float m_rot=.0f;
+
+    int m_sw, m_sh;
+
+    InputData m_input;
 };
 
 #endif // MX_RENDERER_H

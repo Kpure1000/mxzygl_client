@@ -1,105 +1,21 @@
 #include "renderer.h"
 
 #include <QDebug>
+
 #include "renderapi.h"
+#include "renderdata.h"
 #include "resource/model.h"
 #include "resource/bvh.h"
-#include "shadermanager.h"
 
-TriangleData::TriangleData(std::shared_ptr<res::Mesh> mesh)
+Renderer::Renderer(int sw, int sh, QObject *parent)
+    : QObject(parent)
+    , m_sw(sw)
+    , m_sh(sh)
 {
-    triangle_nums = mesh->facesNum();
-    vbo_v = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::Type::VertexBuffer);
-    vbo_v->create();
-    vbo_v->bind();
-    vbo_v->setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
-    vbo_v->allocate(mesh->vertices.data(), mesh->verticesNum() * sizeof(QVector3D));
-
-    vbo_n = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::Type::VertexBuffer);
-    vbo_n->create();
-    vbo_n->bind();
-    vbo_n->setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
-    vbo_n->allocate(mesh->normals.data(), mesh->verticesNum() * sizeof(QVector3D));
-
-//    vbo_u = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::Type::VertexBuffer);
-//    vbo_u->create();
-//    vbo_u->bind();
-//    vbo_u->setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
-//    vbo_u->allocate(mesh->uvs.data(), mesh->verticesNum() * sizeof(QVector2D));
-
-    ibo = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::Type::IndexBuffer);
-    ibo->create();
-    ibo->bind();
-    ibo->setUsagePattern(QOpenGLBuffer::UsagePattern::StaticDraw);
-    ibo->allocate(mesh->indices.data(), mesh->facesNum() * 3 * sizeof(unsigned int));
-}
-
-void TriangleData::bind(QOpenGLShaderProgram *sprog)
-{
-    vbo_v->bind();
-    sprog->enableAttributeArray("aPos");
-    sprog->setAttributeBuffer("aPos", GL_FLOAT, 0, 3, 0);
-    vbo_n->bind();
-    sprog->enableAttributeArray("aNor");
-    sprog->setAttributeBuffer("aNor", GL_FLOAT, 0, 3, 0);
-//    vbo_u->bind();
-//    sprog->enableAttributeArray("aTex");
-//    sprog->setAttributeBuffer("aPos", GL_FLOAT, 0, 2, 0);
-    ibo->bind();
-}
-
-TriangleData::~TriangleData()
-{
-    vbo_v->release(QOpenGLBuffer::Type::VertexBuffer);
-    vbo_n->release(QOpenGLBuffer::Type::VertexBuffer);
-    ibo->release(QOpenGLBuffer::Type::IndexBuffer);
-    qDebug() << "TriangleData::~TriangleData";
-}
-
-RenderData::RenderData(std::shared_ptr<res::Model> model)
-{
-    for (auto mesh : model->meshes) {
-        triangleDatas.emplace_back(std::make_shared<TriangleData>(mesh));
-    }
-}
-
-RenderData::RenderData(std::shared_ptr<res::BVH> bvh)
-{
-
-}
-
-RenderData::~RenderData()
-{
-
-}
-
-IShader::IShader(const std::string &name) : name(name)
-{
-}
-
-IShader::~IShader()
-{
-    sprog->release();
-    sprog.reset();
-}
-
-PhongShader::PhongShader(const std::string &name) : IShader(name)
-{
-    sprog.reset(ShaderManager::getInstance()->load(this->name,
-                                                   ":/assets/assets/shader/phong.vert",
-                                                   ":/assets/assets/shader/phong.frag"));
-}
-
-void PhongShader::use(std::function<void(QOpenGLShaderProgram *)> func)
-{
-    this->sprog->bind();
-    func(this->sprog.get());
-}
-
-Renderer::Renderer(QObject *parent)
-    : QObject(parent), m_shader(std::make_shared<PhongShader>())
-{
-
+    m_phongShader = std::make_shared<PhongShader>();
+    m_skyShader = std::make_shared<SkyShader>();
+    m_skyData = std::make_shared<SkyData>(QVector3D{0.2f, 0.3f, 0.48f}, QVector3D{0.4f, 0.3f, 0.2f});
+    m_arcBall = std::make_shared<ArcBall>(sw, sh);
 }
 
 Renderer::~Renderer()
@@ -107,50 +23,142 @@ Renderer::~Renderer()
 
 }
 
-void Renderer::render(QOpenGLContext *context, float dt)
+void Renderer::resize(QOpenGLContext *context, int w, int h)
 {
-    RenderAPI::getInstance()->clear(context);
-    if (nullptr == m_renderData)
-        return;
-    QOpenGLFunctions glf(context);
-    m_rot += dt * 0.01f;
-    for(auto tri_data : m_renderData->triangleDatas) {
-        m_shader->use([tri_data, this](QOpenGLShaderProgram *sprog) {
-            // 变换
-            tri_data->o2w.setToIdentity();
-            tri_data->o2w.translate(0, 0, -1.f);
-            tri_data->o2w.rotate(m_rot, 0.0f, 1.0f, 0.0f);
-            QMatrix4x4 projMat, viewMat;
-            projMat.perspective(60.f, 1.f, 0.1f, 50.f);
-            viewMat.lookAt({0.f, 0.f, 0.f}, {0.f, 0.f, -1.f}, {0.f, 1.f, 0.f});
-            sprog->setUniformValue("_model", tri_data->o2w);
-            sprog->setUniformValue("_view", viewMat);
-            sprog->setUniformValue("_proj", projMat);
-            sprog->setUniformValue("_normal", tri_data->o2w.normalMatrix());
-            // 材质
-            sprog->setUniformValue("_material.albedo", {0.7, 0.7, 0.7});
-            sprog->setUniformValue("_material.diffuse", {1.0, 1.0, 1.0});
-            sprog->setUniformValue("_material.specular", {0.7, 0.7, 0.7});
-            sprog->setUniformValue("_material.shininess", 16.f);
-            // 直射光
-            sprog->setUniformValue("_light.intensity", 0.5f);
-            sprog->setUniformValue("_light.ambient", {0.3f, 0.3f, 0.3f});
-            sprog->setUniformValue("_light.diffuse", {1.0f, 1.0f, 1.0f});
-            sprog->setUniformValue("_light.specular", {0.6f, 0.6f, 0.6f});
-            sprog->setUniformValue("_light.direction", {0.5f, 0.5f, 0.5f});
+    m_sw = w;
+    m_sh = h;
 
-            tri_data->bind(sprog);
-        });
+    if (m_meshesData)
+        m_meshesData->camera->aspect = static_cast<float>(w) / h;
+    m_arcBall->resize(w, h);
+
+    RenderAPI::getInstance()->resize(context, w, h);
+}
+
+void Renderer::push_input(const InputData &input)
+{
+    switch (input.type) {
+    case InputData::InputType::KEY: {
+        for (int i = 0; i < m_input.nKeyEvents; i++) {
+            m_input.key_event[i] |= input.key_event[i];
+        }
+        break;
+    }
+    case InputData::InputType::MOUSE: {
+        m_input.pos = input.pos;
+        for (int i = 0; i < m_input.nMouseEvents; i++) {
+            m_input.mouse_event[i] |= input.mouse_event[i];
+        }
+        break;
+    }
+    case InputData::InputType::WHEEL: {
+        m_input.scrollx = input.scrollx;
+        m_input.scrolly = input.scrolly;
+        break;
+    }
+    }
+}
+
+void Renderer::logic_tick(float dt)
+{
+    if (m_meshesData) {
+        // 缩放处理
+        auto zoom = -m_input.scrolly;
+        auto scale = &m_meshesData->trans_model.scale;
+        scale->setX(std::max(.5f, std::min(6.f, scale->x() + zoom * dt * 0.0003f)));
+        scale->setY(std::max(.5f, std::min(6.f, scale->y() + zoom * dt * 0.0003f)));
+        scale->setZ(std::max(.5f, std::min(6.f, scale->z() + zoom * dt * 0.0003f)));
+        // ArcBall处理
+        m_arcBall->tick(m_input, dt);
+        m_meshesData->trans_model.rotation = m_arcBall->getRotation();
+    }
+}
+
+void Renderer::render_tick(QOpenGLContext *context)
+{
+    context = QOpenGLContext::currentContext();
+
+    RenderAPI::getInstance()->enableDepth(context, true);
+    RenderAPI::getInstance()->clearAll(context);
+    if (nullptr == m_meshesData)
+        return;
+
+    // 渲染天空
+    auto shSky = m_skyShader->sprog;
+    shSky->bind();
+    shSky->setUniformValue("_sky", m_skyData->sky);
+    shSky->setUniformValue("_ground", m_skyData->ground);
+    shSky->setUniformValue("_pitch", 0.0f);
+    m_skyData->triangleData->bind(shSky.get());
+    RenderAPI::getInstance()->drawTriangle(context, m_skyData->triangleData->triangle_nums);
+
+    RenderAPI::getInstance()->clearDepth(context);
+    auto shPhong = m_phongShader->sprog;
+    shPhong->bind();
+    // 模型变换
+    auto modelMat = m_meshesData->trans_model.get_trans_mat();
+    shPhong->setUniformValue("_model", modelMat);
+    shPhong->setUniformValue("_normal", modelMat.normalMatrix());
+    // 相机变换
+    auto camera = m_meshesData->camera;
+    shPhong->setUniformValue("_view", camera->get_view_mat(m_meshesData->trans_ca));
+    shPhong->setUniformValue("_proj", camera->get_projection_mat());
+    // 材质
+    shPhong->setUniformValue("_material.albedo", {0.8f, 0.8f, 0.8f});
+    shPhong->setUniformValue("_material.diffuse", {1.0f, 1.0f, 1.0f});
+    shPhong->setUniformValue("_material.specular", {1.0f, 1.0f, 1.0f});
+    shPhong->setUniformValue("_material.shininess", 16.f);
+    // 直射光1
+    shPhong->setUniformValue("_light_1.intensity", 1.0f);
+    shPhong->setUniformValue("_light_1.ambient", {0.4f, 0.4f, 0.4f});
+    shPhong->setUniformValue("_light_1.diffuse", {0.8f, 0.8f, 0.8f});
+    shPhong->setUniformValue("_light_1.specular", {0.9f, 0.9f, 0.9f});
+    shPhong->setUniformValue("_light_1.position", {0.1f, 0.5f, 1.5f});
+    shPhong->setUniformValue("_light_1._constant",  1.0f);
+    shPhong->setUniformValue("_light_1._linear",    0.22f);
+    shPhong->setUniformValue("_light_1._quadratic", 0.2f);
+    // 直射光2
+    shPhong->setUniformValue("_light_2.intensity", 1.0f);
+    shPhong->setUniformValue("_light_2.ambient", {0.1f, 0.1f, 0.1f});
+    shPhong->setUniformValue("_light_2.diffuse", {0.2f, 0.3f, 0.48f});
+    shPhong->setUniformValue("_light_2.specular", {0.2f, 0.3f, 0.48f});
+    shPhong->setUniformValue("_light_2.position", {-0.2f, 2.3f, 0.5f});
+    shPhong->setUniformValue("_light_2._constant",  1.0f);
+    shPhong->setUniformValue("_light_2._linear",    0.22f);
+    shPhong->setUniformValue("_light_2._quadratic", 0.2f);
+    // 直射光3
+    shPhong->setUniformValue("_light_3.intensity", 1.0f);
+    shPhong->setUniformValue("_light_3.ambient", {0.1f, 0.1f, 0.1f});
+    shPhong->setUniformValue("_light_3.diffuse", {0.4f, 0.3f, 0.2f});
+    shPhong->setUniformValue("_light_3.specular", {0.4f, 0.3f, 0.2f});
+    shPhong->setUniformValue("_light_3.position", {0.2f, -2.3f, 0.5f});
+    shPhong->setUniformValue("_light_3._constant",  1.0f);
+    shPhong->setUniformValue("_light_3._linear",    0.22f);
+    shPhong->setUniformValue("_light_3._quadratic", 0.2f);
+
+    for (auto tri_data : m_meshesData->triangleDatas) {
+        tri_data->bind(shPhong.get());
         RenderAPI::getInstance()->drawTriangle(context, tri_data->triangle_nums);
     }
 }
 
-void Renderer::setRenderData(std::shared_ptr<RenderData> renderData)
+void Renderer::pop_input()
 {
-    m_renderData = renderData;
+    m_input = InputData{};
+}
+
+void Renderer::setRenderData(std::shared_ptr<res::Model> model)
+{
+    m_meshesData = std::make_shared<RenderData>(model, m_sw, m_sh);
+}
+
+void Renderer::setRenderData(std::shared_ptr<res::BVH> bvh)
+{
+    m_meshesData = std::make_shared<RenderData>(bvh, m_sw, m_sh);
 }
 
 void Renderer::clearRenderData()
 {
-    m_renderData.reset();
+    m_meshesData.reset();
+    m_meshesData = nullptr;
 }

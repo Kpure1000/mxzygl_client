@@ -11,7 +11,13 @@ class RenderAPI : public QObject
 public:
     explicit RenderAPI(QObject *parent = nullptr);
 
-    void clear(QOpenGLContext *context);
+    void resize(QOpenGLContext *context, int w, int h);
+
+    void clearAll(QOpenGLContext *context);
+    void clearColor(QOpenGLContext *context);
+    void clearDepth(QOpenGLContext *context);
+    void enableDepth(QOpenGLContext *context, bool on = true);
+    void enableBlend(QOpenGLContext *context, bool on = true);
 
     void drawTriangle(QOpenGLContext *context, int triangleNums);
 
