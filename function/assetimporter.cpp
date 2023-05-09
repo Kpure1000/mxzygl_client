@@ -19,7 +19,7 @@ AssetImporter::AssetImporter(ImportType type, QObject *parent)
 
 AssetImporter::~AssetImporter()
 {
-    qDebug() << "AssetImporter::~AssetImporter";
+//    qDebug() << "AssetImporter::~AssetImporter";
 }
 
 void AssetImporter::add(const QString &filePath)
