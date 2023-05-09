@@ -5,6 +5,9 @@
 #include <QVector3D>
 #include "transform.h"
 
+#undef far
+#undef near
+
 struct Camera {
     explicit Camera(float aspect, float near, float far);
     QMatrix4x4 get_view_mat(const Transform &trans) const;
