@@ -53,12 +53,13 @@ struct SkyData {
     explicit SkyData(const QVector3D &sky, const QVector3D &ground);
 };
 
-struct IShader {
+struct IShader : public QObject {
+    Q_OBJECT
 public:
     std::shared_ptr<QOpenGLShaderProgram> sprog;
     std::string name;
 
-    explicit IShader(const std::string &name);
+    explicit IShader(const std::string &name, QObject *parent = nullptr);
 
     ~IShader();
 
@@ -66,16 +67,18 @@ public:
 };
 
 struct PhongShader : public IShader {
+    Q_OBJECT
 public:
-    explicit PhongShader(const std::string &name = "Phong");
+    explicit PhongShader(const std::string &name, QObject *parent = nullptr);
     ~PhongShader();
 
 //    void use(std::function<void(QOpenGLShaderProgram*)> func) override;
 };
 
 struct SkyShader : public IShader {
+    Q_OBJECT
 public:
-    explicit SkyShader(const std::string &name = "Phong");
+    explicit SkyShader(const std::string &name, QObject *parent = nullptr);
     ~SkyShader();
 
     //    void use(std::function<void(QOpenGLShaderProgram*)> func) override;

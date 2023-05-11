@@ -12,15 +12,15 @@ Renderer::Renderer(int sw, int sh, QObject *parent)
     , m_sw(sw)
     , m_sh(sh)
 {
-    m_phongShader = std::make_shared<PhongShader>();
-    m_skyShader = std::make_shared<SkyShader>();
+    m_phongShader   = new PhongShader("Phong", this);
+    m_skyShader     = new SkyShader("Skybox", this);
     m_skyData = std::make_shared<SkyData>(QVector3D{0.2f, 0.3f, 0.48f}, QVector3D{0.4f, 0.3f, 0.2f});
     m_arcBall = std::make_shared<ArcBall>(sw, sh);
 }
 
 Renderer::~Renderer()
 {
-
+//    qDebug() << "Renderer::~Renderer";
 }
 
 void Renderer::resize(QOpenGLContext *context, int w, int h)
@@ -86,9 +86,10 @@ void Renderer::render_tick(QOpenGLContext *context)
     // 渲染天空
     auto shSky = m_skyShader->sprog;
     shSky->bind();
+    shSky->setUniformValue("_fov_rad", m_meshesData->camera->fov * 3.1415926f / 180.f);
     shSky->setUniformValue("_sky", m_skyData->sky);
     shSky->setUniformValue("_ground", m_skyData->ground);
-    shSky->setUniformValue("_pitch", 0.0f);
+    shSky->setUniformValue("_pitch", m_meshesData->trans_ca.rotation.toEulerAngles().y());
     m_skyData->triangleData->bind(shSky.get());
     RenderAPI::getInstance()->drawTriangle(context, m_skyData->triangleData->triangle_nums);
 
@@ -149,11 +150,13 @@ void Renderer::pop_input()
 
 void Renderer::setRenderData(std::shared_ptr<res::Model> model)
 {
+    m_meshesData.reset();
     m_meshesData = std::make_shared<RenderData>(model, m_sw, m_sh);
 }
 
 void Renderer::setRenderData(std::shared_ptr<res::BVH> bvh)
 {
+    m_meshesData.reset();
     m_meshesData = std::make_shared<RenderData>(bvh, m_sw, m_sh);
 }
 

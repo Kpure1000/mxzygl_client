@@ -101,17 +101,18 @@ RenderData::~RenderData()
 //    qDebug() << "RenderData::~RenderData";
 }
 
-IShader::IShader(const std::string &name) : name(name)
+IShader::IShader(const std::string &name, QObject *parent) : QObject(parent), name(name)
 {
 }
 
 IShader::~IShader()
 {
+//    qDebug() << "IShader::~IShader";
     sprog->release();
     sprog.reset();
 }
 
-PhongShader::PhongShader(const std::string &name) : IShader(name)
+PhongShader::PhongShader(const std::string &name, QObject *parent): IShader(name, parent)
 {
     sprog.reset(ShaderManager::getInstance()->load(this->name,
                                                    ":/assets/assets/shader/phong.vert",
@@ -120,7 +121,7 @@ PhongShader::PhongShader(const std::string &name) : IShader(name)
 
 PhongShader::~PhongShader()
 {
-
+//    qDebug() << "PhongShader::~PhongShader";
 }
 
 //void PhongShader::use(std::function<void(QOpenGLShaderProgram *)> func)
@@ -129,14 +130,17 @@ PhongShader::~PhongShader()
 //    func(this->sprog.get());
 //}
 
-SkyShader::SkyShader(const std::string &name) : IShader(name)
+SkyShader::SkyShader(const std::string &name, QObject *parent) : IShader(name, parent)
 {
     sprog.reset(ShaderManager::getInstance()->load(this->name,
                                                    ":/assets/assets/shader/skybox.vert",
                                                    ":/assets/assets/shader/skybox.frag"));
 }
 
-SkyShader::~SkyShader() {}
+SkyShader::~SkyShader()
+{
+//    qDebug() << "SkyShader::~SkyShader";
+}
 
 SkyData::SkyData(const QVector3D &sky, const QVector3D &ground)
     : sky(sky), ground(ground)

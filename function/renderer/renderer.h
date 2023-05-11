@@ -39,8 +39,8 @@ private:
     std::shared_ptr<RenderData> m_meshesData;
     std::shared_ptr<SkyData> m_skyData;
 
-    std::shared_ptr<PhongShader> m_phongShader;
-    std::shared_ptr<SkyShader> m_skyShader;
+    PhongShader *m_phongShader;
+    SkyShader   *m_skyShader;
 
     std::shared_ptr<ArcBall> m_arcBall;
 
