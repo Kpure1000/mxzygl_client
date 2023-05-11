@@ -1,17 +1,34 @@
 #include "assetimporter.h"
 
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QDebug>
+#include <QFileInfo>
+
+#include "function/network/client.h"
+#include "function/network/protocal.h"
+#include "function/metacategory.h"
 
 AssetImporter::AssetImporter(ImportType type, QObject *parent)
     : QObject{parent}, m_type(type)
 {
-    QJsonArray headers;
-    // 由于在addPathsNotExist中有addition_count检测，m_filePaths一定有元素
-    auto header_names = res::AssetInfo::getInfoNameList();
-    for (auto& header : header_names) {
-        headers.append(header);
-    }
+    m_client = new Client(this);
+
+    connect(m_client, &Client::onSendingStateChanged, this, &AssetImporter::onResponsing);
+
+    connect(m_client, &Client::onReadOver, this, [=](const QJsonObject &data, const QByteArray &extraData) {
+        qDebug() << "AssetImporter>> Response Type:" << static_cast<Protocal::HeaderField>(data["type"].toInt());
+        this->clear();
+    });
+
+    m_info.insert("type", static_cast<int>(Protocal::HeaderField::REQUEST_UPLOADMODEL));
+    m_info.insert("category", MetaCategory::getInstance()->getCategoryInt());
+    // TODO: 连接MetaCategory修改信号
+    connect(MetaCategory::getInstance(), &MetaCategory::onCategoryModyfied, this, [=](){
+        this->m_info["category"] = MetaCategory::getInstance()->getCategoryInt();
+    });
+
+    QJsonArray headers = res::AssetInfo::get_headers();
     QJsonArray data;
     m_info.insert("headers", headers);
     m_info.insert("data", data);
@@ -27,7 +44,7 @@ void AssetImporter::add(const QString &filePath)
     m_filePathDict.insert(filePath.toStdString());
     m_filePaths << filePath;
     auto data = m_info["data"].toArray();
-    data.append(*(res::AssetInfo(m_type, filePath).getJsonObject()));
+    data.append(*res::AssetInfo::get_data(res::AssetInfo::AssetType::MODEL, filePath));
     m_info["data"] = data;
     emit onAddPath();
 }
@@ -40,7 +57,7 @@ void AssetImporter::addPathsNotExist(const QStringList &filePaths)
             m_filePathDict.insert(filePath.toStdString());
             m_filePaths << filePath;
             auto data = m_info["data"].toArray();
-            data.append(*(res::AssetInfo(m_type, filePath).getJsonObject()));
+            data.append(*res::AssetInfo::get_data(res::AssetInfo::AssetType::MODEL, filePath));
             m_info["data"] = data;
             addition_count++;
         }
@@ -59,7 +76,7 @@ void AssetImporter::clear()
 
 void AssetImporter::upload()
 {
-
+    m_client->sendData(m_info);
 }
 
 QStringList AssetImporter::getFilePaths(const std::vector<int> &index) const
@@ -75,37 +92,9 @@ QStringList AssetImporter::getFileNames(const std::vector<int> &index) const
 {
     QStringList fileNames;
     for (const auto &id : index) {
-        fileNames << res::AssetInfo(m_type, m_filePaths[id]).name;
+        auto fileInfo = QFileInfo(m_filePaths[id]);
+        fileNames << fileInfo.baseName();
     }
     return fileNames;
-}
-
-std::vector<res::AssetInfo> AssetImporter::getAssets() const
-{
-    std::vector<res::AssetInfo> assets;
-    assets.reserve(m_filePaths.size());
-    for (const auto &filePath : m_filePaths) {
-        assets.emplace_back(m_type, filePath);
-    }
-    return assets;
-}
-
-QJsonObject AssetImporter::getAssets_JsonObject() const
-{
-    QJsonObject info;
-    QJsonArray headers;
-    // 由于在addPathsNotExist中有addition_count检测，m_filePaths一定有元素
-    auto header_names = res::AssetInfo::getInfoNameList();
-    for (auto& header : header_names) {
-        headers.append(header);
-    }
-    QJsonArray data;
-    for (const auto &filePath : m_filePaths) {
-        auto asset = res::AssetInfo(m_type, filePath);
-        data.append(*(asset.getJsonObject()));
-    }
-    info.insert("headers", headers);
-    info.insert("data", data);
-    return info;
 }
 

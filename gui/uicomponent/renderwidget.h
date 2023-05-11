@@ -17,6 +17,7 @@ class RenderWidget : public QOpenGLWidget
     Q_OBJECT
 public:
     explicit RenderWidget(QWidget *parent = nullptr);
+    ~RenderWidget();
 
 private:
     void initializeGL() override;

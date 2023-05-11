@@ -14,6 +14,15 @@ RenderWidget::RenderWidget(QWidget *parent) : QOpenGLWidget(parent)
     this->setFocusPolicy(Qt::WheelFocus);
 }
 
+RenderWidget::~RenderWidget()
+{
+//    if (!m_renderer) {
+////        qDebug() << "RenderWidget::~RenderWidget";
+//        delete m_renderer;
+//        m_renderer = nullptr;
+//    }
+}
+
 void RenderWidget::initializeGL()
 {
 //    qDebug() << "initializeGL";

@@ -3,6 +3,7 @@
 
 #include <QStringList>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QJsonDocument>
 
 #include "assetinfo.h"
@@ -17,16 +18,9 @@ struct SearchInfo : public AssetInfo {
         TAG         =   0x01 << 2   // 标签
     };
 
-    SearchType       searchType;
+    static std::shared_ptr<QJsonObject> get_data(SearchType searchType, float similarity);
 
-    float similarity;
-
-    SearchInfo(SearchType searchType);
-
-    std::shared_ptr<QJsonObject>    getJsonObject()     const override;
-
-    QStringList                     getInfoValueList()  const override;
-    static QStringList              getInfoNameList()   ;
+    static QJsonArray                   get_headers();
 
 };
 

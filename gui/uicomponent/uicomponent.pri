@@ -6,7 +6,8 @@ SOURCES += \
     $$PWD/optionwidget_server.cpp \
     $$PWD/previewpane.cpp \
     $$PWD/previewwidget.cpp \
-    $$PWD/renderwidget.cpp
+    $$PWD/renderwidget.cpp \
+    $$PWD/statedialog.cpp
 HEADERS += \
     $$PWD/infotablewidget.h \
     $$PWD/modelsearchwidget.h \
@@ -16,10 +17,12 @@ HEADERS += \
     $$PWD/previewpane.h \
     $$PWD/previewwidget.h \
     $$PWD/renderwidget.h \
+    $$PWD/statedialog.h \
     $$PWD/uicomponent.h
 
 FORMS += \
     $$PWD/modelsearchwidget.ui \
     $$PWD/optionwidget_asset.ui \
     $$PWD/optionwidget_render.ui \
-    $$PWD/optionwidget_server.ui
+    $$PWD/optionwidget_server.ui \
+    $$PWD/statedialog.ui

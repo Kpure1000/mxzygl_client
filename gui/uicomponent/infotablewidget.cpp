@@ -57,18 +57,21 @@ void InfoTableWidget::refresh()
         qDebug() << "InfoTableWidget::refresh>> headers.size()==0";
         return;
     }
-    setColumnCount(headers.size() + 1);
 
     auto rows = (*this->m_info)["data"].toArray();
+    setRowCount(rows.size());
     if (rows.size() == 0) {
         qDebug() << "InfoTableWidget::refresh>> data.size()==0";
         return;
     }
-    setRowCount(rows.size());
 
     QStringList headers_str({tr("预览组")});
-    for (const auto &header : headers)
-        headers_str.append(header.toString());
+    for (const auto &header : headers) {
+        QJsonObject header_ele = header.toObject();
+        if (header_ele["visible"].toBool())
+            headers_str.append(header_ele["name"].toString());
+    }
+    setColumnCount(headers_str.size());
     setHorizontalHeaderLabels(headers_str);
 
     for (int row = 0; row < rows.size(); row++) {
@@ -82,12 +85,15 @@ void InfoTableWidget::refresh()
         previewItem->setFlags(previewItem->flags() ^= Qt::ItemIsEditable);
         setItem(row, 0, previewItem);
         int col = 1;
-        for (const auto &header_name : headers) {
-            auto dataItem = new QTableWidgetItem(key2value[header_name.toString()].toString());
-            if (!m_info_editable)
-                dataItem->setFlags(dataItem->flags() ^= Qt::ItemIsEditable);
-            setItem(row, col, dataItem);
-            col++;
+        for (const auto &header : headers) {
+            QJsonObject header_ele = header.toObject();
+            if (header_ele["visible"].toBool()) {
+                auto dataItem = new QTableWidgetItem(key2value[header_ele["name"].toString()].toString());
+                if (!m_info_editable || !header_ele["editable"].toBool())
+                    dataItem->setFlags(dataItem->flags() ^= Qt::ItemIsEditable);
+                setItem(row, col, dataItem);
+                col++;
+            }
         }
     }
 
@@ -114,7 +120,8 @@ void InfoTableWidget::jumpTo(int row)
 
 void InfoTableWidget::selectGroup(int group)
 {
-    emit itemDoubleClicked(item(std::min(group * m_spanNum, rowCount()), 0));
+    if (this->rowCount() > 0)
+        emit itemDoubleClicked(item(std::min(group * m_spanNum, rowCount() - 1), 0));
 }
 
 void InfoTableWidget::clearInfos()

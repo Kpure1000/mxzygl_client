@@ -6,6 +6,7 @@
 #include <QDebug>
 
 #include "gui/uicomponent/previewwidget.h"
+#include "gui/uicomponent/statedialog.h"
 #include "function/configer/configmanager.h"
 
 ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget *parent) :
@@ -14,14 +15,27 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
     ui->setupUi(this);
 
     m_modelSearch = new ModelSearch(searchType, this);
+    connect(m_modelSearch, &ModelSearch::onResultUpdate, this, [=](){
+        m_preview->clearInfo();
+        m_preview->refreshInfo();
+        m_preview->selectGroup(0);
+    });
+    connect(m_modelSearch, &ModelSearch::onResultClear, this, [=](){
+        m_preview->clearInfo();
+    });
 
     m_preview = new PreviewWidget(m_modelSearch->getResultsModelInfo(),
-                                  2,
+                                  3,
                                   3,
                                   PreviewWidget::PreviewType::MODEL,
                                   Qt::Orientation::Horizontal,
                                   false,
                                   this);
+
+    connect(m_preview, &PreviewWidget::onPreview, this, [this](const std::vector<int> &index) {
+        m_preview->previewFiles(m_modelSearch->getFilePaths(index), m_modelSearch->getPreviewInfo(index));
+    });
+
     if (searchType == ModelSearch::SearchType::CONTENT) {
         // 显示浏览按钮
         ui->bt_browser->setHidden(false);
@@ -52,6 +66,7 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
         ui->ly_preview->addWidget(m_preview);
         ui->le_input->setEnabled(true);
     }
+
 //    emit m_preview->onPreview({0});
 
 }
@@ -91,6 +106,13 @@ void ModelSearchWidget::on_bt_browser_clicked()
 
 void ModelSearchWidget::on_bt_search_clicked()
 {
-
+    m_modelSearch->clearResults();
+    if (m_modelSearch->getType() != ModelSearch::SearchType::CONTENT) {
+        m_modelSearch->setSearchInfo(ui->le_input->text());
+    }
+    m_modelSearch->search();
+    auto stateDialog = new StateDialog(tr("模型检索状态"), this);
+    connect(m_modelSearch, &ModelSearch::onResponsing, stateDialog, &StateDialog::doStateChanged);
+    stateDialog->exec();
 }
 

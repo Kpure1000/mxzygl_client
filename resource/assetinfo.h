@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QJsonDocument>
 
 #include "model.h"
@@ -19,25 +20,11 @@ struct AssetInfo {
         EFFECT          = 0x1 << 2,
     };
 
-    AssetType       assetType = AssetType::MODEL;  // 资源种类
+    static std::shared_ptr<QJsonObject>    get_data(AssetType asset_type, const QString &filePath);
 
-//    QString         catagory;   // 大类
+    static  QJsonArray                      get_headers();
 
-    QString         name;       // 名称
-    QString         type;       // 类型
-    QString         tag;        // 标签
-
-    QString         fileType;   // 文件类型
-    QString         path;       // 路径
-
-    AssetInfo() = default;
-    AssetInfo(AssetType asset_type, const QString &filePath);
-
-    virtual std::shared_ptr<QJsonDocument>  getJsonDoc()        const;
-    virtual std::shared_ptr<QJsonObject>    getJsonObject()     const;
-
-    virtual QStringList                     getInfoValueList()  const;
-    static QStringList                      getInfoNameList()   ;
+    static  QJsonObject toHeaderElement(const QString&header_name, bool editable, bool visible);
 
 };
 

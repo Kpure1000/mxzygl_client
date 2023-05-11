@@ -2,57 +2,54 @@
 
 #include <QFileInfo>
 
-res::AssetInfo::AssetInfo(AssetType asset_type, const QString &filePath)
-    :assetType(asset_type), path(filePath)
+std::shared_ptr<QJsonObject> res::AssetInfo::get_data(AssetType asset_type, const QString &filePath)
 {
+    AssetType       assetType = asset_type;
+
+    QString         name;           // 名称
+    QString         type;           // 类型
+    QString         tag;            // 标签
+    QString         description;    // 描述
+    QString         fileType;       // 文件类型
+    QString         path;           // 路径
+
+    path = filePath;
     auto fileInfo = QFileInfo(filePath);
     name = fileInfo.baseName();
-//    tag = type = fileInfo.baseName().split('_')[0];
-    tag = type = "";
+    description = tag = type = "";
     if (assetType == AssetType::MODEL || assetType == AssetType::BVH) {
         fileType = fileInfo.filePath().split('.').back();
     } else {
         // TODO: Effect Asset fileType
     }
-}
 
-std::shared_ptr<QJsonDocument> res::AssetInfo::getJsonDoc() const
-{
-    auto doc = std::make_shared<QJsonDocument>();
-    doc->setObject(*getJsonObject());
-    return doc;
-}
-
-std::shared_ptr<QJsonObject> res::AssetInfo::getJsonObject() const
-{
     auto obj = std::make_shared<QJsonObject>();
     obj->insert("name", name);
-//    obj->insert("catagory", catagory);
     obj->insert("type", type);
     obj->insert("tag", tag);
+    obj->insert("description", description);
     obj->insert("fileType", fileType);
     obj->insert("path", path);
+
     return obj;
 }
 
-QStringList res::AssetInfo::getInfoValueList() const
+QJsonArray res::AssetInfo::get_headers()
 {
-    return QStringList()
-//                           << catagory
-                           << name
-                           << type
-                           << tag
-                           << fileType
-                           << path;
+    return QJsonArray()
+            << toHeaderElement("name",          false,  true)
+            << toHeaderElement("type",          true,   true)
+            << toHeaderElement("tag",           true,   true)
+            << toHeaderElement("description",   true,   true)
+            << toHeaderElement("fileType",      false,  true)
+            << toHeaderElement("path",          false,  true);
 }
 
-QStringList res::AssetInfo::getInfoNameList()
+QJsonObject res::AssetInfo::toHeaderElement(const QString &header_name, bool editable, bool visible)
 {
-    return QStringList()
-//                           << "catagory"
-                           << "name"
-                           << "type"
-                           << "tag"
-                           << "fileType"
-                           << "path";
+    return QJsonObject{
+        {"name", header_name},
+        {"editable", editable},
+        {"visible", visible},
+    };
 }

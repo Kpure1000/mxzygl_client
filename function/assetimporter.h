@@ -8,6 +8,8 @@
 
 #include "resource/assetinfo.h"
 
+class Client;
+
 class AssetImporter : public QObject
 {
     Q_OBJECT
@@ -35,10 +37,6 @@ public:
 
     QStringList getFileNames(const std::vector<int> &index) const;
 
-    std::vector<res::AssetInfo> getAssets() const;
-
-    QJsonObject getAssets_JsonObject() const;
-
     ImportType type() const { return m_type; }
 
     QJsonObject *getInfoRef() { return &m_info; }
@@ -48,11 +46,17 @@ signals:
     void onAddPaths();
     void onClear();
 
+    void onResponsing(const QString & info, bool is_continue);
+    void onResponsedSuccessful();
+    void onResponsedFailed();
+
 private:
     std::unordered_set<std::string> m_filePathDict;
     QStringList m_filePaths;
     ImportType m_type;
     QJsonObject m_info;
+
+    Client *m_client;
 
 };
 

@@ -1,25 +1,13 @@
 #include "searchinfo.h"
 
-res::SearchInfo::SearchInfo(SearchType searchType)
-    : AssetInfo{AssetType::MODEL, ""}, searchType(searchType)
+std::shared_ptr<QJsonObject> res::SearchInfo::get_data(SearchType searchType, float similarity)
 {
-
-
-}
-
-std::shared_ptr<QJsonObject> res::SearchInfo::getJsonObject() const
-{
-    auto obj = dynamic_cast<const AssetInfo*>(this)->getJsonObject();
+    auto obj = AssetInfo::get_data(AssetType::MODEL, "");
     obj->insert("similarity", similarity);
     return obj;
 }
 
-QStringList res::SearchInfo::getInfoValueList() const
+QJsonArray res::SearchInfo::get_headers()
 {
-    return dynamic_cast<const AssetInfo*>(this)->getInfoValueList() << std::to_string(similarity).c_str();
-}
-
-QStringList res::SearchInfo::getInfoNameList()
-{
-    return AssetInfo::getInfoNameList() << "similarity";
+    return AssetInfo::get_headers() << toHeaderElement("similarity", false, true);
 }

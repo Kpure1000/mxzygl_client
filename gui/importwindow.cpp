@@ -11,6 +11,7 @@
 
 #include "uicomponent/previewwidget.h"
 #include "function/configer/configmanager.h"
+#include "gui/uicomponent/statedialog.h"
 
 ImportWindow::ImportWindow(QWidget *parent)
     : IFunctionWindow("", parent ? parent->size() : QSize{800, 600}, false, false, parent)
@@ -100,9 +101,12 @@ QWidget *ImportWindow::setupImportWidget(QWidget* parent, AssetImporter *importe
     ly_top->addWidget(bt_clear, 1);
 
     auto bt_upload = new QPushButton(tr("上传"), totalWidget);
-    connect(bt_upload, &QPushButton::clicked, totalWidget, [importer]() {
+    connect(bt_upload, &QPushButton::clicked, totalWidget, [=]() {
         // 上传
         importer->upload();
+        auto stateDialog = new StateDialog(tr("资源上传状态"), parent);
+        connect(importer, &AssetImporter::onResponsing, stateDialog, &StateDialog::doStateChanged);
+        stateDialog->exec();
     });
     ly_top->addWidget(bt_upload, 1);
 

@@ -8,6 +8,8 @@
 
 #include "resource/searchinfo.h"
 
+class Client;
+
 class ModelSearch : public QObject
 {
     Q_OBJECT
@@ -17,17 +19,31 @@ public:
 
     void setSearchInfo(const QString &info);
 
+    void search();
+
+    void clearResults();
+
     QJsonObject *getResultsModelInfo() { return m_result_info.get(); }
     QJsonObject *getSearchModelInfo() { return m_search_info.get(); }
 
     SearchType getType() const { return m_type; }
 
+    QStringList getFilePaths(const std::vector<int> &index) const;
+
+    QStringList getPreviewInfo(const std::vector<int> &index) const;
+
 signals:
+    void onResponsing(const QString & info, bool is_continue);
+    void onResultUpdate();
+    void onResultClear();
 
 private:
     SearchType m_type;
 
     std::shared_ptr<QJsonObject> m_search_info, m_result_info;
+    QString m_search_keyword;
+
+    Client *m_client;
 
 };
 
