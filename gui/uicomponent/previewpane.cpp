@@ -36,6 +36,7 @@ PreviewPane::PreviewPane(QWidget *parent, bool linkTableItem)
     connect(this, &PreviewPane::onBVHLoaded, m_renderWidget, &RenderWidget::doBVHRendering, Qt::QueuedConnection);
 
     connect(this, &PreviewPane::onPreviewPrepared, this, &PreviewPane::doShowRenderer, Qt::QueuedConnection);
+    connect(this, &PreviewPane::onPreviewFailed, this, &PreviewPane::doShowError, Qt::QueuedConnection);
 
 }
 
@@ -65,6 +66,15 @@ void PreviewPane::doShowPreparing(const QString& previewInfo)
     m_default->show();
 }
 
+void PreviewPane::doShowError(const QString &previewInfo)
+{
+    m_default->setText(tr("资源载入失败"));
+    m_info->setText(previewInfo);
+
+    m_renderWidget->hide();
+    m_default->show();
+}
+
 void PreviewPane::doShowDefault()
 {
     m_default->setText(tr("无资源"));
@@ -77,9 +87,13 @@ void PreviewPane::doShowDefault()
 void PreviewPane::doPreviewModel(const QString &filePath, const QString& previewInfo)
 {
     doShowPreparing(previewInfo);
-    ModelLoader::getInstance()->asyncLoad(filePath, [filePath, previewInfo, this]() {
+    ModelLoader::getInstance()->asyncLoad(filePath, [filePath, previewInfo, this](bool is_loaded) {
+        if (is_loaded) {
         emit onPreviewPrepared(previewInfo);
         emit onModelLoaded(filePath);
+        } else {
+            emit onPreviewFailed(previewInfo);
+        }
     });
 }
 

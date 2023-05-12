@@ -153,10 +153,14 @@ void RenderWidget::leaveEvent(QEvent *event)
 
 void RenderWidget::doModelRendering(const QString &filePath)
 {
-    auto model = ModelManager::getInstance()->get(filePath.toStdString());
-//    qDebug() << "RenderWidget::doModelRendering>> Render Model" << filePath;
-    if (m_renderer) {
-        m_renderer->setRenderData(model);
+    if (ModelManager::getInstance()->has(filePath.toStdString())) {
+//        qDebug() << "RenderWidget::doModelRendering>> Render Model" << filePath;
+        auto model = ModelManager::getInstance()->get(filePath.toStdString());
+        if (m_renderer) {
+            m_renderer->setRenderData(model);
+        }
+    } else {
+        qDebug() << "RenderWidget::doModelRendering>> Render Model Not Found" << filePath;
     }
 }
 

@@ -32,7 +32,7 @@ ModelLoader::ModelLoader(QObject *parent) : AssetCache(parent)
     });
 }
 
-std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, bool doGlobalTransform)
+std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, bool normalize, bool doGlobalTransform)
 {
     FILE *fp = fopen(filePath.toStdString().c_str(), "rb");
 
@@ -188,10 +188,13 @@ std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, bool doGlob
     model->centroid = (max + min) * .5f;
     model->diagonal = (max - min).length();
 
+    if (normalize)
+        model->normalize();
+
     return model;
 }
 
-std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath)
+std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath, bool normalize)
 {
     tinyobj::ObjReaderConfig reader_config;
     reader_config.mtl_search_path = "./"; // Path to material files
@@ -282,15 +285,18 @@ std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath)
     model->centroid = (max + min) * .5f;
     model->diagonal = (max - min).length();
 
+    if (normalize)
+        model->normalize();
+
     return model;
 }
 
-std::shared_ptr<Model> ModelLoader::loadOFF(const QString &filePath)
+std::shared_ptr<Model> ModelLoader::loadOFF(const QString &filePath, bool normalize)
 {
     return nullptr;
 }
 
-void ModelLoader::asyncLoad(const QString &filePath, std::function<void()> loadCallBack)
+void ModelLoader::asyncLoad(const QString &filePath, std::function<void(bool)> loadCallBack)
 {
     if (!ModelManager::getInstance()->has(filePath.toStdString())) {
         // load FBX file in async Job
@@ -298,26 +304,28 @@ void ModelLoader::asyncLoad(const QString &filePath, std::function<void()> loadC
             auto fileExt = filePath.split('.').back();
             std::shared_ptr<res::Model> model;
             if (fileExt == "fbx") {
-                model = ModelLoader::getInstance()->loadFBX(filePath);
+                model = ModelLoader::getInstance()->loadFBX(filePath, true, true);
             } else if (fileExt == "obj") {
-                model = ModelLoader::getInstance()->loadOBJ(filePath);
+                model = ModelLoader::getInstance()->loadOBJ(filePath, true);
             } else if (fileExt == "off") {
-                model = ModelLoader::getInstance()->loadOFF(filePath);
+                model = ModelLoader::getInstance()->loadOFF(filePath, true);
             } else {
                 qDebug() << "ModelLoader::asyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .off is Legal)";
+                loadCallBack(false);
                 return;
             }
             if (model == nullptr) {
                 qDebug() << "ModelLoader::asyncLoad>> Model" << filePath << "Load Failed";
+                loadCallBack(false);
                 return;
             }
-            model->normalize();
+//            qDebug() << "ModelLoader::asyncLoad>> Model" << filePath << "Load Successed";
             ModelManager::getInstance()->add(filePath.toStdString(), model);
             emit onAssetLoaded(filePath);
-            loadCallBack();
+            loadCallBack(true);
         });
     } else {
         emit onAssetLoaded(filePath);
-        loadCallBack();
+        loadCallBack(true);
     }
 }

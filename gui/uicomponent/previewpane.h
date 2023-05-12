@@ -18,6 +18,7 @@ private:
 
 signals:
     void onPreviewPrepared(const QString& assetName);
+    void onPreviewFailed(const QString& assetName);
     void onSelectedPane();
     void onModelLoaded(const QString& modelName);
     void onBVHLoaded(const QString& bvhName);
@@ -28,8 +29,9 @@ public slots:
     void doClear();
 
 private:
-    void doShowRenderer(const QString& assetName);
-    void doShowPreparing(const QString& assetName);
+    void doShowRenderer(const QString& previewInfo);
+    void doShowPreparing(const QString& previewInfo);
+    void doShowError(const QString& previewInfo);
     void doShowDefault();
 
 private:
