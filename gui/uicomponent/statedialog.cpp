@@ -12,6 +12,7 @@ StateDialog::StateDialog(const QString &title, QWidget *parent) :
     this->setWindowTitle(title);
     ui->btb->setEnabled(false);
     this->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
+    this->setWindowFlag(Qt::WindowCloseButtonHint, false);
 }
 
 StateDialog::~StateDialog()
