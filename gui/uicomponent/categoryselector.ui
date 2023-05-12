@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CategorySelector</class>
+ <widget class="QWidget" name="CategorySelector">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>348</width>
+    <height>221</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="ly_total">
+   <item>
+    <widget class="QRadioButton" name="rbt_1">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>主战装备</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="rbt_4">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>人员</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="rbt_3">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>地物</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="rbt_2">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>建筑</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

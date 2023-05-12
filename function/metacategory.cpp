@@ -10,6 +10,7 @@ MetaCategory::MetaCategory(QObject *parent) : QObject(parent), m_category(Catego
 
 void MetaCategory::setCategory(Category catgr)
 {
+    auto pre = m_category;
     m_category = catgr;
-    emit onCategoryModyfied();
+    emit onCategoryModyfied(pre, catgr);
 }

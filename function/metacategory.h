@@ -27,7 +27,7 @@ public:
     int         getCategoryInt() const { return static_cast<int>(m_category); }
 
 signals:
-    void        onCategoryModyfied();
+    void        onCategoryModyfied(Category pre, Category cur);
 
 public:
     static MetaCategory *getInstance(QObject *parent = nullptr)
