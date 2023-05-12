@@ -1,6 +1,8 @@
 #include "ifunctionwindow.h"
 
 #include <QDebug>
+#include <QKeyEvent>
+#include <QApplication>
 
 IFunctionWindow::IFunctionWindow(const QString &title, QSize size, bool delete_when_close, bool showModal, QWidget *parent)
     : QMainWindow(parent), m_delete_when_close(delete_when_close)
@@ -27,7 +29,15 @@ void IFunctionWindow::showOnTop()
 
 IFunctionWindow::~IFunctionWindow()
 {
-//    qDebug() << "Function Window " << this->windowTitle() <<" Decontrusct";
+    //    qDebug() << "Function Window " << this->windowTitle() <<" Decontrusct";
+}
+
+void IFunctionWindow::keyPressEvent(QKeyEvent *event)
+{
+    // TODO: 方便调试
+    if(event->key() == Qt::Key::Key_Escape) {
+        this->close();
+    }
 }
 
 bool FunctionWnidowManager::show(const std::string &title, bool onTop)

@@ -55,14 +55,14 @@ PreviewWidget::PreviewWidget(QJsonObject *info, int row, int column, PreviewType
 
 void PreviewWidget::refreshInfo()
 {
-    connect(m_infoTable, &InfoTableWidget::onSelectGroupToPreview, this, &PreviewWidget::doPreviewPrepare);
+    connect(m_infoTable, &InfoTableWidget::onGroupSelected, this, &PreviewWidget::doPreviewPrepare);
     m_infoTable->refresh();
 }
 
 void PreviewWidget::clearInfo()
 {
     m_infoTable->clearInfos();
-    disconnect(m_infoTable, &InfoTableWidget::onSelectGroupToPreview, this, 0);
+    disconnect(m_infoTable, &InfoTableWidget::onGroupSelected, this, 0);
 }
 
 void PreviewWidget::selectGroup(int group)

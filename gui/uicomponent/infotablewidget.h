@@ -4,6 +4,7 @@
 #include <QTableWidget>
 #include <vector>
 #include <QJsonObject>
+#include <QColor>
 
 class InfoTableWidget : public QTableWidget
 {
@@ -20,7 +21,7 @@ public:
     void clearInfos();
 
 signals:
-    void onSelectGroupToPreview(const std::vector<int> &rows);
+    void onGroupSelected(const std::vector<int> &rows);
 
 public slots:
 
@@ -28,6 +29,7 @@ private:
     int m_spanNum;
     QJsonObject *m_info;
     bool m_info_editable;
+    static const QColor m_editable_col, m_uneditable_col, m_group_col;
 };
 
 #endif // MX_INFOTABLEWIDGET_H

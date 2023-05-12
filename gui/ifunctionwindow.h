@@ -25,6 +25,9 @@ public:
 
     ~IFunctionWindow();
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     friend FunctionWnidowManager;
     bool m_delete_when_close;

@@ -5,11 +5,16 @@
 #include <QHeaderView>
 #include <QDebug>
 
+const QColor InfoTableWidget::m_editable_col = QColor{235, 255, 235, 255};
+const QColor InfoTableWidget::m_uneditable_col = QColor{255, 245, 235, 255};
+const QColor InfoTableWidget::m_group_col = QColor{235, 245, 255, 255};
+
 InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_editable, QWidget *parent)
     : QTableWidget(parent), m_spanNum(spanNum), m_info(info), m_info_editable(info_editable)
 {
     this->setStyleSheet("border:1px solid #8f8f8f;");
-    horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+    horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
+    horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
     connect(this, &QTableWidget::itemDoubleClicked, this, [this](QTableWidgetItem *item) {
         std::vector<int> rows;
         if (item->column() == 0) {
@@ -19,7 +24,7 @@ InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_edita
             }
         }
         if (rows.size() > 0)
-            emit this->onSelectGroupToPreview(rows);
+            emit this->onGroupSelected(rows);
     });
     if (m_info_editable) {
         connect(this, &QTableWidget::itemChanged, this, [this](QTableWidgetItem *cur) {
@@ -83,14 +88,21 @@ void InfoTableWidget::refresh()
         auto previewItem = new QTableWidgetItem(std::to_string(row / m_spanNum + 1).c_str());
         previewItem->setToolTip(tr("双击以预览组"));
         previewItem->setFlags(previewItem->flags() ^= Qt::ItemIsEditable);
+        previewItem->setBackgroundColor(m_group_col);
         setItem(row, 0, previewItem);
         int col = 1;
         for (const auto &header : headers) {
             QJsonObject header_ele = header.toObject();
             if (header_ele["visible"].toBool()) {
                 auto dataItem = new QTableWidgetItem(key2value[header_ele["name"].toString()].toString());
-                if (!m_info_editable || !header_ele["editable"].toBool())
+                if (!m_info_editable || !header_ele["editable"].toBool()) {
                     dataItem->setFlags(dataItem->flags() ^= Qt::ItemIsEditable);
+                    dataItem->setBackgroundColor(m_uneditable_col);
+                    dataItem->setToolTip(tr("不可编辑"));
+                } else {
+                    dataItem->setBackgroundColor(m_editable_col);
+                    dataItem->setToolTip(tr("可编辑"));
+                }
                 setItem(row, col, dataItem);
                 col++;
             }
@@ -105,10 +117,8 @@ void InfoTableWidget::refresh()
         }
     }
 
-    // 默认双击第一组预览并选中
-//    auto firstGroupItem = item(0, 0);
-//    emit itemDoubleClicked(firstGroupItem);
-//    setCurrentItem(firstGroupItem);
+    horizontalHeader()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+
 }
 
 void InfoTableWidget::jumpTo(int row)
@@ -128,5 +138,5 @@ void InfoTableWidget::clearInfos()
 {
     this->clearContents();
     std::vector<int> empty_row;
-    emit onSelectGroupToPreview(empty_row);
+    emit onGroupSelected(empty_row);
 }
