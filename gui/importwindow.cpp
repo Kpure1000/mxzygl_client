@@ -8,18 +8,27 @@
 #include <QSpacerItem>
 #include <QFileInfo>
 #include <QTabWidget>
+#include <QDockWidget>
 
 #include "uicomponent/previewwidget.h"
 #include "function/configer/configmanager.h"
 #include "gui/uicomponent/statedialog.h"
+#include "gui/uicomponent/categoryselector.h"
 
 ImportWindow::ImportWindow(QWidget *parent)
     : IFunctionWindow("", parent ? parent->size() : QSize{800, 600}, false, false, parent)
 {
-    auto ly_total = new QVBoxLayout(this);
-    this->setLayout(ly_total);
+    auto center_widget = centralWidget();
+    auto ly_total = new QVBoxLayout(center_widget);
 
-    auto tabw = new QTabWidget(this);
+    auto cate_sel = new CategorySelector(center_widget);
+    auto docker_cate = new QDockWidget(tr("资源导入 - 大类选择器"), center_widget);
+    docker_cate->setWidget(cate_sel);
+    docker_cate->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+    docker_cate->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+    addDockWidget(Qt::TopDockWidgetArea, docker_cate);
+
+    auto tabw = new QTabWidget(center_widget);
     ly_total->addWidget(tabw);
 
     auto modelImporter = new AssetImporter(AssetImporter::ImportType::MODEL, this);

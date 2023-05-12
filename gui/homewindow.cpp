@@ -1,15 +1,17 @@
 #include "homewindow.h"
 
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QApplication>
 #include <QDebug>
 #include <QDialog>
 #include <QKeyEvent>
-#include <QHBoxLayout>
+#include <QDockWidget>
 
 #include "optionwindow.h"
 #include "importwindow.h"
 #include "gui/uicomponent/modelsearchwidget.h"
+#include "gui/uicomponent/categoryselector.h"
 
 HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow(parent)
 {
@@ -18,9 +20,17 @@ HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow
     auto centerWidget = new QWidget(this);
     this->setCentralWidget(centerWidget);
 
-    auto ly_total = new QHBoxLayout(centerWidget);
+    auto ly_total = new QVBoxLayout(centerWidget);
 
     makeMenu();
+
+    auto cate_sel = new CategorySelector(centerWidget);
+//    ly_total->addWidget(cate_sel);
+    auto docker_cate = new QDockWidget(tr("大类选择器"), centerWidget);
+    docker_cate->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+    docker_cate->setWidget(cate_sel);
+    docker_cate->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+    addDockWidget(Qt::TopDockWidgetArea, docker_cate);
 
     m_tabw = new QTabWidget(centerWidget);
     ly_total->addWidget(m_tabw);
@@ -82,9 +92,12 @@ void HomeWindow::makeMenu()
 
     }
 
-    // ----------------工具----------------
+    // ----------------编辑----------------
     {
-        auto menu_version = new QMenu(tr("工具(&V)"), this);
+        auto menu_version = new QMenu(tr("编辑(&V)"), this);
+
+        // ----------------索引----------------
+        menu_version->addAction(tr("索引管理"));
 
         // ----------------属性编辑----------------
         menu_version->addAction(tr("属性编辑"));

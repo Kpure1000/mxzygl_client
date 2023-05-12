@@ -1,7 +1,7 @@
 #ifndef MX_IFUNCTIONWINDOW_H
 #define MX_IFUNCTIONWINDOW_H
 
-#include <QDialog>
+#include <QMainWindow>
 
 #include "utils/assetmanager.h"
 
@@ -10,7 +10,7 @@ class FunctionWnidowManager;
 /**
  * @brief 功能弹窗接口
  */
-class IFunctionWindow : public QDialog
+class IFunctionWindow : public QMainWindow
 {
     Q_OBJECT
 public:
@@ -18,7 +18,7 @@ public:
     IFunctionWindow(const   QString     &title,
                             QSize       size                = {800, 600},
                             bool        delete_when_close   = true,
-                            bool        showModel           = false,
+                            bool        showModal           = false,
                             QWidget     *parent             = nullptr);
 
     void showOnTop();

@@ -1,4 +1,5 @@
 SOURCES += \
+    $$PWD/categoryselector.cpp \
     $$PWD/infotablewidget.cpp \
     $$PWD/modelsearchwidget.cpp \
     $$PWD/optionwidget_asset.cpp \
@@ -9,6 +10,7 @@ SOURCES += \
     $$PWD/renderwidget.cpp \
     $$PWD/statedialog.cpp
 HEADERS += \
+    $$PWD/categoryselector.h \
     $$PWD/infotablewidget.h \
     $$PWD/modelsearchwidget.h \
     $$PWD/optionwidget_asset.h \
@@ -21,6 +23,7 @@ HEADERS += \
     $$PWD/uicomponent.h
 
 FORMS += \
+    $$PWD/categoryselector.ui \
     $$PWD/modelsearchwidget.ui \
     $$PWD/optionwidget_asset.ui \
     $$PWD/optionwidget_render.ui \

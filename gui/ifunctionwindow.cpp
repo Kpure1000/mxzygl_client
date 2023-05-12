@@ -2,14 +2,17 @@
 
 #include <QDebug>
 
-IFunctionWindow::IFunctionWindow(const QString &title, QSize size, bool delete_when_close, bool showModel, QWidget *parent)
-    : QDialog(parent), m_delete_when_close(delete_when_close)
+IFunctionWindow::IFunctionWindow(const QString &title, QSize size, bool delete_when_close, bool showModal, QWidget *parent)
+    : QMainWindow(parent), m_delete_when_close(delete_when_close)
 {
     this->setAttribute(Qt::WA_DeleteOnClose, delete_when_close);
+    if (showModal)
+        this->setWindowModality(Qt::WindowModality::ApplicationModal);
 
     this->setWindowTitle(title);
     this->resize(size);
-    this->setModal(showModel);
+
+    this->setCentralWidget(new QWidget(this));
 
     this->setWindowFlags(Qt::Dialog
                          | Qt::WindowMaximizeButtonHint
