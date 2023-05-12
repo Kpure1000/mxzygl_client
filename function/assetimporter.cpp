@@ -17,8 +17,18 @@ AssetImporter::AssetImporter(ImportType type, QObject *parent)
     connect(m_client, &Client::onSendingStateChanged, this, &AssetImporter::onResponsing);
 
     connect(m_client, &Client::onReadOver, this, [=](const QJsonObject &data, const QByteArray &extraData) {
-        qDebug() << "AssetImporter>> Response Type:" << static_cast<Protocal::HeaderField>(data["type"].toInt());
-        this->clear();
+        auto response_type = static_cast<Protocal::HeaderField>(data["type"].toInt());
+        auto status = data["status"].toString();
+        if (Protocal::HeaderField::RESPONSE_ERROR == response_type) {
+            emit onResponsing(tr("服务请求错误. Info:") + status, false);
+        } else {
+            if (!status.isEmpty()) {
+                emit onResponsing(tr("上传失败. Info: ") + status, false);
+            } else {
+                emit onResponsing(tr("上传成功!"), false);
+                this->clear();
+            }
+        }
     });
 
     m_info.insert("type", static_cast<int>(Protocal::HeaderField::REQUEST_UPLOADMODEL));

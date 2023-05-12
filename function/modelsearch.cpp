@@ -19,9 +19,10 @@ ModelSearch::ModelSearch(SearchType type, QObject *parent)
         if (Protocal::HeaderField::RESPONSE_ERROR == response_type) {
             emit onResponsing(tr("服务请求错误. Info:") + status, false);
         } else {
-            if ("" != status) {
+            if (!status.isEmpty()) {
                 emit onResponsing(tr("检索失败. Info: ") + status, false);
             } else {
+                emit onResponsing(tr("检索成功!"), false);
                 (*m_result_info) = data;
             }
         }

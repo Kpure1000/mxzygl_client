@@ -37,22 +37,22 @@ Client::Client(QObject *parent) : QObject(parent)
     });
 
     connect(this, &Client::onConnectSuccessful, this, [=]() {
-        emit onSendingStateChanged(tr("服务器连接成功, 准备发送数据..."), true);
+        emit onSendingStateChanged(tr("服务器连接成功, 发送数据..."), true);
     });
     connect(this, &Client::onConnectError, this, [=](QAbstractSocket::SocketError, const QString &info) {
         emit onSendingStateChanged(tr("与服务器断开连接, 信息: ") + info, false);
     });
     connect(this, &Client::onSendSuccessful, this, [=]() {
-        emit onSendingStateChanged(tr("数据发送成功, 准备接受服务响应"), true);
+        emit onSendingStateChanged(tr("数据发送成功, 接受服务响应..."), true);
     });
     connect(this, &Client::onSendFailed, this, [=]() {
-        emit onSendingStateChanged(tr("数据发送失败,"), false);
+        emit onSendingStateChanged(tr("数据发送失败"), false);
     });
     connect(this, &Client::onReadReady, this, [=]() {
         emit onSendingStateChanged(tr("正在接受服务响应..."), true);
     });
     connect(this, &Client::onReadOver, this, [=](const QJsonObject &data, const QByteArray &extraData) {
-        emit onSendingStateChanged(tr("接受服务响应完毕."), false);
+        emit onSendingStateChanged(tr("服务响应接受成功"), false);
     });
 
 }
@@ -67,7 +67,7 @@ void Client::sendData(const QJsonObject &data, const QByteArray &extraData)
 {
 
     if (QTcpSocket::UnconnectedState != m_socket->state()) {
-        qDebug() << "Client::sendData>> 还没发完别急";
+        qDebug() << "Client::sendData>> 还没发完别急!!!!!!!!!!";
         return;
     }
 
