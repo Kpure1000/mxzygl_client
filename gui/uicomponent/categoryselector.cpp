@@ -23,8 +23,8 @@ CategorySelector::CategorySelector(QWidget *parent) :
     checked_font.setBold(true);
     checked_bt->setFont(checked_font);
 
-    connect(bt_group, QOverload<int>::of(&QButtonGroup::buttonClicked), this, [=](int id){
-        MetaCategory::getInstance()->setCategory(static_cast<MetaCategory::Category>(id));
+    connect(bt_group, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this, [=](QAbstractButton * bt){
+        MetaCategory::getInstance()->setCategory(static_cast<MetaCategory::Category>(bt_group->id(bt)));
     });
 
     connect(MetaCategory::getInstance(), &MetaCategory::onCategoryModyfied, this, [=](MetaCategory::Category pre, MetaCategory::Category cur){

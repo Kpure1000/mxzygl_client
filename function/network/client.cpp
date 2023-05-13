@@ -28,9 +28,15 @@ Client::Client(QObject *parent) : QObject(parent)
         emit onConnectSuccessful();
     }, Qt::QueuedConnection);
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     connect(m_socket,  QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error), this, [=](QAbstractSocket::SocketError error) {
         emit onConnectError(error, m_socket->errorString());
     }, Qt::QueuedConnection);
+#else
+    connect(m_socket,  &QTcpSocket::errorOccurred, this, [=](QAbstractSocket::SocketError error) {
+            emit onConnectError(error, m_socket->errorString());
+        }, Qt::QueuedConnection);
+#endif
 
     connect(m_socket, &QTcpSocket::readyRead, this, [=](){
         emit onReadReady();

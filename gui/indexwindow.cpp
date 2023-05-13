@@ -69,7 +69,7 @@ QWidget *IndexWindow::initIndexWidget()
 
     auto bt_sync = new QPushButton(tr("→\n→\n→\n加\n载\n索\n引\n内\n容\n→\n→\n→\n"), totalWidget);
     {
-        bt_sync->setMaximumWidth(bt_sync->fontMetrics().width("AAAA"));
+        bt_sync->setMaximumWidth(bt_sync->fontMetrics().averageCharWidth() * 4);
         auto plc_bt_sync = bt_sync->sizePolicy();
         plc_bt_sync.setVerticalPolicy(QSizePolicy::Expanding);
         bt_sync->setSizePolicy(plc_bt_sync);

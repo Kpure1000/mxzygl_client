@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <QHeaderView>
 #include <QDebug>
+#include <QBrush>
 
 const QColor InfoTableWidget::m_editable_col = QColor{235, 255, 235, 255};
 const QColor InfoTableWidget::m_uneditable_col = QColor{255, 245, 235, 255};
@@ -88,7 +89,9 @@ void InfoTableWidget::refresh()
         auto previewItem = new QTableWidgetItem(std::to_string(row / m_spanNum + 1).c_str());
         previewItem->setToolTip(tr("双击以预览组"));
         previewItem->setFlags(previewItem->flags() ^= Qt::ItemIsEditable);
-        previewItem->setBackgroundColor(m_group_col);
+        QBrush brush = QBrush();
+        brush.setColor(m_group_col);
+        previewItem->setBackground(brush);
         setItem(row, 0, previewItem);
         int col = 1;
         for (const auto &header : headers) {
@@ -97,10 +100,14 @@ void InfoTableWidget::refresh()
                 auto dataItem = new QTableWidgetItem(key2value[header_ele["name"].toString()].toString());
                 if (!m_info_editable || !header_ele["editable"].toBool()) {
                     dataItem->setFlags(dataItem->flags() ^= Qt::ItemIsEditable);
-                    dataItem->setBackgroundColor(m_uneditable_col);
+                    QBrush brush = QBrush();
+                    brush.setColor(m_uneditable_col);
+                    dataItem->setBackground(brush);
                     dataItem->setToolTip(tr("不可编辑"));
                 } else {
-                    dataItem->setBackgroundColor(m_editable_col);
+                    QBrush brush = QBrush();
+                    brush.setColor(m_editable_col);
+                    dataItem->setBackground(brush);
                     dataItem->setToolTip(tr("可编辑"));
                 }
                 setItem(row, col, dataItem);
