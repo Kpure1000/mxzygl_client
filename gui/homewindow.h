@@ -14,13 +14,19 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     void makeMenu();
+    void saveLayout();
+    void restoreLayout();
 
 private:
     QMenuBar* m_top_menubar = nullptr;
     QTabWidget * m_tabw = nullptr;
+
+    bool _is_first_paint = true;
 
 };
 

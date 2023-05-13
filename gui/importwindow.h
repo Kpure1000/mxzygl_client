@@ -19,10 +19,13 @@ public:
 
 private:
     static QWidget *setupImportWidget(QWidget *parent, AssetImporter *importer);
+    void closeEvent(QCloseEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 signals:
 
 private:
+    bool _is_first_paint = true;
 
 };
 

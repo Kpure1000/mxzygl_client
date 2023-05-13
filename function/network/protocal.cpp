@@ -55,11 +55,7 @@ QJsonObject Protocal::unpack(const QJsonObject &packed)
     auto packed_titles  =   packed_models   [   "titles"    ].toArray();
     auto packed_values  =   packed_models   [   "values"    ].toArray();
 
-    QJsonArray headers, data;
-
-    for (const auto &title : packed_titles) {
-        headers << res::AssetInfo::toHeaderElement(title.toString(), false, true);
-    }
+    QJsonArray data;
 
     for (int i = 0; i < packed_values.size(); i++) {
         auto value = packed_values[i].toArray();
@@ -70,7 +66,7 @@ QJsonObject Protocal::unpack(const QJsonObject &packed)
         data << data_element;
     }
 
-    unpacked.insert( "headers",  headers);
+    unpacked.insert( "headers",  packed_titles);
     unpacked.insert( "data",  data);
     return unpacked;
 }

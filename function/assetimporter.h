@@ -47,6 +47,7 @@ signals:
     void onClear();
 
     void onResponsing(const QString & info, bool is_continue);
+//    void onImportOver(const QString & info, bool is_successful);
     void onResponsedSuccessful();
     void onResponsedFailed();
 

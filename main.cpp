@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     JobSystem::getInstance(std::max(get_core_numbers() - 2, 2u));
 
     auto homeWin = std::make_shared<HomeWindow>(nullptr, &a);
-//    homeWin->showMaximized();
-    homeWin->show();
+    homeWin->showMaximized();
+//    homeWin->show();
     return a.exec();
 }

@@ -19,6 +19,7 @@ public:
                             QSize       size                = {800, 600},
                             bool        delete_when_close   = true,
                             bool        showModal           = false,
+                            bool        maxFollow           = true,
                             QWidget     *parent             = nullptr);
 
     void showOnTop();
@@ -31,6 +32,7 @@ protected:
 private:
     friend FunctionWnidowManager;
     bool m_delete_when_close;
+    bool m_max_follow;
 
 };
 
@@ -45,7 +47,7 @@ public:
      * @param title
      * @return if window is created, return true
      */
-    bool show(const std::string& title, bool onTop = true);
+    bool show(const std::string& title, bool is_maximized, bool onTop = true);
 
     void create(const std::string& title, IFunctionWindow* newWindow);
 

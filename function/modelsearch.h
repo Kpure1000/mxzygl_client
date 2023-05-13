@@ -34,8 +34,12 @@ public:
 
 signals:
     void onResponsing(const QString & info, bool is_continue);
+//    void onSearchOver(const QString & info, bool is_successful);
     void onResultUpdate();
     void onResultClear();
+
+private:
+    void setResultInfo(const QJsonObject &result);
 
 private:
     SearchType m_type;

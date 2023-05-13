@@ -52,7 +52,7 @@ Client::Client(QObject *parent) : QObject(parent)
         emit onSendingStateChanged(tr("正在接受服务响应..."), true);
     });
     connect(this, &Client::onReadOver, this, [=](const QJsonObject &data, const QByteArray &extraData) {
-        emit onSendingStateChanged(tr("服务响应接受成功"), false);
+        emit onSendingStateChanged(tr("服务响应接受成功"), true);
     });
 
 }

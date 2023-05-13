@@ -9,7 +9,7 @@
 #include "function/configer/configmanager.h"
 
 OptionWindow::OptionWindow(QWidget *parent)
-    : IFunctionWindow("选项", {600,500}, true, false, parent)
+    : IFunctionWindow("选项", {600,500}, true, false, false, parent)
 {
     auto center_widget = centralWidget();
 

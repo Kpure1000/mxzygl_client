@@ -21,11 +21,14 @@ AssetImporter::AssetImporter(ImportType type, QObject *parent)
         auto status = data["status"].toString();
         if (Protocal::HeaderField::RESPONSE_ERROR == response_type) {
             emit onResponsing(tr("服务请求错误. Info:") + status, false);
+//            emit onImportOver(tr("服务请求错误. Info:") + status, false);
         } else {
             if (!status.isEmpty()) {
                 emit onResponsing(tr("上传失败. Info: ") + status, false);
+//                emit onImportOver(tr("上传失败. Info: ") + status, false);
             } else {
                 emit onResponsing(tr("上传成功!"), false);
+//                emit onImportOver(tr("上传成功!"), true);
                 this->clear();
             }
         }
@@ -86,6 +89,11 @@ void AssetImporter::clear()
 
 void AssetImporter::upload()
 {
+    switch (m_type) {
+    case ImportType::MODEL:  emit onResponsing(tr("模型资源上传开始"), true); break;
+    case ImportType::BVH:    emit onResponsing(tr("骨骼动画资源上传开始"), true); break;
+    case ImportType::EFFECT: emit onResponsing(tr("特效资源上传开始"), true); break;
+    }
     m_client->sendData(m_info);
 }
 

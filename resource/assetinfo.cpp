@@ -8,7 +8,7 @@ std::shared_ptr<QJsonObject> res::AssetInfo::get_data(AssetType asset_type, cons
 
     QString         name;           // 名称
     QString         type;           // 类型
-    QString         tag;            // 标签
+    QString         tags;           // 标签
     QString         description;    // 描述
     QString         fileType;       // 文件类型
     QString         path;           // 路径
@@ -16,7 +16,7 @@ std::shared_ptr<QJsonObject> res::AssetInfo::get_data(AssetType asset_type, cons
     path = filePath;
     auto fileInfo = QFileInfo(filePath);
     name = fileInfo.baseName();
-    description = tag = type = "";
+    description = tags = type = name.split('_')[0];
     if (assetType == AssetType::MODEL || assetType == AssetType::BVH) {
         fileType = fileInfo.filePath().split('.').back();
     } else {
@@ -26,7 +26,7 @@ std::shared_ptr<QJsonObject> res::AssetInfo::get_data(AssetType asset_type, cons
     auto obj = std::make_shared<QJsonObject>();
     obj->insert("name", name);
     obj->insert("type", type);
-    obj->insert("tag", tag);
+    obj->insert("tags", tags);
     obj->insert("description", description);
     obj->insert("fileType", fileType);
     obj->insert("path", path);
@@ -39,7 +39,7 @@ QJsonArray res::AssetInfo::get_headers()
     return QJsonArray()
             << toHeaderElement("name",          false,  true)
             << toHeaderElement("type",          true,   true)
-            << toHeaderElement("tag",           true,   true)
+            << toHeaderElement("tags",          true,   true)
             << toHeaderElement("description",   true,   true)
             << toHeaderElement("fileType",      false,  true)
             << toHeaderElement("path",          false,  true);

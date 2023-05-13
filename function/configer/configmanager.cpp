@@ -3,6 +3,7 @@
 #include <QSettings>
 #include <QApplication>
 #include <QDebug>
+#include <QTextCodec>
 
 ConfigManager::ConfigManager(const QString &filePath, QObject *parent) : QObject(parent), m_filePath(filePath)
 {
@@ -37,6 +38,7 @@ QVariant ConfigManager::getConfig(const QString &key, const QVariant& defaultVal
 QVariantList ConfigManager::getConfigs(const QStringList &keys) const
 {
     QSettings qst(m_filePath, QSettings::Format::IniFormat, const_cast<ConfigManager*>(this));
+    qst.setIniCodec(QTextCodec::codecForName("utf-8"));
     QVariantList ret;
     ret.reserve(keys.size());
     for (auto& key : keys) {

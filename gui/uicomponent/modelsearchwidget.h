@@ -19,6 +19,8 @@ public:
     explicit ModelSearchWidget(ModelSearch::SearchType searchType, QWidget *parent = nullptr);
     ~ModelSearchWidget();
 
+    ModelSearch *getSearcher() const { return m_modelSearch; }
+
 private slots:
     void on_le_input_textChanged(const QString &input);
 

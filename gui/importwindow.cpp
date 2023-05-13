@@ -9,24 +9,35 @@
 #include <QFileInfo>
 #include <QTabWidget>
 #include <QDockWidget>
+#include <QMessageBox>
 
 #include "uicomponent/previewwidget.h"
 #include "function/configer/configmanager.h"
-#include "gui/uicomponent/statedialog.h"
 #include "gui/uicomponent/categoryselector.h"
+#include "gui/uicomponent/loggingwidget.h"
+#include "function/layoutmanager.h"
 
 ImportWindow::ImportWindow(QWidget *parent)
-    : IFunctionWindow("", parent ? parent->size() : QSize{800, 600}, false, false, parent)
+    : IFunctionWindow("", {800, 600}, false, false, true, parent)
 {
     auto center_widget = centralWidget();
     auto ly_total = new QVBoxLayout(center_widget);
 
     auto cate_sel = new CategorySelector(center_widget);
     auto docker_cate = new QDockWidget(tr("资源导入 - 大类选择器"), center_widget);
+    docker_cate->setObjectName("docker_cate");
     docker_cate->setWidget(cate_sel);
     docker_cate->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
     docker_cate->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     addDockWidget(Qt::TopDockWidgetArea, docker_cate);
+
+    auto logging_widget = new LoggingWidget(center_widget);
+    auto docker_logging = new QDockWidget(tr("资源导入 - 信息输出"), center_widget);
+    docker_logging->setObjectName("docker_logging");
+    docker_logging->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+    docker_logging->setWidget(logging_widget);
+    docker_logging->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+    addDockWidget(Qt::RightDockWidgetArea, docker_logging);
 
     auto tabw = new QTabWidget(center_widget);
     ly_total->addWidget(tabw);
@@ -43,6 +54,18 @@ ImportWindow::ImportWindow(QWidget *parent)
     connect(tabw, &QTabWidget::currentChanged, this, [this, tabw](int index){
         this->setWindowTitle(tabw->tabText(index));
     });
+
+    connect(modelImporter, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
+        is_continue ? logging_widget->info(info) : logging_widget->warning(info);
+    });
+    connect(bvhImporter, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
+        is_continue ? logging_widget->info(info) : logging_widget->warning(info);
+    });
+
+    connect(effectImporter, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
+        is_continue ? logging_widget->info(info) : logging_widget->warning(info);
+    });
+
     emit tabw->currentChanged(0);
 }
 
@@ -69,7 +92,7 @@ QWidget *ImportWindow::setupImportWidget(QWidget* parent, AssetImporter *importe
     ly_top->setContentsMargins(12, 12, 12, 1);
 
     auto bt_fileBrowse = new QPushButton(tr("添加资源"), totalWidget);
-    connect(bt_fileBrowse, &QPushButton::clicked, totalWidget, [totalWidget, importer]() {
+    connect(bt_fileBrowse, &QPushButton::clicked, totalWidget, [=]() {
         QStringList selectedFiles;
         QString config_key, open_title, open_option;
         switch (importer->type()) {
@@ -98,6 +121,7 @@ QWidget *ImportWindow::setupImportWidget(QWidget* parent, AssetImporter *importe
             ConfigManager::getInstance()->setConfig(config_key, QFileInfo(selectedFiles[0]).absolutePath());
 
         importer->addPathsNotExist(selectedFiles);
+        previewWidget->selectGroup(0);
     });
 
     ly_top->addWidget(bt_fileBrowse, 1);
@@ -112,11 +136,13 @@ QWidget *ImportWindow::setupImportWidget(QWidget* parent, AssetImporter *importe
     auto bt_upload = new QPushButton(tr("上传"), totalWidget);
     connect(bt_upload, &QPushButton::clicked, totalWidget, [=]() {
         // 上传
+        bt_upload->setEnabled(false);
         importer->upload();
-        auto stateDialog = new StateDialog(tr("资源上传状态"), parent);
-        connect(importer, &AssetImporter::onResponsing, stateDialog, &StateDialog::doStateChanged);
-        stateDialog->exec();
     });
+    connect(importer, &AssetImporter::onResponsing, parent, [=](const QString & info, bool is_continue){
+        bt_upload->setEnabled(!is_continue);
+    });
+
     ly_top->addWidget(bt_upload, 1);
 
     ly_top->addSpacerItem(new QSpacerItem(40, 20));
@@ -137,4 +163,17 @@ QWidget *ImportWindow::setupImportWidget(QWidget* parent, AssetImporter *importe
     ly_total->setSpacing(1);
 
     return totalWidget;
+}
+
+void ImportWindow::closeEvent(QCloseEvent *event)
+{
+    LayoutManager::getInstance()->save(this, "ImportWindow");
+    QWidget::closeEvent(event);
+}
+
+void ImportWindow::paintEvent(QPaintEvent *event)
+{
+    if (_is_first_paint)
+        LayoutManager::getInstance()->restore(this, "ImportWindow");
+    _is_first_paint = false;
 }

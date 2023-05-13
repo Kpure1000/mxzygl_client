@@ -4,8 +4,8 @@
 #include <QKeyEvent>
 #include <QApplication>
 
-IFunctionWindow::IFunctionWindow(const QString &title, QSize size, bool delete_when_close, bool showModal, QWidget *parent)
-    : QMainWindow(parent), m_delete_when_close(delete_when_close)
+IFunctionWindow::IFunctionWindow(const QString &title, QSize size, bool delete_when_close, bool showModal, bool maxFollow, QWidget *parent)
+    : QMainWindow(parent), m_delete_when_close(delete_when_close), m_max_follow(maxFollow)
 {
     this->setAttribute(Qt::WA_DeleteOnClose, delete_when_close);
     if (showModal)
@@ -19,6 +19,7 @@ IFunctionWindow::IFunctionWindow(const QString &title, QSize size, bool delete_w
     this->setWindowFlags(Qt::Dialog
                          | Qt::WindowMaximizeButtonHint
                          | Qt::WindowCloseButtonHint);
+
 }
 
 void IFunctionWindow::showOnTop()
@@ -40,7 +41,7 @@ void IFunctionWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
-bool FunctionWnidowManager::show(const std::string &title, bool onTop)
+bool FunctionWnidowManager::show(const std::string &title, bool is_maximized, bool onTop)
 {
     if (!this->has(title)){
         return false;
@@ -48,7 +49,7 @@ bool FunctionWnidowManager::show(const std::string &title, bool onTop)
     auto win = this->get(title);
     if (onTop)
         win->showOnTop();
-    win->show();
+    win->m_max_follow && is_maximized ? win->showMaximized() : win->show();
     return true;
 }
 
@@ -60,5 +61,9 @@ void FunctionWnidowManager::create(const std::string &title, IFunctionWindow *ne
         });
     }
     newWindow->showOnTop();
-    newWindow->show();
+
+    if (nullptr != newWindow->parent() && dynamic_cast<QWidget*>(newWindow->parent())->isMaximized() && newWindow->m_max_follow)
+        newWindow->showMaximized();
+    else
+        newWindow->show();
 }

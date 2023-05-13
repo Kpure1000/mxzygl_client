@@ -4,9 +4,9 @@
 #include <QFileDialog>
 #include <QSplitter>
 #include <QDebug>
+#include <QMessageBox>
 
 #include "gui/uicomponent/previewwidget.h"
-#include "gui/uicomponent/statedialog.h"
 #include "function/configer/configmanager.h"
 
 ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget *parent) :
@@ -22,6 +22,9 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
     });
     connect(m_modelSearch, &ModelSearch::onResultClear, this, [=](){
         m_preview->clearInfo();
+    });
+    connect(m_modelSearch, &ModelSearch::onResponsing, this, [=](const QString&, bool is_continue){
+        ui->bt_search->setEnabled(!is_continue);
     });
 
     m_preview = new PreviewWidget(m_modelSearch->getResultsModelInfo(),
@@ -106,13 +109,11 @@ void ModelSearchWidget::on_bt_browser_clicked()
 
 void ModelSearchWidget::on_bt_search_clicked()
 {
+    ui->bt_search->setEnabled(false);
     m_modelSearch->clearResults();
     if (m_modelSearch->getType() != ModelSearch::SearchType::CONTENT) {
         m_modelSearch->setSearchInfo(ui->le_input->text());
     }
     m_modelSearch->search();
-    auto stateDialog = new StateDialog(tr("模型检索状态"), this);
-    connect(m_modelSearch, &ModelSearch::onResponsing, stateDialog, &StateDialog::doStateChanged);
-    stateDialog->exec();
 }
 

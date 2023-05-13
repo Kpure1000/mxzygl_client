@@ -15,12 +15,10 @@ struct SearchInfo : public AssetInfo {
     enum class SearchType : int {
         CONTENT     =   0x01 << 0,  // 内容
         TYPE        =   0x01 << 1,  // 类型
-        TAG         =   0x01 << 2   // 标签
+        TAGS        =   0x01 << 2   // 标签
     };
 
-    static std::shared_ptr<QJsonObject> get_data(SearchType searchType, float similarity);
-
-    static QJsonArray                   get_headers();
+    static QJsonArray get_headers(const QJsonArray &header);
 
 };
 
