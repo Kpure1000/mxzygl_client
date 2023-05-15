@@ -15,7 +15,7 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
-    void paintEvent(QPaintEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
 private:
     void makeMenu();

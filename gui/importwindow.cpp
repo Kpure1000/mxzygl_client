@@ -10,6 +10,8 @@
 #include <QTabWidget>
 #include <QDockWidget>
 #include <QMessageBox>
+#include <QCloseEvent>
+#include <QShowEvent>
 
 #include "uicomponent/previewwidget.h"
 #include "function/configer/configmanager.h"
@@ -171,9 +173,11 @@ void ImportWindow::closeEvent(QCloseEvent *event)
     QWidget::closeEvent(event);
 }
 
-void ImportWindow::paintEvent(QPaintEvent *event)
+void ImportWindow::showEvent(QShowEvent *event)
 {
-    if (_is_first_paint)
+    if (_is_first_paint) {
+        _is_first_paint = false;
         LayoutManager::getInstance()->restore(this, "ImportWindow");
-    _is_first_paint = false;
+    }
+    repaint();
 }

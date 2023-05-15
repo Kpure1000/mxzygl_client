@@ -7,6 +7,8 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QSpacerItem>
+#include <QShowEvent>
+#include <QCloseEvent>
 
 #include "gui/uicomponent/categoryselector.h"
 #include "gui/uicomponent/infotablewidget.h"
@@ -17,39 +19,11 @@
 IndexWindow::IndexWindow(QWidget *parent)
     : IFunctionWindow(tr("索引编辑"), {800, 600}, true, false, true, parent)
 {
-    auto center_widget = centralWidget();
-    {
-        auto cate_sel = new CategorySelector(center_widget);
-        auto docker_cate = new QDockWidget(tr("索引编辑 - 大类选择器"), center_widget);
-        docker_cate->setObjectName("docker_cate");
-        docker_cate->setWidget(cate_sel);
-        docker_cate->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-        docker_cate->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
-        addDockWidget(Qt::TopDockWidgetArea, docker_cate);
-    }
-
-    {
-        auto docker_index = new QDockWidget(tr("索引编辑"), center_widget);
-        docker_index->setWidget(initIndexWidget());
-        docker_index->setObjectName("docker_index");
-        docker_index->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
-        docker_index->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
-        addDockWidget(Qt::LeftDockWidgetArea, docker_index);
-    }
-
-    auto logging_widget = new LoggingWidget(center_widget);
-    auto docker_logging = new QDockWidget(tr("索引编辑 - 信息输出"), center_widget);
-    docker_logging->setObjectName("docker_logging");
-    docker_logging->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
-    docker_logging->setWidget(logging_widget);
-    docker_logging->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
-    addDockWidget(Qt::RightDockWidgetArea, docker_logging);
-
     initModelWidget();
-
+    initIndexWidget();
 }
 
-QWidget *IndexWindow::initIndexWidget()
+void IndexWindow::initIndexWidget()
 {
 
     auto center_widget = centralWidget();
@@ -57,13 +31,13 @@ QWidget *IndexWindow::initIndexWidget()
     auto totalWidget = new QWidget(center_widget);
 
     auto ly_total = new QGridLayout(totalWidget);
-    totalWidget->setLayout(ly_total);
 
     auto bt_pull = new QPushButton(tr("↓↓↓拉取索引↓↓↓"), totalWidget);
 
     auto bt_push = new QPushButton(tr("↑↑↑推送索引↑↑↑"), center_widget);
 
-    auto ly_bt_push_pull = new QHBoxLayout(totalWidget);
+    auto push_pull_widget = new QWidget(totalWidget);
+    auto ly_bt_push_pull = new QHBoxLayout(push_pull_widget);
     ly_bt_push_pull->addWidget(bt_pull);
     ly_bt_push_pull->addWidget(bt_push);
 
@@ -84,11 +58,17 @@ QWidget *IndexWindow::initIndexWidget()
     tab_w->addTab(index_type, tr("模型类型索引"));
     tab_w->addTab(index_tags, tr("模型标签索引"));
 
-    ly_total->addLayout(ly_bt_push_pull, 0, 0);
+    ly_total->addWidget(push_pull_widget, 0, 0);
     ly_total->addWidget(bt_sync,         1, 1);
     ly_total->addWidget(tab_w,           1, 0);
 
-    return totalWidget;
+    auto docker_index = new QDockWidget(tr("索引编辑"), center_widget);
+    docker_index->setWidget(totalWidget);
+    docker_index->setObjectName("docker_index");
+    docker_index->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+    docker_index->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+    addDockWidget(Qt::LeftDockWidgetArea, docker_index);
+
 }
 
 void IndexWindow::initModelWidget()
@@ -106,6 +86,26 @@ void IndexWindow::initModelWidget()
                                    center_widget);
     ly_total->addWidget(pre_w);
 
+    {
+        auto cate_sel = new CategorySelector(center_widget);
+        auto docker_cate = new QDockWidget(tr("索引编辑 - 大类选择器"), center_widget);
+        docker_cate->setObjectName("docker_cate");
+        docker_cate->setWidget(cate_sel);
+        docker_cate->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+        docker_cate->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+        addDockWidget(Qt::TopDockWidgetArea, docker_cate);
+    }
+
+    {
+        auto logging_widget = new LoggingWidget(center_widget);
+        auto docker_logging = new QDockWidget(tr("索引编辑 - 信息输出"), center_widget);
+        docker_logging->setObjectName("docker_logging");
+        docker_logging->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+        docker_logging->setWidget(logging_widget);
+        docker_logging->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+        addDockWidget(Qt::RightDockWidgetArea, docker_logging);
+    }
+
 }
 
 void IndexWindow::closeEvent(QCloseEvent *event)
@@ -114,9 +114,11 @@ void IndexWindow::closeEvent(QCloseEvent *event)
     QWidget::closeEvent(event);
 }
 
-void IndexWindow::paintEvent(QPaintEvent *event)
+void IndexWindow::showEvent(QShowEvent *event)
 {
-    if (_is_first_paint)
+    if (_is_first_paint) {
+        _is_first_paint = false;
         LayoutManager::getInstance()->restore(this, "IndexWindow");
-    _is_first_paint = false;
+    }
+    update();
 }

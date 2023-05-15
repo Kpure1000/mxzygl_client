@@ -7,6 +7,7 @@
 #include <QDialog>
 #include <QKeyEvent>
 #include <QCloseEvent>
+#include <QShowEvent>
 #include <QDockWidget>
 
 #include "optionwindow.h"
@@ -91,11 +92,13 @@ void HomeWindow::closeEvent(QCloseEvent *event)
     QWidget::closeEvent(event);
 }
 
-void HomeWindow::paintEvent(QPaintEvent *event)
+void HomeWindow::showEvent(QShowEvent *event)
 {
-    if (_is_first_paint)
+    if (_is_first_paint) {
+        _is_first_paint = false;
         restoreLayout();
-    _is_first_paint = false;
+    }
+    update();
 }
 
 void HomeWindow::makeMenu()

@@ -20,7 +20,7 @@ public:
 private:
     static QWidget *setupImportWidget(QWidget *parent, AssetImporter *importer);
     void closeEvent(QCloseEvent *event) override;
-    void paintEvent(QPaintEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
 signals:
 

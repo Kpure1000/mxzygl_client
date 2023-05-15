@@ -12,10 +12,10 @@ public:
 signals:
 
 private:
-    QWidget *initIndexWidget();
+    void initIndexWidget();
     void initModelWidget();
     void closeEvent(QCloseEvent *event) override;
-    void paintEvent(QPaintEvent *event) override;
+    void showEvent(QShowEvent *event) override;
     bool _is_first_paint = true;
 
 };
