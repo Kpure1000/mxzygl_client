@@ -9,6 +9,8 @@
 #include <QSpacerItem>
 #include <QShowEvent>
 #include <QCloseEvent>
+#include <QMenuBar>
+#include <QMenu>
 
 #include "gui/uicomponent/categoryselector.h"
 #include "gui/uicomponent/infotablewidget.h"
@@ -74,6 +76,25 @@ void IndexWindow::initIndexWidget()
 void IndexWindow::initModelWidget()
 {
     auto center_widget = centralWidget();
+
+    // ----------------视图----------------
+    {
+        auto top_menubar = new QMenuBar(this);
+        auto menu_view = new QMenu(tr("视图(&V)"), this);
+
+        // ----------------保存布局----------------
+        menu_view->addAction(tr("保存布局"), this, [=]() {
+            LayoutManager::getInstance()->save(this, "IndexWindow");
+        });
+        // ----------------加载布局----------------
+        menu_view->addAction(tr("加载布局"), this, [=]() {
+            LayoutManager::getInstance()->restore(this, "IndexWindow");
+        });
+
+        top_menubar->addMenu(menu_view);
+        this->setMenuBar(top_menubar);
+    }
+
 
     auto ly_total = new QVBoxLayout(center_widget);
 
