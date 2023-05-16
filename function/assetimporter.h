@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "resource/assetinfo.h"
-#include "modeltypemanager.h"
-#include "modeltagsmanager.h"
+#include "typemanager.h"
+#include "tagsmanager.h"
 
 class Client;
 
@@ -63,8 +63,8 @@ private:
 
     Client *m_client;
 
-    ModelTypeManager *m_modelType;
-    ModelTagsManager *m_ModelTags;
+    TypeManager *m_typeManager;
+    TagsManager *m_tagsManager;
 
     bool is_typeLoaded = false, is_tagsLoaded = false;
 

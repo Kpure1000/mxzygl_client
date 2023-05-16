@@ -17,6 +17,8 @@
 #include "gui/uicomponent/loggingwidget.h"
 #include "gui/indexwindow.h"
 #include "function/layoutmanager.h"
+#include "gui/typemanagerwindow.h"
+#include "gui/tagsmanagerwindow.h"
 
 HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow(parent)
 {
@@ -140,6 +142,24 @@ void HomeWindow::makeMenu()
     // ----------------编辑----------------
     {
         auto menu_version = new QMenu(tr("编辑(&V)"), this);
+
+        // ----------------类型----------------
+        menu_version->addAction(tr("类型管理"), this, [=](){
+            auto winName = "类型管理";
+            auto fm = FunctionWnidowManager::getInstance();
+            if (!fm->show(winName, this->isMaximized(), true)){
+                fm->create(winName, new TypeManagerWindow(this));
+            }
+        });
+
+        // ----------------标签----------------
+        menu_version->addAction(tr("标签管理"), this, [=](){
+            auto winName = "标签管理";
+            auto fm = FunctionWnidowManager::getInstance();
+            if (!fm->show(winName, this->isMaximized(), true)){
+                fm->create(winName, new TagsManagerWindow(this));
+            }
+        });
 
         // ----------------索引----------------
         menu_version->addAction(tr("索引管理"), this, [=](){

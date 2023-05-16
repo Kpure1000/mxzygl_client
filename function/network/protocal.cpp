@@ -14,7 +14,7 @@ QJsonObject Protocal::pack(const QJsonObject &org)
     auto org_headers    = org[  "headers"   ].toArray();
     auto org_data       = org[  "data"      ].toArray();
 
-    QJsonObject packed;
+    QJsonObject packed = org;
 
     packed.insert( "category",   org_category);
     packed.insert( "type",       org_type);

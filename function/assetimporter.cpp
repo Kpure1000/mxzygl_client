@@ -32,19 +32,19 @@ AssetImporter::AssetImporter(ImportType type, QObject *parent)
         }
     });
 
-    m_modelType = new ModelTypeManager(type, this);
-    m_ModelTags = new ModelTagsManager(type, this);
+    m_typeManager = new TypeManager(type, this);
+    m_tagsManager = new TagsManager(type, this);
 
-    connect(m_modelType, &ModelTypeManager::onResponsing, this, &AssetImporter::onResponsing);
-    connect(m_ModelTags, &ModelTagsManager::onResponsing, this, &AssetImporter::onResponsing);
+    connect(m_typeManager, &TypeManager::onResponsing, this, &AssetImporter::onResponsing);
+    connect(m_tagsManager, &TagsManager::onResponsing, this, &AssetImporter::onResponsing);
 
-    connect(m_modelType, &ModelTypeManager::onPullSuccessful, this, [=](){
+    connect(m_typeManager, &TypeManager::onPullSuccessful, this, [=](){
         is_typeLoaded = true;
         if (is_tagsLoaded) {
             emit onTypeAndTagsLoaded();
         }
     });
-    connect(m_ModelTags, &ModelTagsManager::onPullSuccessful, this, [=](){
+    connect(m_tagsManager, &TagsManager::onPullSuccessful, this, [=](){
         is_tagsLoaded = true;
         if (is_typeLoaded) {
             emit onTypeAndTagsLoaded();
@@ -86,8 +86,8 @@ void AssetImporter::addPathsNotExist(const QStringList &filePaths)
             auto fileInfo = QFileInfo(filePath);
             QJsonObject item;
             item.insert("name", fileInfo.baseName());
-            item.insert("type", QJsonObject{{"array", m_modelType->getTypesNameList()},  {"value", ""}});
-            item.insert("tags", QJsonObject{{"array", m_ModelTags->getTagsNameList()},   {"value", ""}});
+            item.insert("type", QJsonObject{{"array", m_typeManager->getTypesNameList()},  {"value", ""}});
+            item.insert("tags", QJsonObject{{"array", m_tagsManager->getTagsNameList()},   {"value", ""}});
             QString fileType;
             if (m_type == ImportType::MODEL || m_type == ImportType::BVH) {
                 fileType = fileInfo.filePath().split('.').back();
@@ -117,8 +117,8 @@ void AssetImporter::clear()
 
 void AssetImporter::pullTypeAndTags()
 {
-    m_modelType->pull();
-    m_ModelTags->pull();
+    m_typeManager->pull();
+    m_tagsManager->pull();
 }
 
 void AssetImporter::upload()

@@ -42,6 +42,11 @@ public:
         RESPONSE_PULLTYPE       = 0x10000009,   // 拉取类型
         REQUEST_PULLTAGS        = 0x0000000A,   // 请求拉取标签
         RESPONSE_PULLTAGS       = 0x1000000A,   // 拉取标签
+
+        REQUEST_PUSHTYPE        = 0x0000000B,   // 请求推送类型
+        RESPONSE_PUSHTYPE       = 0x1000000B,   // 推送类型
+        REQUEST_PUSHTAGS        = 0x0000000C,   // 请求推送标签
+        RESPONSE_PUSHTAGS       = 0x1000000C,   // 推送标签
     };
     Q_ENUM(HeaderField)
 
