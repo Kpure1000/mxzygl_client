@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "resource/assetinfo.h"
+#include "modeltypemanager.h"
+#include "modeltagsmanager.h"
 
 class Client;
 
@@ -16,14 +18,18 @@ class AssetImporter : public QObject
 public:
     using ImportType = res::AssetInfo::AssetType;
 
+    enum class ResponseType : int {
+
+    };
+
     explicit AssetImporter(ImportType type, QObject *parent = nullptr);
     ~AssetImporter();
-
-    void add(const QString &filePath);
 
     void addPathsNotExist(const QStringList &filePaths);
 
     void clear();
+
+    void pullTypeAndTags();
 
     void upload();
 
@@ -42,22 +48,25 @@ public:
     QJsonObject *getInfoRef() { return &m_info; }
 
 signals:
-    void onAddPath();
     void onAddPaths();
     void onClear();
 
     void onResponsing(const QString & info, bool is_continue);
-//    void onImportOver(const QString & info, bool is_successful);
-    void onResponsedSuccessful();
-    void onResponsedFailed();
+    void onImportSuccessful();
+    void onTypeAndTagsLoaded();
 
 private:
     std::unordered_set<std::string> m_filePathDict;
     QStringList m_filePaths;
     ImportType m_type;
-    QJsonObject m_info;
+    QJsonObject m_info;    
 
     Client *m_client;
+
+    ModelTypeManager *m_modelType;
+    ModelTagsManager *m_ModelTags;
+
+    bool is_typeLoaded = false, is_tagsLoaded = false;
 
 };
 

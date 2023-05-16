@@ -4,9 +4,11 @@
 #include "ifunctionwindow.h"
 #include <QStringList>
 #include <QWidget>
+#include <QPushButton>
 #include "function/assetimporter.h"
 
 class PreviewWidget;
+class LoggingWidget;
 
 /**
  * @brief 资源导入
@@ -18,7 +20,7 @@ public:
     explicit ImportWindow(QWidget *parent = nullptr);
 
 private:
-    static QWidget *setupImportWidget(QWidget *parent, AssetImporter *importer);
+    QWidget *setupImportWidget(AssetImporter *importer);
     void closeEvent(QCloseEvent *event) override;
     void showEvent(QShowEvent *event) override;
 
@@ -26,6 +28,7 @@ signals:
 
 private:
     bool _is_first_paint = true;
+    LoggingWidget *m_logging_widget;
 
 };
 

@@ -5,6 +5,7 @@
 #include <QHeaderView>
 #include <QDebug>
 #include <QBrush>
+#include <QComboBox>
 
 const QColor InfoTableWidget::m_editable_col = QColor{235, 255, 235, 255};
 const QColor InfoTableWidget::m_uneditable_col = QColor{255, 245, 235, 255};
@@ -35,6 +36,7 @@ InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_edita
             if (C <= 0 )
                 return;
             auto headerName = this->horizontalHeaderItem(C)->text();
+            auto headers = (*this->m_info)["headers"].toArray();
             auto vals = (*this->m_info)["data"].toArray();
             if (R >= vals.size()) {
                 return;
@@ -44,8 +46,17 @@ InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_edita
                 qDebug() << "InfoTableWidget>>QTableWidget::itemChanged>> m_info doesn't contain header " << headerName;
                 return;
             }
-            auto preText = row[headerName].toString();// 去除预览组一列
-            row[headerName] = newText;
+            QString preText;
+            bool is_array = headers[C - 1].toObject()["is_array"].toBool();
+            if (is_array) {
+                auto row_obj = row[headerName].toObject();
+                preText = row_obj["value"].toString();
+                row_obj["value"] = newText;
+                row[headerName] = row_obj;
+            } else {
+                preText = row[headerName].toString();
+                row[headerName] = newText;
+            }
             vals[R] = row;
             (*this->m_info)["data"]=vals;
 //            qDebug() << "InfoTableWidget>>QTableWidget::itemChanged>>, "
@@ -89,7 +100,8 @@ void InfoTableWidget::refresh()
         auto previewItem = new QTableWidgetItem(std::to_string(row / m_spanNum + 1).c_str());
         previewItem->setToolTip(tr("双击以预览组"));
         previewItem->setFlags(previewItem->flags() ^= Qt::ItemIsEditable);
-        QBrush brush = QBrush();
+        QBrush brush = previewItem->background();
+        brush.setStyle(Qt::BrushStyle::SolidPattern);
         brush.setColor(m_group_col);
         previewItem->setBackground(brush);
         setItem(row, 0, previewItem);
@@ -97,15 +109,35 @@ void InfoTableWidget::refresh()
         for (const auto &header : headers) {
             QJsonObject header_ele = header.toObject();
             if (header_ele["visible"].toBool()) {
-                auto dataItem = new QTableWidgetItem(key2value[header_ele["name"].toString()].toString());
+                QTableWidgetItem *dataItem;
+                if (header_ele["is_array"].toBool()) {
+                    dataItem = new QTableWidgetItem("");
+                    auto data_array = key2value[header_ele["name"].toString()].toObject()["array"].toArray();
+                    auto combo = new QComboBox(this);
+                    for (const auto &d : data_array) {
+                        combo->addItem(d.toString());
+                    }
+                    connect(combo, &QComboBox::currentTextChanged, this, [=](const QString &t) {
+                        dataItem->setText(t);
+                    });
+                    if (data_array.size() > 0) {
+                        combo->setCurrentIndex(0);
+                        dataItem->setText(combo->itemText(0));
+                    }
+                    this->setCellWidget(row, col, combo);
+                } else {
+                    dataItem = new QTableWidgetItem(key2value[header_ele["name"].toString()].toString());
+                }
                 if (!m_info_editable || !header_ele["editable"].toBool()) {
                     dataItem->setFlags(dataItem->flags() ^= Qt::ItemIsEditable);
-                    QBrush brush = QBrush();
+                    QBrush brush = dataItem->background();
+                    brush.setStyle(Qt::BrushStyle::SolidPattern);
                     brush.setColor(m_uneditable_col);
                     dataItem->setBackground(brush);
                     dataItem->setToolTip(tr("不可编辑"));
                 } else {
-                    QBrush brush = QBrush();
+                    QBrush brush = dataItem->background();
+                    brush.setStyle(Qt::BrushStyle::SolidPattern);
                     brush.setColor(m_editable_col);
                     dataItem->setBackground(brush);
                     dataItem->setToolTip(tr("可编辑"));

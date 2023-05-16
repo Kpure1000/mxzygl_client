@@ -20,11 +20,11 @@ struct AssetInfo {
         EFFECT          = 0x1 << 2,
     };
 
-    static std::shared_ptr<QJsonObject>    get_data(AssetType asset_type, const QString &filePath);
+//    static std::shared_ptr<QJsonObject>    get_data(AssetType asset_type, const QString &filePath);
 
-    static  QJsonArray                      get_headers();
+//    static  QJsonArray                      get_headers();
 
-    static  QJsonObject toHeaderElement(const QString&header_name, bool editable, bool visible);
+    static  QJsonObject toHeaderElement(const QString&header_name, bool editable, bool is_array, bool visible);
 
 };
 

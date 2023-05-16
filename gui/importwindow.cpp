@@ -54,11 +54,11 @@ ImportWindow::ImportWindow(QWidget *parent)
     docker_cate->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     addDockWidget(Qt::TopDockWidgetArea, docker_cate);
 
-    auto logging_widget = new LoggingWidget(center_widget);
+    m_logging_widget = new LoggingWidget(center_widget);
     auto docker_logging = new QDockWidget(tr("资源导入 - 信息输出"), center_widget);
     docker_logging->setObjectName("docker_logging");
     docker_logging->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
-    docker_logging->setWidget(logging_widget);
+    docker_logging->setWidget(m_logging_widget);
     docker_logging->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     addDockWidget(Qt::RightDockWidgetArea, docker_logging);
 
@@ -66,35 +66,27 @@ ImportWindow::ImportWindow(QWidget *parent)
     ly_total->addWidget(tabw);
 
     auto modelImporter = new AssetImporter(AssetImporter::ImportType::MODEL, this);
-    tabw->addTab(setupImportWidget(this, modelImporter), tr("模型导入"));
+    tabw->addTab(setupImportWidget(modelImporter), tr("模型导入"));
 
     auto bvhImporter = new AssetImporter(AssetImporter::ImportType::BVH, this);
-    tabw->addTab(setupImportWidget(this, bvhImporter), tr("骨骼动画导入"));
+    tabw->addTab(setupImportWidget(bvhImporter), tr("骨骼动画导入"));
 
     auto effectImporter = new AssetImporter(AssetImporter::ImportType::EFFECT, this);
-    tabw->addTab(setupImportWidget(this, effectImporter), tr("特效资源导入"));
+    tabw->addTab(setupImportWidget(effectImporter), tr("特效资源导入"));
 
     connect(tabw, &QTabWidget::currentChanged, this, [this, tabw](int index){
         this->setWindowTitle(tabw->tabText(index));
     });
 
-    connect(modelImporter, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
-        is_continue ? logging_widget->info(info) : logging_widget->warning(info);
-    });
-    connect(bvhImporter, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
-        is_continue ? logging_widget->info(info) : logging_widget->warning(info);
-    });
-
-    connect(effectImporter, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
-        is_continue ? logging_widget->info(info) : logging_widget->warning(info);
-    });
-
     emit tabw->currentChanged(0);
 }
 
-QWidget *ImportWindow::setupImportWidget(QWidget* parent, AssetImporter *importer)
+QWidget *ImportWindow::setupImportWidget(AssetImporter *importer)
 {
-    auto totalWidget = new QWidget(parent);
+
+    QPushButton *bt_pull, *bt_fileBrowse, *bt_clear, *bt_upload;
+
+    auto totalWidget = new QWidget(this);
 
     PreviewWidget *previewWidget = new PreviewWidget(importer->getInfoRef(),
                                                      2,
@@ -114,7 +106,14 @@ QWidget *ImportWindow::setupImportWidget(QWidget* parent, AssetImporter *importe
     auto ly_top = new QHBoxLayout();
     ly_top->setContentsMargins(12, 12, 12, 1);
 
-    auto bt_fileBrowse = new QPushButton(tr("添加资源"), totalWidget);
+    bt_pull = new QPushButton(tr("拉取类型和标签信息"), totalWidget);
+    connect(bt_pull, &QPushButton::clicked, totalWidget, [=](){
+        importer->pullTypeAndTags();
+    });
+    ly_top->addWidget(bt_pull, 1);
+
+    bt_fileBrowse = new QPushButton(tr("添加资源"), totalWidget);
+    bt_fileBrowse->setEnabled(false);
     connect(bt_fileBrowse, &QPushButton::clicked, totalWidget, [=]() {
         QStringList selectedFiles;
         QString config_key, open_title, open_option;
@@ -149,20 +148,22 @@ QWidget *ImportWindow::setupImportWidget(QWidget* parent, AssetImporter *importe
 
     ly_top->addWidget(bt_fileBrowse, 1);
 
-    auto bt_clear = new QPushButton(tr("清空"), totalWidget);
+    bt_clear = new QPushButton(tr("清空"), totalWidget);
+    bt_clear->setEnabled(false);
     connect(bt_clear, &QPushButton::clicked, totalWidget, [importer](){
         // 清空预览与表格
         importer->clear();
     });
     ly_top->addWidget(bt_clear, 1);
 
-    auto bt_upload = new QPushButton(tr("上传"), totalWidget);
+    bt_upload = new QPushButton(tr("上传"), totalWidget);
+    bt_upload->setEnabled(false);
     connect(bt_upload, &QPushButton::clicked, totalWidget, [=]() {
         // 上传
         bt_upload->setEnabled(false);
         importer->upload();
     });
-    connect(importer, &AssetImporter::onResponsing, parent, [=](const QString & info, bool is_continue){
+    connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
         bt_upload->setEnabled(!is_continue);
     });
 
@@ -184,6 +185,23 @@ QWidget *ImportWindow::setupImportWidget(QWidget* parent, AssetImporter *importe
     ly_total->addWidget(previewWidget, 1);
 
     ly_total->setSpacing(1);
+
+    connect(importer, &AssetImporter::onImportSuccessful, this, [=](){
+        bt_fileBrowse->setEnabled(false);
+        bt_clear->setEnabled(false);
+        bt_upload->setEnabled(false);
+//        bt_pull->setEnabled(true);
+    });
+
+    connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
+        is_continue ? m_logging_widget->info(info) : m_logging_widget->warning(info);
+    });
+    connect(importer, &AssetImporter::onTypeAndTagsLoaded, this, [=](){
+        bt_fileBrowse->setEnabled(true);
+        bt_clear->setEnabled(true);
+        bt_upload->setEnabled(true);
+//        bt_pull->setEnabled(false);
+    });
 
     return totalWidget;
 }

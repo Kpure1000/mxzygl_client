@@ -20,12 +20,26 @@ QJsonObject Protocal::pack(const QJsonObject &org)
     packed.insert( "type",       org_type);
 
     QJsonArray headers;
+    QJsonArray data;
     for (const auto &header : org_headers) {
         headers.append(header.toObject()["name"]);
     }
 
+    for (const auto& row : org_data) {
+        QJsonObject packedRow;
+        for (const auto& header : org_headers) {
+            QString headerName = header.toObject()["name"].toString();
+            if (header.toObject()["is_array"].toBool()) {
+                packedRow.insert(headerName, row.toObject()[headerName].toObject()["value"]);
+            } else {
+                packedRow.insert(headerName, row.toObject()[headerName]);
+            }
+        }
+        data << packedRow;
+    }
+
     packed.insert( "titles",     headers);
-    packed.insert( "values",     org_data);
+    packed.insert( "values",     data);
 
     QJsonArray block_size;
     for (int i = 0; i < org_data.size(); i++) {

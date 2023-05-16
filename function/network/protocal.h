@@ -29,7 +29,19 @@ public:
         RESPONSE_SEARCHLABEL    = 0x10000004,   // 搜索模型标签
 
         REQUEST_SEARCHTYPE      = 0x00000005,   // 搜索模型类型
-        RESPONSE_SEARCHTYPE     = 0x10000005    // 搜索模型类型
+        RESPONSE_SEARCHTYPE     = 0x10000005,   // 搜索模型类型
+
+        REQUEST_TYPEINDEX       = 0x00000006,   // 请求类型索引
+        RESPONSE_TYPEINDEX      = 0x10000006,   // 类型索引
+        REQUEST_LABELINDEX      = 0x00000007,   // 请求标签索引
+        RESPONSE_LABELINDEX     = 0x10000007,   // 标签索引
+        REQUEST_MODELINDEX      = 0x00000008,   // 请求内容索引
+        RESPONSE_MODELINDEX     = 0x10000008,   // 内容索引
+
+        REQUEST_PULLTYPE        = 0x00000009,   // 请求拉取类型
+        RESPONSE_PULLTYPE       = 0x10000009,   // 拉取类型
+        REQUEST_PULLTAGS        = 0x0000000A,   // 请求拉取标签
+        RESPONSE_PULLTAGS       = 0x1000000A,   // 拉取标签
     };
     Q_ENUM(HeaderField)
 

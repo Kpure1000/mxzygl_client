@@ -12,9 +12,9 @@ QJsonArray res::SearchInfo::get_headers(const QJsonArray &headers)
     QJsonArray ret;
     for (const auto &header : headers) {
         if (header.toString() == "hash")
-            ret << toHeaderElement(header.toString(), false, false);
+            ret << toHeaderElement(header.toString(), false, false, false);
         else
-            ret << toHeaderElement(header.toString(), false, true);
+            ret << toHeaderElement(header.toString(), false, false, true);
     }
     return ret;
 }

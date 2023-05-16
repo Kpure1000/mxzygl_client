@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include <QDebug>
 #include <QMetaEnum>
+#include <QFileInfo>
 
 #include "resource/assetinfo.h"
 #include "function/network/client.h"
@@ -34,7 +35,10 @@ ModelSearch::ModelSearch(SearchType type, QObject *parent)
     connect(m_client, &Client::onSendingStateChanged, this, &ModelSearch::onResponsing);
 
     {
-        QJsonArray headers = res::AssetInfo::get_headers();
+        QJsonArray headers;
+        headers << res::AssetInfo::toHeaderElement("name", false, false, true);
+        headers << res::AssetInfo::toHeaderElement("fileType", false, false, true);
+        headers << res::AssetInfo::toHeaderElement("path", false, false, true);
         QJsonArray data;
         m_search_info = std::make_shared<QJsonObject>();
         m_search_info->insert("headers", headers);
@@ -69,7 +73,14 @@ void ModelSearch::setSearchInfo(const QString &info)
 {
     if (m_type == SearchType::CONTENT) {
         auto data = QJsonArray();
-        data.append(*res::AssetInfo::get_data(res::AssetInfo::AssetType::MODEL, info));
+
+        auto fileInfo = QFileInfo(info);
+        QJsonObject item;
+        item.insert("name", fileInfo.baseName());
+        item.insert("fileType", fileInfo.filePath().split('.').back());
+        item.insert("path", info);
+
+        data << item;
         (*m_search_info)["data"] = data;
     } else if (m_type == SearchType::TYPE || m_type == SearchType::TAGS) {
         auto data = QJsonArray();

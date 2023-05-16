@@ -43,7 +43,7 @@ void IndexWindow::initIndexWidget()
     ly_bt_push_pull->addWidget(bt_pull);
     ly_bt_push_pull->addWidget(bt_push);
 
-    auto bt_sync = new QPushButton(tr("→\n→\n→\n加\n载\n索\n引\n内\n容\n→\n→\n→\n"), totalWidget);
+    auto bt_sync = new QPushButton(tr("←\n←\n←\n压\n缩\n为\n索\n引\n←\n←\n←\n"), totalWidget);
     {
         bt_sync->setMaximumWidth(bt_sync->fontMetrics().averageCharWidth() * 4);
         auto plc_bt_sync = bt_sync->sizePolicy();
