@@ -11,8 +11,8 @@ OptionWidget_Asset::OptionWidget_Asset(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    m_cache_timeout = ConfigManager::getInstance()->getConfig("Asset/CacheTimeout").toDouble();
-    m_cache_timeout_retry = ConfigManager::getInstance()->getConfig("Asset/CacheTimeoutRetry").toDouble();
+    m_cache_timeout = ConfigManager::getInstance()->getConfig("Asset/CacheTimeout", 1.f).toDouble();
+    m_cache_timeout_retry = ConfigManager::getInstance()->getConfig("Asset/CacheTimeoutRetry", .5f).toDouble();
 
     ui->spinb_timeout->setValue(m_cache_timeout);
     ui->spinb_retry->setValue(m_cache_timeout_retry);

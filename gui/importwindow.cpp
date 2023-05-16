@@ -22,7 +22,7 @@
 #include "function/layoutmanager.h"
 
 ImportWindow::ImportWindow(QWidget *parent)
-    : IFunctionWindow("", {800, 600}, false, false, true, parent)
+    : IFunctionWindow("", {800, 600}, true, false, true, parent)
 {
     auto center_widget = centralWidget();
 
@@ -190,7 +190,7 @@ QWidget *ImportWindow::setupImportWidget(AssetImporter *importer)
         bt_fileBrowse->setEnabled(false);
         bt_clear->setEnabled(false);
         bt_upload->setEnabled(false);
-//        bt_pull->setEnabled(true);
+        bt_pull->setEnabled(true);
     });
 
     connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
@@ -200,7 +200,7 @@ QWidget *ImportWindow::setupImportWidget(AssetImporter *importer)
         bt_fileBrowse->setEnabled(true);
         bt_clear->setEnabled(true);
         bt_upload->setEnabled(true);
-//        bt_pull->setEnabled(false);
+        bt_pull->setEnabled(false);
     });
 
     return totalWidget;

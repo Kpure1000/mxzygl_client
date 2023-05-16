@@ -5,8 +5,8 @@
 
 AssetCache::AssetCache(QObject *parent) : QObject(parent)
 {
-    m_cache_timeout = 1000 * 60 * ConfigManager::getInstance()->getConfig("Asset/CacheTimeout").toInt();
-    m_cache_timeout_retry = 1000 * 60 * ConfigManager::getInstance()->getConfig("Asset/CacheTimeoutRetry").toInt();
+    m_cache_timeout = 1000 * 60 * ConfigManager::getInstance()->getConfig("Asset/CacheTimeout", 1.f).toInt();
+    m_cache_timeout_retry = 1000 * 60 * ConfigManager::getInstance()->getConfig("Asset/CacheTimeoutRetry", .5f).toInt();
 
     connect(this, &AssetCache::onAssetLoaded, this, &AssetCache::cacheStart);
 
