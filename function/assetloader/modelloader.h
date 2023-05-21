@@ -14,11 +14,14 @@ class ModelLoader : public AssetCache
 public:
     explicit ModelLoader(QObject *parent = nullptr);
 
-    static std::shared_ptr<res::Model> loadFBX(const QString& filePath, bool normalize = true, bool doGlobalTransform = true);
-    static std::shared_ptr<res::Model> loadOBJ(const QString& filePath, bool normalize = true);
-    static std::shared_ptr<res::Model> loadOFF(const QString& filePath, bool normalize = true);
+    static std::shared_ptr<res::Model> loadFBX(const QString& filePath, bool doGlobalTransform = true);
+    static std::shared_ptr<res::Model> loadOBJ(const QString& filePath);
+    static std::shared_ptr<res::Model> loadOFF(const QString& filePath);
+
+    static void saveOBJ(const QString& filePath, std::shared_ptr<res::Model>);
 
     void asyncLoad(const QString &filePath, std::function<void(bool)> loadCallBack);
+    void tempAsyncLoad(const QString &filePath, std::function<void(std::shared_ptr<res::Model>)> loadCallBack);
 
 public:
 

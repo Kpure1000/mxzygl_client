@@ -19,18 +19,18 @@ ModelSearch::ModelSearch(SearchType type, QObject *parent)
         auto status = data["status"].toString();
         if (Protocal::HeaderField::RESPONSE_ERROR == response_type) {
             emit onResponsing(tr("服务请求错误. Info:") + status, false);
-//            emit onSearchOver(tr("服务请求错误. Info:") + status, false);
+            emit onResultUpdate();
         } else {
             if (!status.isEmpty()) {
                 emit onResponsing(tr("检索失败. Info: ") + status, false);
-//                emit onSearchOver(tr("检索失败. Info: ") + status, false);
+                emit onResultUpdate();
             } else {
-                emit onResponsing(tr("检索成功!"), false);
-//                emit onSearchOver(tr("检索成功!"), true);
                 setResultInfo(data);
+                emit onResultUpdate();
+                emit onResponsing(tr("检索成功!"), false);
+                emit onSearchSuccessful();
             }
         }
-        emit onResultUpdate();
     });
     connect(m_client, &Client::onSendingStateChanged, this, &ModelSearch::onResponsing);
 
@@ -130,6 +130,16 @@ QStringList ModelSearch::getPreviewInfo(const std::vector<int> &index) const
             ret << (row["name"].toString());
     }
     return ret;
+}
+
+std::pair<Transform, Transform> ModelSearch::getTransform(int row) const
+{
+    auto data = (*m_result_info)["data"].toArray();
+    auto obj = data[row].toObject();
+    return {
+        Transform::fromJson(obj["trans_model" ].toArray()),
+        Transform::fromJson(obj["trans_camera"].toArray())
+    };
 }
 
 void ModelSearch::setResultInfo(const QJsonObject &result)

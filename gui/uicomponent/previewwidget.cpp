@@ -70,19 +70,24 @@ void PreviewWidget::selectGroup(int group)
     m_infoTable->selectGroup(group);
 }
 
-void PreviewWidget::previewFiles(const QStringList &filePaths, const QStringList &assetNames)
+void PreviewWidget::previewFiles(const QStringList &filePaths, const QStringList &assetNames, bool cache)
 {
     for (int i = 0; i < m_previewNum; i++) {
         if (i < filePaths.size()) {
             if (m_type == PreviewType::MODEL) {
-                m_previewPanes[i]->doPreviewModel(filePaths[i], assetNames[i]);
+                m_previewPanes[i]->doPreviewModel(filePaths[i], assetNames[i], cache);
             } else if (m_type == PreviewType::BVH) {
-                m_previewPanes[i]->doPreviewBVH(filePaths[i], assetNames[i]);
+                m_previewPanes[i]->doPreviewBVH(filePaths[i], assetNames[i], cache);
             } else if (m_type == PreviewType::EFFECT) {
                 // TODO: preview effect
             }
         }
     }
+}
+
+std::vector<PreviewPane *> PreviewWidget::getPreviewPane() const
+{
+    return m_previewPanes;
 }
 
 void PreviewWidget::doPreviewPrepare(const std::vector<int> &index)

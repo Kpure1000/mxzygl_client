@@ -5,6 +5,7 @@
 #include "resource/model.h"
 #include "resource/bvh.h"
 #include "shadermanager.h"
+#include "camera.h"
 
 TriangleData::TriangleData(std::shared_ptr<res::Mesh> mesh)
 {
@@ -78,10 +79,6 @@ TriangleData::~TriangleData()
 RenderData::RenderData(std::shared_ptr<res::Model> model, int sw, int sh)
     : camera(std::make_shared<PerspectiveCamera>(static_cast<float>(sw) / sh, .1f, 100.f, 60.f))
 {
-    trans_ca = Transform{QVector3D{.0f, .0f, .0f},
-                         QQuaternion{1.f, QVector3D{.0f, .0f, .0f}},
-                         QVector3D{.0f, .0f, .0f}};
-    trans_model = Transform({.0f, .0f, -1.2f}, QQuaternion{1.f, {.0f, .0f, .0f}}, {1.f, 1.f, 1.f});
     for (auto mesh : model->meshes) {
         triangleDatas.push_back(std::make_shared<TriangleData>(mesh));
     }
@@ -90,10 +87,6 @@ RenderData::RenderData(std::shared_ptr<res::Model> model, int sw, int sh)
 RenderData::RenderData(std::shared_ptr<res::BVH> bvh, int sw, int sh)
     : camera(std::make_shared<PerspectiveCamera>(static_cast<float>(sw) / sh, .1f, 100.f, 60.f))
 {
-    trans_ca = Transform{QVector3D{.0f, .0f, .0f},
-                         QQuaternion{1.f, QVector3D{.0f, .0f, .0f}},
-                         QVector3D{.0f, .0f, .0f}};
-    trans_model = Transform({.0f, .0f, -1.2f}, QQuaternion{1.f, {.0f, .0f, .0f}}, {1.f, 1.f, 1.f});
 }
 
 RenderData::~RenderData()

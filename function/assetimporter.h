@@ -5,10 +5,13 @@
 #include <QJsonObject>
 #include <unordered_set>
 #include <vector>
+#include <atomic>
+#include <chrono>
 
 #include "resource/assetinfo.h"
 #include "typemanager.h"
 #include "tagsmanager.h"
+#include "function/renderer/transform.h"
 
 class Client;
 
@@ -18,10 +21,6 @@ class AssetImporter : public QObject
 public:
     using ImportType = res::AssetInfo::AssetType;
 
-    enum class ResponseType : int {
-
-    };
-
     explicit AssetImporter(ImportType type, QObject *parent = nullptr);
     ~AssetImporter();
 
@@ -29,9 +28,20 @@ public:
 
     void clear();
 
+    void alignToOrigin();
+
+    void initAllTransform(const Transform &trans_model, const Transform &trans_camera);
+    void saveTransform(int row, const Transform &trans_model, const Transform &trans_camera);
+    /**
+     * return pair[trans_model, trans_camera]
+     */
+    std::pair<Transform, Transform> getTransform(int row) const;
+
     void pullTypeAndTags();
 
     void upload();
+
+    void upload_simple();
 
     inline bool has(const QString &filePath) const { return m_filePathDict.find(filePath.toStdString()) != m_filePathDict.end(); }
 
@@ -52,8 +62,15 @@ signals:
     void onClear();
 
     void onResponsing(const QString & info, bool is_continue);
-    void onImportSuccessful();
+    void saveSuccessful();
+    void onUploadSuccessful();
+    void onUploadSimpleSuccessful();
     void onTypeAndTagsLoaded();
+
+private:
+    void addTypeAndTagsData();
+
+    void __upload();
 
 private:
     std::unordered_set<std::string> m_filePathDict;
@@ -67,6 +84,9 @@ private:
     TagsManager *m_tagsManager;
 
     bool is_typeLoaded = false, is_tagsLoaded = false;
+    std::atomic_int m_saveCount = 0;
+
+    std::chrono::steady_clock::time_point m_upload_start;
 
 };
 

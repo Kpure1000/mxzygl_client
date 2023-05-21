@@ -47,7 +47,12 @@ InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_edita
                 return;
             }
             QString preText;
-            bool is_array = headers[C - 1].toObject()["is_array"].toBool();
+            bool is_array = false;
+            for (auto header : headers) {
+                if (header.toObject()["name"].toString() == headerName) {
+                    is_array = header.toObject()["is_array"].toBool();
+                }
+            }
             if (is_array) {
                 auto row_obj = row[headerName].toObject();
                 preText = row_obj["value"].toString();
@@ -157,7 +162,6 @@ void InfoTableWidget::refresh()
     }
 
     horizontalHeader()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
-
 }
 
 void InfoTableWidget::jumpTo(int row)

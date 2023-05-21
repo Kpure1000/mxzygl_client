@@ -8,6 +8,9 @@
 
 #include "gui/uicomponent/previewwidget.h"
 #include "function/configer/configmanager.h"
+#include "gui/uicomponent/previewpane.h"
+#include "gui/uicomponent/renderwidget.h"
+#include "function/renderer/renderer.h"
 
 ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget *parent) :
     QWidget(parent), ui(new Ui::ModelSearchWidget), m_single_preview(nullptr)
@@ -26,6 +29,19 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
     connect(m_modelSearch, &ModelSearch::onResponsing, this, [=](const QString&, bool is_continue){
         ui->bt_search->setEnabled(!is_continue);
     });
+    connect(m_modelSearch, &ModelSearch::onSearchSuccessful, this, [=](){
+        switch (searchType) {
+        case ModelSearch::SearchType::CONTENT:
+            QMessageBox::information(this, tr("模型内容检索"), tr("内容检索成功!"));
+            break;
+        case ModelSearch::SearchType::TYPE:
+            QMessageBox::information(this, tr("模型类型检索"), tr("类型检索成功!"));
+            break;
+        case ModelSearch::SearchType::TAGS:
+            QMessageBox::information(this, tr("模型标签检索"), tr("标签检索成功!"));
+            break;
+        }
+    });
 
     m_preview = new PreviewWidget(m_modelSearch->getResultsModelInfo(),
                                   3,
@@ -36,7 +52,16 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
                                   this);
 
     connect(m_preview, &PreviewWidget::onPreview, this, [this](const std::vector<int> &index) {
-        m_preview->previewFiles(m_modelSearch->getFilePaths(index), m_modelSearch->getPreviewInfo(index));
+        m_preview->previewFiles(m_modelSearch->getFilePaths(index), m_modelSearch->getPreviewInfo(index), true);
+        auto panes = m_preview->getPreviewPane();
+        for (size_t i = 0; i < panes.size(); i++) {
+            if (i < index.size()) {
+                auto renderer = panes[i]->getRenderWidget()->getRenderer();
+                auto trans_pair = m_modelSearch->getTransform(index[i]);
+                renderer->setModelTransform(trans_pair.first);
+                renderer->setCameraTransform(trans_pair.second);
+            }
+        }
     });
 
     if (searchType == ModelSearch::SearchType::CONTENT) {
@@ -61,7 +86,7 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
 
         connect(m_single_preview, &PreviewWidget::onPreview, this, [this](const std::vector<int> &index) {
             if (m_selectedFile != "" && index.size() > 0) {
-                m_single_preview->previewFiles({m_selectedFile}, {tr("模型预览")});
+                m_single_preview->previewFiles({m_selectedFile}, {tr("模型预览")}, true);
             }
         });
     } else {

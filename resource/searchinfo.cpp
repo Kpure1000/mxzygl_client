@@ -11,7 +11,7 @@ QJsonArray res::SearchInfo::get_headers(const QJsonArray &headers)
 {
     QJsonArray ret;
     for (const auto &header : headers) {
-        if (header.toString() == "hash")
+        if (header.toString() == "hash" || header.toString() == "trans_model" || header.toString() == "trans_camera")
             ret << toHeaderElement(header.toString(), false, false, false);
         else
             ret << toHeaderElement(header.toString(), false, false, true);

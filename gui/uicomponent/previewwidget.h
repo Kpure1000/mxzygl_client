@@ -29,7 +29,9 @@ public:
 
     void selectGroup(int group);
 
-    void previewFiles(const QStringList &filePaths, const QStringList &assetNames);
+    void previewFiles(const QStringList &filePaths, const QStringList &assetNames, bool cache);
+
+    std::vector<PreviewPane *> getPreviewPane() const;
 
 signals:
     void onPreview(const std::vector<int> &index);

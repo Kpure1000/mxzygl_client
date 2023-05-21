@@ -17,14 +17,18 @@ public:
     ~OptionWidget_Render();
 
 private slots:
-    void on_bt_color_clicked();
-
     void on_bt_save_clicked();
+
+    void on_bt_clearColor_clicked();
+
+    void on_bt_skyColor_clicked();
+
+    void on_bt_groundColor_clicked();
 
 private:
     Ui::OptionWidget_Render *ui;
 
-    QColor m_clearColor;
+    QColor m_clearColor, m_skyColor, m_groundColor;
 };
 
 #endif // OPTIONWIDGET_RENDER_H

@@ -12,7 +12,6 @@
 #include <functional>
 
 #include "transform.h"
-#include "camera.h"
 
 namespace res {
 struct Mesh;
@@ -33,10 +32,10 @@ struct TriangleData {
     ~TriangleData();
 };
 
+struct PerspectiveCamera;
+
 struct RenderData {
     std::vector<std::shared_ptr<TriangleData>> triangleDatas;
-    Transform trans_ca;
-    Transform trans_model;
 
     std::shared_ptr<PerspectiveCamera> camera;
 
@@ -87,24 +86,28 @@ public:
 struct InputData {
     enum class InputType : int { KEY, MOUSE, WHEEL } type;
     // Key Input
-    static constexpr int nKeyEvents = 5;
-    union {
-        struct { bool front = false, back = false, left = false, right = false, reset = false; };
+    enum KeyCode { W = 0x1, A = 0x1 << 1, S = 0x1 << 2, D = 0x1 << 3, R = 0x1 << 4 } keyCode;
+    static constexpr int nKeyEvents = 2;
+    union Key {
+        struct { bool press, release; };
         bool key_event[nKeyEvents];
-    };
+    } key;
     // Wheel Input
     float scrollx = 0.0f, scrolly = 0.0f;
     // Mouse Input
+    enum MouseButton { LEFT = 0x1, RIGHT = 0x1 << 1, MIDDLE = 0x1 << 2 } mouseButton;
+    unsigned int mouseButtons = 0;
     QPoint pos = {0, 0};
     static constexpr int nMouseEvents = 3;
-    union {
-        struct { bool press = false, release = false, move = false; };
+    union Mouse {
+        struct { bool press, release, move; };
         bool mouse_event[nMouseEvents];
-    };
+    } mouse;
 
     explicit InputData(InputType type = InputData::InputType::KEY)
-        : type(type)
-    {}
+        : type(type), key{{false, false}}, mouse{{false, false, false}}
+    {
+    }
 };
 
 #endif // RENDERDATA_H

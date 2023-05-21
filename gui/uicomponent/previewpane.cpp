@@ -8,6 +8,7 @@
 
 #include "function/assetloader/modelloader.h"
 #include "function/assetloader/bvhloader.h"
+#include "gui/uicomponent/renderwidget.h"
 
 PreviewPane::PreviewPane(QWidget *parent, bool linkTableItem)
     : QWidget(parent), m_linkTableItem(linkTableItem)
@@ -32,13 +33,20 @@ PreviewPane::PreviewPane(QWidget *parent, bool linkTableItem)
 
     doShowDefault();
 
-    connect(this, &PreviewPane::onModelLoaded, m_renderWidget, &RenderWidget::doModelRendering, Qt::QueuedConnection);
-    connect(this, &PreviewPane::onBVHLoaded, m_renderWidget, &RenderWidget::doBVHRendering, Qt::QueuedConnection);
+    connect(this, &PreviewPane::onModelCached, m_renderWidget, QOverload<const QString&>::of(&RenderWidget::doModelRendering), Qt::QueuedConnection);
+    connect(this, &PreviewPane::onBVHCached, m_renderWidget, QOverload<const QString&>::of(&RenderWidget::doBVHRendering), Qt::QueuedConnection);
+
+    qRegisterMetaType<std::shared_ptr<res::Model>>("std::shared_ptr<res::Model>");
+    qRegisterMetaType<std::shared_ptr<res::BVH>>("std::shared_ptr<res::BVH>");
+    connect(this, &PreviewPane::onModelLoaded, m_renderWidget, QOverload<std::shared_ptr<res::Model>>::of(&RenderWidget::doModelRendering), Qt::QueuedConnection);
+    connect(this, &PreviewPane::onBVHLoaded, m_renderWidget, QOverload<std::shared_ptr<res::BVH>>::of(&RenderWidget::doBVHRendering), Qt::QueuedConnection);
 
     connect(this, &PreviewPane::onPreviewPrepared, this, &PreviewPane::doShowRenderer, Qt::QueuedConnection);
     connect(this, &PreviewPane::onPreviewFailed, this, &PreviewPane::doShowError, Qt::QueuedConnection);
 
 }
+
+RenderWidget *PreviewPane::getRenderWidget() const { return m_renderWidget; }
 
 void PreviewPane::mouseDoubleClickEvent(QMouseEvent *event)
 {
@@ -84,20 +92,31 @@ void PreviewPane::doShowDefault()
     m_default->show();
 }
 
-void PreviewPane::doPreviewModel(const QString &filePath, const QString& previewInfo)
+void PreviewPane::doPreviewModel(const QString &filePath, const QString& previewInfo, bool cache)
 {
     doShowPreparing(previewInfo);
-    ModelLoader::getInstance()->asyncLoad(filePath, [filePath, previewInfo, this](bool is_loaded) {
-        if (is_loaded) {
-        emit onPreviewPrepared(previewInfo);
-        emit onModelLoaded(filePath);
-        } else {
-            emit onPreviewFailed(previewInfo);
-        }
-    });
+    if (cache) {
+        ModelLoader::getInstance()->asyncLoad(filePath, [filePath, previewInfo, this](bool is_loaded) {
+            if (is_loaded) {
+                emit onPreviewPrepared(previewInfo);
+                emit onModelCached(filePath);
+            } else {
+                emit onPreviewFailed(previewInfo);
+            }
+        });
+    } else {
+        ModelLoader::getInstance()->tempAsyncLoad(filePath, [filePath, previewInfo, this](std::shared_ptr<res::Model> model) {
+            if (nullptr != model) {
+                emit onPreviewPrepared(previewInfo);
+                emit onModelLoaded(model);
+            } else {
+                emit onPreviewFailed(previewInfo);
+            }
+        });
+    }
 }
 
-void PreviewPane::doPreviewBVH(const QString &filePath, const QString &previewInfo)
+void PreviewPane::doPreviewBVH(const QString &filePath, const QString &previewInfo, bool cache)
 {
     doShowPreparing(previewInfo);
     // TODO load BVH file

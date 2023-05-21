@@ -5,8 +5,6 @@
 #include <QMatrix4x4>
 #include <QFileInfo>
 
-#include <fstream>
-
 #include "utils/jobsystem.h"
 #include "3rd_part/openfbx/ofbx.h"
 
@@ -32,7 +30,7 @@ ModelLoader::ModelLoader(QObject *parent) : AssetCache(parent)
     });
 }
 
-std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, bool normalize, bool doGlobalTransform)
+std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, bool doGlobalTransform)
 {
     FILE *fp = fopen(filePath.toStdString().c_str(), "rb");
 
@@ -188,13 +186,10 @@ std::shared_ptr<Model> ModelLoader::loadFBX(const QString &filePath, bool normal
     model->centroid = (max + min) * .5f;
     model->diagonal = (max - min).length();
 
-    if (normalize)
-        model->normalize();
-
     return model;
 }
 
-std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath, bool normalize)
+std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath)
 {
     tinyobj::ObjReaderConfig reader_config;
     reader_config.mtl_search_path = "./"; // Path to material files
@@ -285,15 +280,46 @@ std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath, bool normal
     model->centroid = (max + min) * .5f;
     model->diagonal = (max - min).length();
 
-    if (normalize)
-        model->normalize();
-
     return model;
 }
 
-std::shared_ptr<Model> ModelLoader::loadOFF(const QString &filePath, bool normalize)
+std::shared_ptr<Model> ModelLoader::loadOFF(const QString &filePath)
 {
     return nullptr;
+}
+
+void ModelLoader::saveOBJ(const QString &filePath, std::shared_ptr<res::Model> model)
+{
+    FILE *fp = fopen(filePath.toStdString().c_str(), "w");
+
+    int mesh_count = 0;
+    int index_offset = 0;
+    for (auto &mesh : model->meshes) {
+        fprintf(fp, "o mesh_%d\n", mesh_count);
+        for (auto &v : mesh->vertices) {
+            fprintf(fp, "v %f %f %f\n", v.x(), v.y(), v.z());
+        }
+        for (auto &vn : mesh->normals) {
+            fprintf(fp, "vn %f %f %f\n", vn.x(), vn.y(), vn.z());
+        }
+        for (auto &vt : mesh->uvs) {
+            fprintf(fp, "vt %f %f\n", vt.x(), vt.y());
+        }
+        if (false == mesh->uvs.empty()) {
+            for (size_t i = 0; i < mesh->indices.size(); i += 3) {
+                unsigned int i1 = index_offset + mesh->indices[i] + 1, i2 = index_offset + mesh->indices[i + 1] + 1, i3 = index_offset + mesh->indices[i + 2] + 1;
+                fprintf(fp, "f %d/%d/%d %d/%d/%d %d/%d/%d\n", i1, i1, i1, i2, i2, i2, i3, i3, i3);
+            }
+        } else {
+            for (size_t i = 0; i < mesh->indices.size(); i += 3) {
+                unsigned int i1 = index_offset + mesh->indices[i] + 1, i2 = index_offset + mesh->indices[i + 1] + 1, i3 = index_offset + mesh->indices[i + 2] + 1;
+                fprintf(fp, "f %d//%d %d//%d %d//%d\n", i1, i1, i2, i2, i3, i3);
+            }
+        }
+        index_offset += mesh->indices.size();
+    }
+    fflush(fp);
+    fclose(fp);
 }
 
 void ModelLoader::asyncLoad(const QString &filePath, std::function<void(bool)> loadCallBack)
@@ -304,11 +330,11 @@ void ModelLoader::asyncLoad(const QString &filePath, std::function<void(bool)> l
             auto fileExt = filePath.split('.').back();
             std::shared_ptr<res::Model> model;
             if (fileExt == "fbx") {
-                model = ModelLoader::getInstance()->loadFBX(filePath, true, true);
+                model = ModelLoader::getInstance()->loadFBX(filePath, true);
             } else if (fileExt == "obj") {
-                model = ModelLoader::getInstance()->loadOBJ(filePath, true);
+                model = ModelLoader::getInstance()->loadOBJ(filePath);
             } else if (fileExt == "off") {
-                model = ModelLoader::getInstance()->loadOFF(filePath, true);
+                model = ModelLoader::getInstance()->loadOFF(filePath);
             } else {
                 qDebug() << "ModelLoader::asyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .off is Legal)";
                 loadCallBack(false);
@@ -320,6 +346,7 @@ void ModelLoader::asyncLoad(const QString &filePath, std::function<void(bool)> l
                 return;
             }
 //            qDebug() << "ModelLoader::asyncLoad>> Model" << filePath << "Load Successed";
+            model->normalize();
             ModelManager::getInstance()->add(filePath.toStdString(), model);
             emit onAssetLoaded(filePath);
             loadCallBack(true);
@@ -328,4 +355,27 @@ void ModelLoader::asyncLoad(const QString &filePath, std::function<void(bool)> l
         emit onAssetLoaded(filePath);
         loadCallBack(true);
     }
+}
+
+void ModelLoader::tempAsyncLoad(const QString &filePath, std::function<void (std::shared_ptr<res::Model>)> loadCallBack)
+{
+    JobSystem::getInstance()->submit([filePath, loadCallBack]() {
+        auto fileExt = filePath.split('.').back();
+        std::shared_ptr<res::Model> model = nullptr;
+        if (fileExt == "fbx") {
+            model = ModelLoader::getInstance()->loadFBX(filePath, true);
+        } else if (fileExt == "obj") {
+            model = ModelLoader::getInstance()->loadOBJ(filePath);
+        } else if (fileExt == "off") {
+            model = ModelLoader::getInstance()->loadOFF(filePath);
+        } else {
+            qDebug() << "ModelLoader::tempAsyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .off is Legal)";
+        }
+        if (model == nullptr) {
+            qDebug() << "ModelLoader::tempAsyncLoad>> Model" << filePath << "Load Failed";
+        }
+//        qDebug() << "ModelLoader::tempLoad>> Model" << filePath << "Load Successed";
+        model->normalize();
+        loadCallBack(model);
+    });
 }

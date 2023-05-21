@@ -13,7 +13,14 @@
 
 #include "renderdata.h"
 
-#include "arcball.h"
+struct FPSCameraController;
+struct ArcBall;
+
+struct RenderConfig {
+    QVector3D skyColor, groundColor;
+    struct { float moveSpeed, rotateSpeed, drag; } arcball;
+    struct { float moveSpeed, rotateSpeed; } fpscamera;
+};
 
 class Renderer : public QObject, public QOpenGLFunctions
 {
@@ -22,6 +29,9 @@ public:
     explicit Renderer(int sw, int sh, QObject *parent = nullptr);
 
     ~Renderer();
+
+    void initialize();
+    bool is_initialized() const { return m_is_initialized; }
 
     void resize(QOpenGLContext *context, int w, int h);
 
@@ -34,6 +44,17 @@ public:
     void setRenderData(std::shared_ptr<res::Model> model);
     void setRenderData(std::shared_ptr<res::BVH> bvh);
     void clearRenderData();
+    bool hasRendererData() const { return nullptr != m_meshesData; }
+
+    void resetAllTransform();
+    Transform getModelTransform() const;
+    Transform getCameraTransform() const;
+    void setModelTransform(const Transform &trans);
+    void setCameraTransform(const Transform &trans);
+
+signals:
+    void onRenderDataSet();
+    void onRenderDataCleared();
 
 private:
     std::shared_ptr<RenderData> m_meshesData;
@@ -42,13 +63,21 @@ private:
     PhongShader *m_phongShader;
     SkyShader   *m_skyShader;
 
+    Transform trans_camera;
+    Transform trans_model;
+
     std::shared_ptr<ArcBall> m_arcBall;
+    std::shared_ptr<FPSCameraController> m_fpsCamera;
+
+    RenderConfig m_renderConfig;
 
     float m_rot=.0f;
 
     int m_sw, m_sh;
 
     InputData m_input;
+
+    bool m_is_initialized;
 };
 
 #endif // MX_RENDERER_H

@@ -9,6 +9,7 @@
 
 class PreviewWidget;
 class LoggingWidget;
+class WizardWidget;
 
 /**
  * @brief 资源导入
@@ -20,7 +21,16 @@ public:
     explicit ImportWindow(QWidget *parent = nullptr);
 
 private:
-    QWidget *setupImportWidget(AssetImporter *importer);
+    WizardWidget *setupModelWizard(AssetImporter *importer);
+    WizardWidget *setupBVHWizard(AssetImporter *importer);
+    WizardWidget *setupEffectWizard(AssetImporter *importer);
+
+    QWidget *setupBrowseWidget(AssetImporter *importer, WizardWidget* wizard);
+    // 模型部分界面
+    QWidget *setupModel_UniformFormat(AssetImporter *importer, WizardWidget* wizard);
+    QWidget *setupModel_TransformCamera(AssetImporter *importer, WizardWidget* wizard);
+    QWidget *setupModel_ThumbUpload(AssetImporter *importer, WizardWidget* wizard);
+    //
     void closeEvent(QCloseEvent *event) override;
     void showEvent(QShowEvent *event) override;
 
@@ -29,6 +39,7 @@ signals:
 private:
     bool _is_first_paint = true;
     LoggingWidget *m_logging_widget;
+    int m_transform_row_selected = -1;
 
 };
 

@@ -25,4 +25,29 @@ struct PerspectiveCamera : public Camera
     float fov;
 };
 
+struct InputData;
+
+struct FPSCameraController {
+    FPSCameraController(Transform *trans_ca, float moveSpeed = 1.0f, float rotateSpeed = 1.0f);
+
+    void reset();
+
+    void tick(const InputData &input, float dt);
+
+    QVector3D getFront() const;
+
+    void setMoveSpeed(float moveSpeed) { m_moveSpeed = moveSpeed; }
+    void setRotateSpeed(float rotateSpeed) { m_rotateSpeed = rotateSpeed; }
+
+private:
+    Transform *m_trans_ca;
+    QVector3D m_front;
+    float m_yaw, m_pitch, m_row;
+    float m_moveSpeed, m_rotateSpeed;
+
+    QPoint m_last_cursor_pos;
+
+    bool m_is_track = false;
+};
+
 #endif // MX_CAMERA_H

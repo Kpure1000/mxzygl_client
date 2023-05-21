@@ -7,6 +7,7 @@
 #include <QJsonObject>
 
 #include "resource/searchinfo.h"
+#include "function/renderer/transform.h"
 
 class Client;
 
@@ -32,11 +33,16 @@ public:
 
     QStringList getPreviewInfo(const std::vector<int> &index) const;
 
+    /**
+     * return pair[trans_model, trans_camera]
+     */
+    std::pair<Transform, Transform> getTransform(int row) const;
+
 signals:
     void onResponsing(const QString & info, bool is_continue);
-//    void onSearchOver(const QString & info, bool is_successful);
     void onResultUpdate();
     void onResultClear();
+    void onSearchSuccessful();
 
 private:
     void setResultInfo(const QJsonObject &result);

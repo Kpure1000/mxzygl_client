@@ -47,6 +47,10 @@ public:
         RESPONSE_PUSHTYPE       = 0x1000000B,   // 推送类型
         REQUEST_PUSHTAGS        = 0x0000000C,   // 请求推送标签
         RESPONSE_PUSHTAGS       = 0x1000000C,   // 推送标签
+
+        REQUEST_UPLOADMODEL_SIMPLE  = 0x0000000D, // 上传模型(不计算特征值)
+        RESPONSE_UPLOADMODEL_SIMPLE = 0x1000000D, // 上传模型(不计算特征值)
+
     };
     Q_ENUM(HeaderField)
 

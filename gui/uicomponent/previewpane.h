@@ -5,13 +5,18 @@
 #include <QLabel>
 #include <memory>
 
-#include "renderwidget.h"
-
+namespace res {
+struct Model;
+struct BVH;
+}
+class RenderWidget;
 class PreviewPane : public QWidget
 {
     Q_OBJECT
 public:
     explicit PreviewPane(QWidget *parent = nullptr, bool linkTableItem = true);
+
+    RenderWidget *getRenderWidget() const;
 
 private:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
@@ -20,12 +25,15 @@ signals:
     void onPreviewPrepared(const QString& assetName);
     void onPreviewFailed(const QString& assetName);
     void onSelectedPane();
-    void onModelLoaded(const QString& modelName);
-    void onBVHLoaded(const QString& bvhName);
+    void onModelCached(const QString& modelName);
+    void onBVHCached(const QString& bvhName);
+    void onModelLoaded(std::shared_ptr<res::Model> model);
+    void onBVHLoaded(std::shared_ptr<res::BVH> model);
+
 
 public slots:
-    void doPreviewModel(const QString &filePath, const QString& previewInfo);
-    void doPreviewBVH(const QString &filePath, const QString& previewInfo);
+    void doPreviewModel(const QString &filePath, const QString& previewInfo, bool cache);
+    void doPreviewBVH(const QString &filePath, const QString& previewInfo, bool cache);
     void doClear();
 
 private:
