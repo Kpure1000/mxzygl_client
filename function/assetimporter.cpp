@@ -9,6 +9,8 @@
 #include "function/network/protocal.h"
 #include "function/metacategory.h"
 #include "function/assetloader/modelloader.h"
+#include "function/assetloader/modelconverter.h"
+#include "utils/jobsystem.h"
 
 AssetImporter::AssetImporter(ImportType type, QObject *parent)
     : QObject{parent}, m_type(type)
@@ -128,9 +130,14 @@ void AssetImporter::clear()
 void AssetImporter::alignToOrigin()
 {
     if (m_type == ImportType::EFFECT) {
+        emit onResponsing("AssetImporter::alignToOrigin>> 特效资源不可执行对齐原点操作", false);
         qDebug() << "AssetImporter::alignToOrigin>> 特效资源不可执行对齐原点操作";
         return;
     }
+
+    emit onResponsing(QString().asprintf("开始执行对齐原点操作, 共%d个模型", m_filePaths.size()), false);
+    emit onStartAlignToOrigin(m_filePaths.size());
+
     for (auto &filePath : m_filePaths) {
         auto info = QFileInfo(filePath);
         auto baseName = info.baseName();
@@ -142,10 +149,19 @@ void AssetImporter::alignToOrigin()
 
         filePath = savedName;
 
-        ModelLoader::getInstance()->tempAsyncLoad(info.absoluteFilePath(), [=](std::shared_ptr<res::Model> model) {
-            ModelLoader::saveOBJ(savedName, model);
+        JobSystem::getInstance()->submit([=](){
+            auto convertResult = ModelConverter::toOBJ(info.absoluteFilePath(), savedName);
 
+            int doneCount = m_saveCount.load() + 1;
             this->m_saveCount++;
+
+            if (!convertResult) {
+                emit onResponsing(QString().asprintf("模型 '%s' 转换失败", info.absoluteFilePath().toStdString().c_str()), false);
+            }
+
+            emit onResponsing(QString().asprintf("完成 %d / %d 个模型 '%s'", doneCount, m_filePaths.size(), baseName.toStdString().c_str()), false);
+
+            emit onDoneAlignToOrigin(doneCount);
 
             if (m_saveCount == m_filePaths.size()) {
                 auto data = m_info["data"].toArray();
@@ -162,6 +178,7 @@ void AssetImporter::alignToOrigin()
                 emit saveSuccessful();
             }
         });
+
     }
 }
 

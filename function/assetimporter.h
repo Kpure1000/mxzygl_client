@@ -62,6 +62,8 @@ signals:
     void onClear();
 
     void onResponsing(const QString & info, bool is_continue);
+    void onStartAlignToOrigin(int totalSize);
+    void onDoneAlignToOrigin(int proccessing);
     void saveSuccessful();
     void onUploadSuccessful();
     void onUploadSimpleSuccessful();

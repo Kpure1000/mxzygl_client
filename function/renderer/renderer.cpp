@@ -10,16 +10,20 @@
 #include "camera.h"
 #include "function/configer/configmanager.h"
 
+const auto defaultCameraTrans = Transform{QVector3D{.0f, .0f, 1.0f},
+                                         QQuaternion{1.f, QVector3D{.0f, .0f, .0f}},
+                                         QVector3D{.0f, .0f, .0f}};
+
+const auto defaultModelTrans = Transform({.0f, .0f, -1.2f}, QQuaternion{1.f, {.0f, .0f, .0f}}, {1.f, 1.f, 1.f});
+
 Renderer::Renderer(int sw, int sh, QObject *parent)
     : QObject(parent)
     , m_sw(sw)
     , m_sh(sh)
     , m_is_initialized(false)
 {
-    trans_model = Transform({.0f, .0f, -1.2f}, QQuaternion{1.f, {.0f, .0f, .0f}}, {1.f, 1.f, 1.f});
-    trans_camera = Transform{QVector3D{.0f, .0f, .0f},
-                             QQuaternion{1.f, QVector3D{.0f, .0f, .0f}},
-                             QVector3D{.0f, .0f, .0f}};
+    trans_camera = defaultCameraTrans;
+    trans_model = defaultModelTrans;
 
     m_renderConfig.skyColor = QVector3D{0.2f, 0.3f, 0.48f};
     m_renderConfig.groundColor = QVector3D{0.4f, 0.3f, 0.2f};
@@ -234,11 +238,8 @@ void Renderer::clearRenderData()
 
 void Renderer::resetAllTransform()
 {
-    trans_model = Transform({.0f, .0f, -1.2f}, QQuaternion{1.f, {.0f, .0f, .0f}}, {1.f, 1.f, 1.f});
-    trans_camera = Transform{QVector3D{.0f, .0f, .0f},
-                             QQuaternion{1.f, QVector3D{.0f, .0f, .0f}},
-                             QVector3D{.0f, .0f, .0f}};
-
+    trans_camera = defaultCameraTrans;
+    trans_model = defaultModelTrans;
     m_arcBall->reset();
 }
 

@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QTabWidget>
+#include <QNetworkReply>
+#include <QNetworkAccessManager>
 
 class HomeWindow : public QMainWindow
 {
@@ -27,7 +29,6 @@ private:
     QTabWidget * m_tabw = nullptr;
 
     bool _is_first_paint = true;
-
 };
 
 #endif // MX_HOMEWINDOW_H

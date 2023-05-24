@@ -23,12 +23,14 @@ public:
     explicit WizardWidget(QWidget *parent = nullptr);
     ~WizardWidget();
 
+    void setNextButtonEnable(bool cango);
+
     void pushStep(QWidget *widget, const QString &name);
 
     std::shared_ptr<WizardStep> currentStep();
 
 signals:
-    void onNextStep();
+    void onSwitchStep();
 
 private slots:
     void on_bt_next_clicked();

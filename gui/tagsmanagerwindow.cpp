@@ -15,11 +15,15 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <QSpacerItem>
+#include <QKeyEvent>
+#include <QShowEvent>
+#include <QCloseEvent>
 
 #include "gui/uicomponent/infotablewidget.h"
 #include "gui/uicomponent/loggingwidget.h"
 #include "gui/uicomponent/categoryselector.h"
 #include "function/tagsmanager.h"
+#include "function/layoutmanager.h"
 
 TagsManagerWindow::TagsManagerWindow(QWidget *parent)
     : IFunctionWindow("", parent ? parent->size() / 2 : QSize{1000, 900}, true, false, false, parent)
@@ -57,6 +61,29 @@ TagsManagerWindow::TagsManagerWindow(QWidget *parent)
 
 TagsManagerWindow::~TagsManagerWindow()
 {
+}
+
+void TagsManagerWindow::keyPressEvent(QKeyEvent *ev)
+{
+    // TODO: 方便调试
+    if(ev->key() == Qt::Key::Key_Escape) {
+        close();
+    }
+}
+
+void TagsManagerWindow::closeEvent(QCloseEvent *event)
+{
+    LayoutManager::getInstance()->save(this, "TagsManagerWindow");
+    QWidget::closeEvent(event);
+}
+
+void TagsManagerWindow::showEvent(QShowEvent *event)
+{
+    if (_is_first_paint) {
+        _is_first_paint = false;
+        LayoutManager::getInstance()->restore(this, "TagsManagerWindow");
+    }
+    update();
 }
 
 QWidget *TagsManagerWindow::initManagerWidget(TagsManager *manager)

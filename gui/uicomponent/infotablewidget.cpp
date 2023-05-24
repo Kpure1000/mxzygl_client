@@ -129,6 +129,7 @@ void InfoTableWidget::refresh()
                         combo->setCurrentIndex(0);
                         dataItem->setText(combo->itemText(0));
                     }
+                    combo->setStyleSheet(QString().asprintf("background-color: #%04X; color:black;", m_editable_col.rgb()));
                     this->setCellWidget(row, col, combo);
                 } else {
                     dataItem = new QTableWidgetItem(key2value[header_ele["name"].toString()].toString());

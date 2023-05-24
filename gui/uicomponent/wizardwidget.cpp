@@ -17,6 +17,11 @@ WizardWidget::~WizardWidget()
     delete ui;
 }
 
+void WizardWidget::setNextButtonEnable(bool cango)
+{
+    ui->bt_next->setEnabled(cango);
+}
+
 void WizardWidget::pushStep(QWidget *widget, const QString &name)
 {
     ui->gb_stepName->layout()->addWidget(widget);
@@ -27,7 +32,7 @@ void WizardWidget::pushStep(QWidget *widget, const QString &name)
         m_currentIndex = 0;
         widget->show();
         ui->gb_stepName->setTitle(QString().asprintf("第%d步: %s", m_currentIndex + 1, name.toStdString().c_str()));
-        emit onNextStep();
+        emit onSwitchStep();
     }
 }
 
@@ -46,7 +51,7 @@ void WizardWidget::on_bt_next_clicked()
         m_steps[m_currentIndex - 1]->widget->hide();
         m_steps[m_currentIndex]->widget->show();
         ui->gb_stepName->setTitle(QString().asprintf("第%d步: %s", m_currentIndex + 1, m_steps[m_currentIndex]->name.toStdString().c_str()));
-        emit onNextStep();
+        emit onSwitchStep();
     }
     if (m_currentIndex == static_cast<int>(m_steps.size()) - 1) {
         ui->bt_next->setEnabled(false);

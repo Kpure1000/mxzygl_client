@@ -22,10 +22,10 @@ void LoggingWidget::add(LoggingType type, const QString &msg)
         ui->te_logging->append(QString().asprintf("<p><b>I[%s] %s</b></p>", QTime::currentTime().toString().toStdString().c_str(), msg.toStdString().c_str()));
         break;
     case LoggingWidget::LoggingType::Trace:
-        ui->te_logging->append(QString().asprintf("<p style=\"color:#66a334\";><b>T[%s] %s</b></p>", QTime::currentTime().toString().toStdString().c_str(), msg.toStdString().c_str()));
+        ui->te_logging->append(QString().asprintf("<p style=\"color:#008787\";><b>T[%s] %s</b></p>", QTime::currentTime().toString().toStdString().c_str(), msg.toStdString().c_str()));
         break;
     case LoggingWidget::LoggingType::Warning:
-        ui->te_logging->append(QString().asprintf("<p style=\"color:#a45d24\";><b>W[%s] %s</b></p>", QTime::currentTime().toString().toStdString().c_str(), msg.toStdString().c_str()));
+        ui->te_logging->append(QString().asprintf("<p style=\"color:#f1d66e\";><b>W[%s] %s</b></p>", QTime::currentTime().toString().toStdString().c_str(), msg.toStdString().c_str()));
         break;
     case LoggingWidget::LoggingType::Error:
         ui->te_logging->append(QString().asprintf("<p style=\"color:#ff6666\";><b>E[%s] %s</b></p>", QTime::currentTime().toString().toStdString().c_str(), msg.toStdString().c_str()));

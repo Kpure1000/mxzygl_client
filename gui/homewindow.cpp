@@ -9,6 +9,10 @@
 #include <QCloseEvent>
 #include <QShowEvent>
 #include <QDockWidget>
+#include <QMessageBox>
+
+#include <QNetworkReply>
+#include <QUrl>
 
 #include "optionwindow.h"
 #include "importwindow.h"
@@ -22,6 +26,50 @@
 
 HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow(parent)
 {
+    // 授权
+    this->setEnabled(false);
+    auto network_access_manager_authorization = new QNetworkAccessManager(this);
+    connect(network_access_manager_authorization, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply){
+        QByteArray data = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        if (doc.isNull()) {
+            qDebug() << "Failed to create JSON doc.";
+            QMessageBox::critical(this,"错误","鉴权错误！");
+            QCoreApplication::exit(1);
+            return;
+        }
+
+        if (!doc.isObject()) {
+            qDebug() << "JSON is not an object.";
+            QMessageBox::critical(this,"错误","鉴权错误！");
+            QCoreApplication::exit(1);
+            return;
+        }
+
+        QJsonObject obj = doc.object();
+        if (obj.isEmpty()) {
+            qDebug() << "JSON object is empty.";
+            QMessageBox::critical(this,"错误","鉴权错误！");
+            QCoreApplication::exit(1);
+            return;
+        }
+
+        if (obj.contains("code") && obj["code"] == 0){
+            qDebug() << "authorization code is: " << QString::number(obj["code"].toInt());
+            this->setEnabled(true);
+            return;
+        }
+        else{
+            qDebug() << "authorization code is: " << QString::number(obj["code"].toInt());
+            QMessageBox::about(this,"错误","未获授权！");
+            QCoreApplication::exit(1);
+            return;
+        }
+    });
+    QUrl authorization_url("http://localhost:9722/auth?appcode=APP1601&pincode=1234567890");
+    QNetworkRequest authorization_request(authorization_url);
+    network_access_manager_authorization->get(authorization_request);
+
     this->setWindowTitle(tr("主页 - 模型检索"));
 
     setWindowIcon(QIcon(":/assets/assets/icon/icon.jpg"));
@@ -133,8 +181,8 @@ void HomeWindow::makeMenu()
         menu_file->addSeparator();
 
         // ----------------退出----------------
-        menu_file->addAction(tr("退出(&X)"), this, [](){
-            QApplication::exit(0);
+        menu_file->addAction(tr("退出(&X)"), this, [=](){
+            this->close();
         }, QKeySequence("Ctrl+w"));
 
     }

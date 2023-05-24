@@ -23,6 +23,7 @@ PreviewPane::PreviewPane(QWidget *parent, bool linkTableItem)
     m_info = new QLabel(this);
     m_info->setStyleSheet("border: 1px solid #8f8f8f;");
     m_info->setAlignment(Qt::AlignmentFlag::AlignCenter);
+    m_info->setContentsMargins(0, 5, 0, 5);
 
     auto ly_v = new QVBoxLayout(this);
     ly_v->setSpacing(2);
@@ -96,7 +97,7 @@ void PreviewPane::doPreviewModel(const QString &filePath, const QString& preview
 {
     doShowPreparing(previewInfo);
     if (cache) {
-        ModelLoader::getInstance()->asyncLoad(filePath, [filePath, previewInfo, this](bool is_loaded) {
+        ModelLoader::getInstance()->cachedAsyncLoad(filePath, [filePath, previewInfo, this](bool is_loaded) {
             if (is_loaded) {
                 emit onPreviewPrepared(previewInfo);
                 emit onModelCached(filePath);

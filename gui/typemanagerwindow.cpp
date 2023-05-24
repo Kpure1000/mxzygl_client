@@ -15,11 +15,15 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <QSpacerItem>
+#include <QKeyEvent>
+#include <QShowEvent>
+#include <QCloseEvent>
 
 #include "gui/uicomponent/infotablewidget.h"
 #include "gui/uicomponent/loggingwidget.h"
 #include "gui/uicomponent/categoryselector.h"
 #include "function/typemanager.h"
+#include "function/layoutmanager.h"
 
 TypeManagerWindow::TypeManagerWindow(QWidget *parent)
     : IFunctionWindow("", parent ? parent->size() / 2 : QSize{1000, 900}, true, false, false, parent)
@@ -57,6 +61,29 @@ TypeManagerWindow::TypeManagerWindow(QWidget *parent)
 
 TypeManagerWindow::~TypeManagerWindow()
 {
+}
+
+void TypeManagerWindow::keyPressEvent(QKeyEvent *ev)
+{
+    // TODO: 方便调试
+    if(ev->key() == Qt::Key::Key_Escape) {
+        close();
+    }
+}
+
+void TypeManagerWindow::closeEvent(QCloseEvent *event)
+{
+    LayoutManager::getInstance()->save(this, "TypeManagerWindow");
+    QWidget::closeEvent(event);
+}
+
+void TypeManagerWindow::showEvent(QShowEvent *event)
+{
+    if (_is_first_paint) {
+        _is_first_paint = false;
+        LayoutManager::getInstance()->restore(this, "TypeManagerWindow");
+    }
+    update();
 }
 
 QWidget *TypeManagerWindow::initManagerWidget(TypeManager *manager)

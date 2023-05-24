@@ -15,6 +15,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QSplitter>
+#include <QProgressDialog>
 
 #include "uicomponent/previewwidget.h"
 #include "function/configer/configmanager.h"
@@ -156,6 +157,13 @@ QWidget *ImportWindow::setupBrowseWidget(AssetImporter *importer, WizardWidget* 
 
     auto totalWidget = new QWidget(this);
 
+    connect(wizard, &WizardWidget::onSwitchStep, this, [=]() {
+        // 当进行到当前步骤时
+        if (totalWidget == wizard->currentStep()->widget) {
+            wizard->setNextButtonEnable(false);
+        }
+    });
+
     PreviewWidget *previewWidget = new PreviewWidget(importer->getInfoRef(),
                                                      2,
                                                      3,
@@ -164,8 +172,14 @@ QWidget *ImportWindow::setupBrowseWidget(AssetImporter *importer, WizardWidget* 
                                                      true,
                                                      totalWidget);
 
-    connect(importer, &AssetImporter::onAddPaths, totalWidget, [previewWidget]() {
+    connect(importer, &AssetImporter::onAddPaths, totalWidget, [=]() {
+        wizard->setNextButtonEnable(true);
         previewWidget->refreshInfo();
+    });
+
+    connect(importer, &AssetImporter::onClear, totalWidget, [=]() {
+        wizard->setNextButtonEnable(false);
+        previewWidget->clearInfo();
     });
 
     auto ly_top = new QHBoxLayout();
@@ -236,7 +250,7 @@ QWidget *ImportWindow::setupModel_UniformFormat(AssetImporter *importer, WizardW
 {
     auto totalWidget = new QWidget(this);
     auto ly_total = new QVBoxLayout(totalWidget);
-    auto bt_align = new QPushButton(tr("对齐原点"), this);
+    auto bt_align = new QPushButton(tr("对齐原点并转换格式"), this);
     ly_total->addWidget(bt_align);
 
     PreviewWidget *previewWidget = new PreviewWidget(importer->getInfoRef(),
@@ -248,7 +262,7 @@ QWidget *ImportWindow::setupModel_UniformFormat(AssetImporter *importer, WizardW
                                                      totalWidget);
     ly_total->addWidget(previewWidget);
 
-    connect(wizard, &WizardWidget::onNextStep, this, [=]() {
+    connect(wizard, &WizardWidget::onSwitchStep, this, [=]() {
         // 当进行到当前步骤时
         if (totalWidget == wizard->currentStep()->widget) {
             previewWidget->refreshInfo();
@@ -261,13 +275,38 @@ QWidget *ImportWindow::setupModel_UniformFormat(AssetImporter *importer, WizardW
     });
 
     connect(bt_align, &QPushButton::clicked, this, [=]() {
-        int res = QMessageBox::warning(this, tr("操作警告"), tr("对齐原点可能覆盖原模型文件, 且操作不可撤销!"), QMessageBox::StandardButton::Cancel, QMessageBox::StandardButton::Ok);
+        int res = QMessageBox::warning(this, tr("操作警告"), tr("转换格式可能覆盖原模型文件, 且操作不可撤销!"), QMessageBox::StandardButton::Cancel, QMessageBox::StandardButton::Ok);
         if (res != QMessageBox::StandardButton::Ok)
             return;
+        bt_align->setEnabled(false);
         importer->alignToOrigin();
     });
-    connect(importer, &AssetImporter::saveSuccessful, this, [=](){
-        m_logging_widget->info("保存成功");
+
+    auto progressDialog = new QProgressDialog(tr(""), tr("隐藏进度显示, 转换不会终止"), 0, 1, this);
+    progressDialog->reset();
+    auto prog_bt_cancel = new QPushButton(tr("完成"), progressDialog);
+    prog_bt_cancel->setEnabled(false);
+    progressDialog->setCancelButton(prog_bt_cancel);
+    progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
+    progressDialog->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+    progressDialog->setAutoClose(false);
+
+    connect(importer, &AssetImporter::onStartAlignToOrigin, this, [=](int size) {
+        progressDialog->setLabelText(QString().asprintf("已转换 0 个, 剩余 %d 个, 请勿关闭导入程序", size));
+        progressDialog->setMaximum(size);
+        progressDialog->open();
+    });
+    connect(importer, &AssetImporter::onDoneAlignToOrigin, this, [=](int progress) {
+        progressDialog->setLabelText(QString().asprintf("已转换 %d 个, 剩余 %d 个, 请勿关闭导入程序", progress, progressDialog->maximum() - progress));
+        progressDialog->setValue(progress);
+    });
+    connect(importer, &AssetImporter::saveSuccessful, this, [=]() {
+        progressDialog->setLabelText(QString().asprintf("已转换 %d 个, 剩余 0 个.", progressDialog->maximum()));
+        prog_bt_cancel->setEnabled(true);
+        progressDialog->reset();
+
+        m_logging_widget->trace("保存成功");
+
         previewWidget->refreshInfo();
     });
     return totalWidget;
@@ -293,7 +332,7 @@ QWidget *ImportWindow::setupModel_TransformCamera(AssetImporter *importer, Wizar
     splitter->setStretchFactor(0, 1);
     splitter->setStretchFactor(1, 1);
 
-    connect(wizard, &WizardWidget::onNextStep, this, [=]() {
+    connect(wizard, &WizardWidget::onSwitchStep, this, [=]() {
         // 当进行到当前步骤时
         if (totalWidget == wizard->currentStep()->widget) {
             infotable->refresh();
@@ -393,15 +432,11 @@ QWidget *ImportWindow::setupModel_ThumbUpload(AssetImporter *importer, WizardWid
         importer->upload();
     });
 
-    connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
-        bt_upload->setEnabled(!is_continue);
-    });
-
     connect(importer, &AssetImporter::onClear, this, [=](){
         previewWidget->clearInfo();
     });
 
-    connect(wizard, &WizardWidget::onNextStep, this, [=]() {
+    connect(wizard, &WizardWidget::onSwitchStep, this, [=]() {
         // 当进行到当前步骤时
         if (totalWidget == wizard->currentStep()->widget) {
             previewWidget->refreshInfo();
@@ -412,7 +447,7 @@ QWidget *ImportWindow::setupModel_ThumbUpload(AssetImporter *importer, WizardWid
     connect(importer, &AssetImporter::onTypeAndTagsLoaded, this, [=](){
         bt_upload->setEnabled(true);
         bt_upload_simple->setEnabled(true);
-        bt_pull->setEnabled(false);
+        m_logging_widget->trace("类型与标签拉取成功");
         previewWidget->refreshInfo();
     });
 
@@ -420,6 +455,7 @@ QWidget *ImportWindow::setupModel_ThumbUpload(AssetImporter *importer, WizardWid
         bt_upload->setEnabled(false);
         bt_upload_simple->setEnabled(false);
         importer->clear();
+        m_logging_widget->trace("上传成功");
         QMessageBox::information(this, tr("模型资源上传"), tr("上传成功!"));
     });
 
@@ -427,6 +463,7 @@ QWidget *ImportWindow::setupModel_ThumbUpload(AssetImporter *importer, WizardWid
         bt_upload->setEnabled(false);
         bt_upload_simple->setEnabled(false);
         importer->clear();
+        m_logging_widget->trace("简单上传成功");
         QMessageBox::information(this, tr("模型资源简单上传"), tr("简单上传成功!"));
     });
 

@@ -8,6 +8,8 @@
 #include "resource/model.h"
 #include "assetcache.h"
 
+struct aiNode;
+
 class ModelLoader : public AssetCache
 {
     Q_OBJECT
@@ -18,9 +20,7 @@ public:
     static std::shared_ptr<res::Model> loadOBJ(const QString& filePath);
     static std::shared_ptr<res::Model> loadOFF(const QString& filePath);
 
-    static void saveOBJ(const QString& filePath, std::shared_ptr<res::Model>);
-
-    void asyncLoad(const QString &filePath, std::function<void(bool)> loadCallBack);
+    void cachedAsyncLoad(const QString &filePath, std::function<void(bool)> loadCallBack);
     void tempAsyncLoad(const QString &filePath, std::function<void(std::shared_ptr<res::Model>)> loadCallBack);
 
 public:
