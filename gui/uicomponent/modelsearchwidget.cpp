@@ -49,6 +49,7 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
                                   PreviewWidget::PreviewType::MODEL,
                                   Qt::Orientation::Horizontal,
                                   false,
+                                  true,
                                   this);
 
     connect(m_preview, &PreviewWidget::onPreview, this, [this](const std::vector<int> &index) {

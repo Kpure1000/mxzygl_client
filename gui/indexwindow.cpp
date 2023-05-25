@@ -51,9 +51,9 @@ void IndexWindow::initIndexWidget()
         bt_sync->setSizePolicy(plc_bt_sync);
     }
 
-    auto index_content = new InfoTableWidget(nullptr, 1, true, totalWidget);
-    auto index_type = new InfoTableWidget(nullptr, 1, true, totalWidget);
-    auto index_tags = new InfoTableWidget(nullptr, 1, true, totalWidget);
+    auto index_content = new InfoTableWidget(nullptr, 1, true, true, totalWidget);
+    auto index_type = new InfoTableWidget(nullptr, 1, true, true, totalWidget);
+    auto index_tags = new InfoTableWidget(nullptr, 1, true, true, totalWidget);
 
     auto tab_w = new QTabWidget(totalWidget);
     tab_w->addTab(index_content, tr("模型内容索引"));
@@ -103,6 +103,7 @@ void IndexWindow::initModelWidget()
                                    2,
                                    PreviewWidget::PreviewType::MODEL,
                                    Qt::Horizontal,
+                                   true,
                                    true,
                                    center_widget);
     ly_total->addWidget(pre_w);

@@ -105,7 +105,7 @@ QWidget *TagsManagerWindow::initManagerWidget(TagsManager *manager)
 
     ly_info->addLayout(ly_pullpush);
 
-    auto infotable = new InfoTableWidget(manager->getTags(), 1, false, tab);
+    auto infotable = new InfoTableWidget(manager->getTags(), 1, false, true, tab);
 
     ly_info->addWidget(infotable);
     ly_tab_info->addLayout(ly_info);

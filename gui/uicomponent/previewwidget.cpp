@@ -13,7 +13,7 @@
 #include "gui/uicomponent/previewpane.h"
 #include "gui/uicomponent/infotablewidget.h"
 
-PreviewWidget::PreviewWidget(QJsonObject *info, int row, int column, PreviewType type, Qt::Orientation split_orientation, bool info_editable, QWidget *parent)
+PreviewWidget::PreviewWidget(QJsonObject *info, int row, int column, PreviewType type, Qt::Orientation split_orientation, bool info_editable, bool info_resizeAsContent, QWidget *parent)
     : QWidget{parent}, m_previewNum(row * column), m_type(type)
 {
     auto ly_total = new QVBoxLayout(this);
@@ -25,7 +25,7 @@ PreviewWidget::PreviewWidget(QJsonObject *info, int row, int column, PreviewType
     panesWidget->setStyleSheet("border:1px solid #8f8f8f;");
     panesWidget->setLayout(ly_pane);
 
-    m_infoTable = new InfoTableWidget(info, m_previewNum, info_editable, this);
+    m_infoTable = new InfoTableWidget(info, m_previewNum, info_editable, info_resizeAsContent, this);
 
     for (int r = 0; r < row; r++) {
         for (int c = 0; c < column; c++) {

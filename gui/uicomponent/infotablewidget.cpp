@@ -11,8 +11,8 @@ const QColor InfoTableWidget::m_editable_col = QColor{235, 255, 235, 255};
 const QColor InfoTableWidget::m_uneditable_col = QColor{255, 245, 235, 255};
 const QColor InfoTableWidget::m_group_col = QColor{235, 245, 255, 255};
 
-InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_editable, QWidget *parent)
-    : QTableWidget(parent), m_spanNum(spanNum), m_info(info), m_info_editable(info_editable)
+InfoTableWidget::InfoTableWidget(QJsonObject *info, int spanNum, bool info_editable, bool resizeAsContent, QWidget *parent)
+    : QTableWidget(parent), m_spanNum(spanNum), m_info(info), m_info_editable(info_editable), m_resizeAsContent(resizeAsContent)
 {
     this->setStyleSheet("border:1px solid #8f8f8f;");
     horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Interactive);
@@ -162,7 +162,10 @@ void InfoTableWidget::refresh()
         }
     }
 
-    horizontalHeader()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+    if (m_resizeAsContent)
+        horizontalHeader()->resizeSections(QHeaderView::ResizeMode::ResizeToContents);
+    else
+        horizontalHeader()->resizeSections(QHeaderView::ResizeMode::Interactive);
 }
 
 void InfoTableWidget::jumpTo(int row)

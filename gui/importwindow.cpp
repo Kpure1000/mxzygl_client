@@ -170,6 +170,7 @@ QWidget *ImportWindow::setupBrowseWidget(AssetImporter *importer, WizardWidget* 
                                                      static_cast<PreviewWidget::PreviewType>(importer->type()),
                                                      Qt::Orientation::Horizontal,
                                                      true,
+                                                     true,
                                                      totalWidget);
 
     connect(importer, &AssetImporter::onAddPaths, totalWidget, [=]() {
@@ -259,6 +260,7 @@ QWidget *ImportWindow::setupModel_UniformFormat(AssetImporter *importer, WizardW
                                                      static_cast<PreviewWidget::PreviewType>(importer->type()),
                                                      Qt::Orientation::Horizontal,
                                                      true,
+                                                     true,
                                                      totalWidget);
     ly_total->addWidget(previewWidget);
 
@@ -317,7 +319,7 @@ QWidget *ImportWindow::setupModel_TransformCamera(AssetImporter *importer, Wizar
     auto totalWidget = new QWidget(this);
     auto ly_total = new QHBoxLayout(totalWidget);
 
-    auto infotable = new InfoTableWidget(importer->getInfoRef(), 1, false, totalWidget);
+    auto infotable = new InfoTableWidget(importer->getInfoRef(), 1, false, true, totalWidget);
 
     auto splitter = new QSplitter(Qt::Horizontal, totalWidget);
     ly_total->addWidget(splitter);
@@ -401,6 +403,7 @@ QWidget *ImportWindow::setupModel_ThumbUpload(AssetImporter *importer, WizardWid
                                                      3,
                                                      static_cast<PreviewWidget::PreviewType>(importer->type()),
                                                      Qt::Orientation::Horizontal,
+                                                     true,
                                                      true,
                                                      totalWidget);
     ly_total->addWidget(previewWidget);

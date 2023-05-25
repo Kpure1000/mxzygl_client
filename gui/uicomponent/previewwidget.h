@@ -21,6 +21,7 @@ public:
                            PreviewType type,
                            Qt::Orientation split_orientation,
                            bool info_editable,
+                           bool info_resizeAsContent,
                            QWidget *parent = nullptr);
 
     void refreshInfo();
