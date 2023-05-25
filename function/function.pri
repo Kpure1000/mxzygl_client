@@ -1,5 +1,6 @@
 HEADERS += \
     $$PWD/assetimporter.h \
+    $$PWD/dbtableviewer.h \
     $$PWD/indexeditor.h \
     $$PWD/layoutmanager.h \
     $$PWD/metacategory.h \
@@ -14,6 +15,7 @@ include(network/network.pri)
 
 SOURCES += \
     $$PWD/assetimporter.cpp \
+    $$PWD/dbtableviewer.cpp \
     $$PWD/indexeditor.cpp \
     $$PWD/layoutmanager.cpp \
     $$PWD/metacategory.cpp \

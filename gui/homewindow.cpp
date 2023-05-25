@@ -23,6 +23,7 @@
 #include "function/layoutmanager.h"
 #include "gui/typemanagerwindow.h"
 #include "gui/tagsmanagerwindow.h"
+#include "gui/dbtablewindow.h"
 
 HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow(parent)
 {
@@ -159,6 +160,15 @@ void HomeWindow::makeMenu()
     {
         auto menu_file = new QMenu(tr("文件(&F)"), this);
         m_top_menubar->addMenu(menu_file);
+
+        // ----------------查看资源数据库----------------
+        menu_file->addAction(tr("模型数据表预览(&I)"), this, [this](){
+            auto winName = "模型数据表预览";
+            auto fm = FunctionWnidowManager::getInstance();
+            if (!fm->show(winName, this->isMaximized(), true)) {
+                fm->create(winName, new DBTableWindow(this));
+            }
+        }, QKeySequence("Ctrl+T"));
 
         // ----------------导入----------------
         menu_file->addAction(tr("资源导入(&I)"), this, [this](){

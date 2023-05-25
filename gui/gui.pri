@@ -1,4 +1,5 @@
 SOURCES += \
+    $$PWD/dbtablewindow.cpp \
     $$PWD/homewindow.cpp \
     $$PWD/ifunctionwindow.cpp \
     $$PWD/importwindow.cpp \
@@ -7,6 +8,7 @@ SOURCES += \
     $$PWD/tagsmanagerwindow.cpp \
     $$PWD/typemanagerwindow.cpp
 HEADERS += \
+    $$PWD/dbtablewindow.h \
     $$PWD/gui.h \
     $$PWD/homewindow.h \
     $$PWD/ifunctionwindow.h \

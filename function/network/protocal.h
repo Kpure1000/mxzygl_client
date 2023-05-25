@@ -51,6 +51,9 @@ public:
         REQUEST_UPLOADMODEL_SIMPLE  = 0x0000000D, // 上传模型(不计算特征值)
         RESPONSE_UPLOADMODEL_SIMPLE = 0x1000000D, // 上传模型(不计算特征值)
 
+        REQUEST_SHOWTBMODEL     = 0x0000000E,   // 请求显示模型数据表
+        RESPONSE_SHOWTBMODEL    = 0x1000000E,   // 显示模型数据表
+
     };
     Q_ENUM(HeaderField)
 

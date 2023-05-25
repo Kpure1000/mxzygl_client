@@ -29,7 +29,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QRadioButton" name="rbt_4">
+    <widget class="QRadioButton" name="rbt_2">
      <property name="font">
       <font>
        <pointsize>10</pointsize>
@@ -57,7 +57,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QRadioButton" name="rbt_2">
+    <widget class="QRadioButton" name="rbt_4">
      <property name="font">
       <font>
        <pointsize>10</pointsize>

@@ -159,7 +159,7 @@ void AssetImporter::alignToOrigin()
                 emit onResponsing(QString().asprintf("模型 '%s' 转换失败", info.absoluteFilePath().toStdString().c_str()), false);
             }
 
-            emit onResponsing(QString().asprintf("完成 %d / %d 个模型 '%s'", doneCount, m_filePaths.size(), baseName.toStdString().c_str()), false);
+            emit onResponsing(QString().asprintf("完成 %d / %d 个模型 '%s'", doneCount, m_filePaths.size(), baseName.toStdString().c_str()), true);
 
             emit onDoneAlignToOrigin(doneCount);
 
