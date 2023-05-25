@@ -7,20 +7,22 @@
 
 template<typename keyT>
 struct is_basic_type : std::false_type {};
-#define IS_BASIC_TYPE(_type) template <> struct is_basic_type<_type> : std::true_type {};
 
-IS_BASIC_TYPE(int8_t)
-IS_BASIC_TYPE(int16_t)
-IS_BASIC_TYPE(int32_t)
-IS_BASIC_TYPE(int64_t)
-IS_BASIC_TYPE(uint8_t)
-IS_BASIC_TYPE(uint16_t)
-IS_BASIC_TYPE(uint32_t)
-IS_BASIC_TYPE(uint64_t)
-IS_BASIC_TYPE(float)
-IS_BASIC_TYPE(double)
-IS_BASIC_TYPE(long)
-IS_BASIC_TYPE(unsigned long)
+// 注册为基本类型
+#define REG_BASIC_TYPE(_type) template <> struct is_basic_type<_type> : std::true_type {};
+
+REG_BASIC_TYPE(int8_t)
+REG_BASIC_TYPE(int16_t)
+REG_BASIC_TYPE(int32_t)
+REG_BASIC_TYPE(int64_t)
+REG_BASIC_TYPE(uint8_t)
+REG_BASIC_TYPE(uint16_t)
+REG_BASIC_TYPE(uint32_t)
+REG_BASIC_TYPE(uint64_t)
+REG_BASIC_TYPE(float)
+REG_BASIC_TYPE(double)
+REG_BASIC_TYPE(long)
+REG_BASIC_TYPE(unsigned long)
 
 template<typename keyT, typename assetT, typename _Enable = void>
 class IAssetManager
