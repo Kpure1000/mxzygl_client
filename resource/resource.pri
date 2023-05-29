@@ -1,5 +1,6 @@
 SOURCES += \
     $$PWD/assetinfo.cpp \
+    $$PWD/bvh.cpp \
     $$PWD/indexinfo.cpp \
     $$PWD/model.cpp \
     $$PWD/searchinfo.cpp

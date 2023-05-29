@@ -2,8 +2,9 @@
     <qresource prefix="/assets">
         <file>assets/icon/icon.jpg</file>
         <file>assets/shader/phong.frag</file>
-        <file>assets/shader/phong.vert</file>
+        <file>assets/shader/static.vert</file>
         <file>assets/shader/skybox.vert</file>
         <file>assets/shader/skybox.frag</file>
+        <file>assets/shader/animation.vert</file>
     </qresource>
 </RCC>
