@@ -15,15 +15,16 @@
 
 namespace res {
 struct Mesh;
+struct BoneMesh;
 struct Model;
 struct BVH;
 struct Effect;
 }
 
 struct TriangleData {
-    std::shared_ptr<QOpenGLBuffer> vbo_v = nullptr, vbo_n = nullptr, vbo_u = nullptr, ibo = nullptr;
+    std::shared_ptr<QOpenGLBuffer> vbo_v = nullptr, vbo_n = nullptr, ibo = nullptr;
 
-    int triangle_nums;
+    int triangle_nums, vertices_nums;
 
     explicit TriangleData(std::shared_ptr<res::Mesh> mesh);
 
@@ -32,15 +33,37 @@ struct TriangleData {
     ~TriangleData();
 };
 
+struct BoneData {
+    std::shared_ptr<QOpenGLBuffer> vbo_v = nullptr, vbo_n = nullptr, vbo_t = nullptr, vbo_tn = nullptr, ibo = nullptr;
+    std::shared_ptr<res::BVH> bvh;
+
+    int current_frame = 0;
+    float current_time = .0f;
+
+    int triangle_nums;
+    int vertices_nums;
+
+    explicit BoneData(std::shared_ptr<res::BVH> bvh);
+
+    void resetBuffer(std::shared_ptr<res::BoneMesh> boneMesh);
+
+    void bind(QOpenGLShaderProgram *sprog);
+
+    ~BoneData();
+};
+
 struct PerspectiveCamera;
 
 struct RenderData {
     std::vector<std::shared_ptr<TriangleData>> triangleDatas;
+    std::shared_ptr<BoneData> boneData = nullptr;
 
     std::shared_ptr<PerspectiveCamera> camera;
 
     explicit RenderData(std::shared_ptr<res::Model> model, int sw, int sh);
     explicit RenderData(std::shared_ptr<res::BVH> bvh, int sw, int sh);
+
+    void tick(float dt);
 
     ~RenderData();
 
@@ -65,13 +88,22 @@ public:
 //    virtual void use(std::function<void(QOpenGLShaderProgram *)> func) = 0;
 };
 
-struct PhongShader : public IShader {
+struct StaticModelLightShader : public IShader {
     Q_OBJECT
 public:
-    explicit PhongShader(const std::string &name, QObject *parent = nullptr);
-    ~PhongShader();
+    explicit StaticModelLightShader(const std::string &name, QObject *parent = nullptr);
+    ~StaticModelLightShader();
 
 //    void use(std::function<void(QOpenGLShaderProgram*)> func) override;
+};
+
+struct AnimationModelLightShader : public IShader {
+    Q_OBJECT
+public:
+    explicit AnimationModelLightShader(const std::string &name, QObject *parent = nullptr);
+    ~AnimationModelLightShader();
+
+    //    void use(std::function<void(QOpenGLShaderProgram*)> func) override;
 };
 
 struct SkyShader : public IShader {

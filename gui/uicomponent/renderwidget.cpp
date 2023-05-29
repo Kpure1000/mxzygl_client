@@ -259,7 +259,14 @@ void RenderWidget::doModelRendering(const QString &filePath)
 
 void RenderWidget::doBVHRendering(const QString &filePath)
 {
-    // TODO render BVH asset
+    if (BVHManager::getInstance()->has(filePath.toStdString())) {
+        auto bvh = BVHManager::getInstance()->get(filePath.toStdString());
+        if (m_renderer->is_initialized()) {
+            m_renderer->setRenderData(bvh);
+        }
+    } else {
+        qDebug() << "RenderWidget::doModelRendering>> Render Model Not Found" << filePath;
+    }
 }
 
 void RenderWidget::doModelRendering(std::shared_ptr<res::Model> model)
@@ -271,7 +278,9 @@ void RenderWidget::doModelRendering(std::shared_ptr<res::Model> model)
 
 void RenderWidget::doBVHRendering(std::shared_ptr<res::BVH> bvh)
 {
-    // TODO render BVH asset
+    if (m_renderer->is_initialized()) {
+        m_renderer->setRenderData(bvh);
+    }
 }
 
 void RenderWidget::stopRendering()

@@ -20,6 +20,8 @@ public:
     
     void clearInfos();
 
+    void resetInfo(QJsonObject *info);
+
 signals:
     void onGroupSelected(const std::vector<int> &rows);
 

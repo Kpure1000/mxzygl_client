@@ -60,7 +60,8 @@ private:
     std::shared_ptr<RenderData> m_meshesData;
     std::shared_ptr<SkyData> m_skyData;
 
-    PhongShader *m_phongShader;
+    StaticModelLightShader *m_staticShader;
+    AnimationModelLightShader *m_animationShader;
     SkyShader   *m_skyShader;
 
     Transform trans_camera;

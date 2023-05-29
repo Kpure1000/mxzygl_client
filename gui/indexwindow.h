@@ -3,6 +3,8 @@
 
 #include "gui/ifunctionwindow.h"
 
+class IndexEditor;
+
 class IndexWindow : public IFunctionWindow
 {
     Q_OBJECT
@@ -12,8 +14,7 @@ public:
 signals:
 
 private:
-    void initIndexWidget();
-    void initModelWidget();
+    QWidget *initModelWidget(IndexEditor *editor);
     void closeEvent(QCloseEvent *event) override;
     void showEvent(QShowEvent *event) override;
     bool _is_first_paint = true;

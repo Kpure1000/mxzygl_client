@@ -187,3 +187,10 @@ void InfoTableWidget::clearInfos()
     std::vector<int> empty_row;
     emit onGroupSelected(empty_row);
 }
+
+void InfoTableWidget::resetInfo(QJsonObject *info)
+{
+    m_info = info;
+    clearInfos();
+    refresh();
+}

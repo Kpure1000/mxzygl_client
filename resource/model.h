@@ -32,12 +32,12 @@ struct Model
 {
     std::vector<std::shared_ptr<Mesh>> meshes;
 
-    QVector3D centroid;
-    float diagonal;
+//    QVector3D centroid;
+//    float diagonal;
 
     inline int meshesNum() const { return static_cast<int>(meshes.size()); }
 
-    void normalize();
+//    void normalize();
 };
 
 } // namespace res

@@ -201,21 +201,21 @@ void HomeWindow::makeMenu()
     {
         auto menu_version = new QMenu(tr("编辑(&V)"), this);
 
-        // ----------------类型----------------
-        menu_version->addAction(tr("类型管理"), this, [=](){
-            auto winName = "类型管理";
-            auto fm = FunctionWnidowManager::getInstance();
-            if (!fm->show(winName, this->isMaximized(), true)){
-                fm->create(winName, new TypeManagerWindow(this));
-            }
-        });
-
         // ----------------标签----------------
         menu_version->addAction(tr("标签管理"), this, [=](){
             auto winName = "标签管理";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName, this->isMaximized(), true)){
                 fm->create(winName, new TagsManagerWindow(this));
+            }
+        });
+
+        // ----------------类型----------------
+        menu_version->addAction(tr("类型管理"), this, [=](){
+            auto winName = "类型管理";
+            auto fm = FunctionWnidowManager::getInstance();
+            if (!fm->show(winName, this->isMaximized(), true)){
+                fm->create(winName, new TypeManagerWindow(this));
             }
         });
 

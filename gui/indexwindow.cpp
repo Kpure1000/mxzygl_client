@@ -17,65 +17,11 @@
 #include "gui/uicomponent/previewwidget.h"
 #include "gui/uicomponent/loggingwidget.h"
 #include "function/layoutmanager.h"
+#include "function/indexeditor.h"
 
 IndexWindow::IndexWindow(QWidget *parent)
     : IFunctionWindow(tr("索引编辑"), {800, 600}, true, false, true, parent)
 {
-    initModelWidget();
-    initIndexWidget();
-}
-
-void IndexWindow::initIndexWidget()
-{
-
-    auto center_widget = centralWidget();
-
-    auto totalWidget = new QWidget(center_widget);
-
-    auto ly_total = new QGridLayout(totalWidget);
-
-    auto bt_pull = new QPushButton(tr("↓↓↓拉取索引↓↓↓"), totalWidget);
-
-    auto bt_push = new QPushButton(tr("↑↑↑推送索引↑↑↑"), center_widget);
-
-    auto push_pull_widget = new QWidget(totalWidget);
-    auto ly_bt_push_pull = new QHBoxLayout(push_pull_widget);
-    ly_bt_push_pull->addWidget(bt_pull);
-    ly_bt_push_pull->addWidget(bt_push);
-
-    auto bt_sync = new QPushButton(tr("←\n←\n←\n压\n缩\n为\n索\n引\n←\n←\n←\n"), totalWidget);
-    {
-        bt_sync->setMaximumWidth(bt_sync->fontMetrics().averageCharWidth() * 4);
-        auto plc_bt_sync = bt_sync->sizePolicy();
-        plc_bt_sync.setVerticalPolicy(QSizePolicy::Expanding);
-        bt_sync->setSizePolicy(plc_bt_sync);
-    }
-
-    auto index_content = new InfoTableWidget(nullptr, 1, true, true, totalWidget);
-    auto index_type = new InfoTableWidget(nullptr, 1, true, true, totalWidget);
-    auto index_tags = new InfoTableWidget(nullptr, 1, true, true, totalWidget);
-
-    auto tab_w = new QTabWidget(totalWidget);
-    tab_w->addTab(index_content, tr("模型内容索引"));
-    tab_w->addTab(index_type, tr("模型类型索引"));
-    tab_w->addTab(index_tags, tr("模型标签索引"));
-
-    ly_total->addWidget(push_pull_widget, 0, 0);
-    ly_total->addWidget(bt_sync,         1, 1);
-    ly_total->addWidget(tab_w,           1, 0);
-
-    auto docker_index = new QDockWidget(tr("索引编辑"), center_widget);
-    docker_index->setWidget(totalWidget);
-    docker_index->setObjectName("docker_index");
-    docker_index->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
-    docker_index->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
-    addDockWidget(Qt::LeftDockWidgetArea, docker_index);
-
-}
-
-void IndexWindow::initModelWidget()
-{
-    auto center_widget = centralWidget();
 
     // ----------------视图----------------
     {
@@ -95,18 +41,68 @@ void IndexWindow::initModelWidget()
         this->setMenuBar(top_menubar);
     }
 
+    auto index_editor_cont = new IndexEditor(IndexEditor::IndexType::CONTENT, this);
+    auto index_editor_tags = new IndexEditor(IndexEditor::IndexType::TAGS,    this);
+    auto index_editor_type = new IndexEditor(IndexEditor::IndexType::TYPE,    this);
 
-    auto ly_total = new QVBoxLayout(center_widget);
+    auto center_widget = centralWidget();
 
-    auto pre_w = new PreviewWidget(nullptr,
-                                   3,
-                                   2,
-                                   PreviewWidget::PreviewType::MODEL,
-                                   Qt::Horizontal,
-                                   true,
-                                   true,
-                                   center_widget);
-    ly_total->addWidget(pre_w);
+    auto ly_total = new QGridLayout(center_widget);
+
+    auto tab_w = new QTabWidget(center_widget);
+    auto model_cont = initModelWidget(index_editor_cont);
+    auto model_tags = initModelWidget(index_editor_tags);
+    auto model_type = initModelWidget(index_editor_type);
+    tab_w->addTab(model_cont, tr("模型内容数据"));
+    tab_w->addTab(model_tags, tr("模型标签数据"));
+    tab_w->addTab(model_type, tr("模型类型数据"));
+
+    ly_total->addWidget(tab_w);
+
+    auto indexWidget = new QWidget(center_widget);
+
+    auto ly_index = new QHBoxLayout(indexWidget);
+
+    auto infotable = new InfoTableWidget(index_editor_cont->getIndexInfo(), 1, true, true, center_widget);
+
+    auto bt_sync = new QPushButton(tr("→\n→\n→\n同\n步\n修\n改\n到\n原\n始\n数\n据\n→\n→\n→\n"),center_widget);
+    {
+        bt_sync->setMaximumWidth(bt_sync->fontMetrics().averageCharWidth() * 4);
+        auto plc_bt_sync = bt_sync->sizePolicy();
+        plc_bt_sync.setVerticalPolicy(QSizePolicy::Expanding);
+        bt_sync->setSizePolicy(plc_bt_sync);
+    }
+    ly_index->addWidget(infotable, 1);
+    ly_index->addWidget(bt_sync,   0);
+
+    connect(bt_sync, &QPushButton::clicked, this, [=]() {
+        if (model_cont == tab_w->currentWidget()) {
+            index_editor_cont->syncToOrg();
+        } else if (model_tags == tab_w->currentWidget()) {
+            index_editor_tags->syncToOrg();
+        } else if (model_type == tab_w->currentWidget()) {
+            index_editor_type->syncToOrg();
+        }
+    });
+
+    connect(tab_w, &QTabWidget::currentChanged, this, [=](int index) {
+        if (model_cont == tab_w->widget(index)) {
+            infotable->resetInfo(index_editor_cont->getIndexInfo());
+        } else if (model_tags == tab_w->widget(index)) {
+            infotable->resetInfo(index_editor_tags->getIndexInfo());
+        } else if (model_type == tab_w->widget(index)) {
+            infotable->resetInfo(index_editor_type->getIndexInfo());
+        }
+    });
+
+    {
+        auto docker_index = new QDockWidget(tr("索引编辑"), center_widget);
+        docker_index->setWidget(indexWidget);
+        docker_index->setObjectName("docker_index");
+        docker_index->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+        docker_index->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+        addDockWidget(Qt::LeftDockWidgetArea, docker_index);
+    }
 
     {
         auto cate_sel = new CategorySelector(center_widget);
@@ -128,6 +124,50 @@ void IndexWindow::initModelWidget()
         addDockWidget(Qt::RightDockWidgetArea, docker_logging);
     }
 
+}
+
+QWidget *IndexWindow::initModelWidget(IndexEditor *editor)
+{
+    auto modelWidget = new QWidget(centralWidget());
+
+    auto ly_total = new QGridLayout(modelWidget);
+
+    auto bt_pull = new QPushButton(tr("↓↓↓拉取数据↓↓↓"), modelWidget);
+
+    auto bt_push = new QPushButton(tr("↑↑↑拉取数据↑↑↑"), modelWidget);
+
+    auto ly_pp = new QHBoxLayout();
+    ly_pp->addWidget(bt_pull);
+    ly_pp->addWidget(bt_push);
+
+    auto bt_compress = new QPushButton(tr("←\n←\n←\n压\n缩\n为\n索\n引\n←\n←\n←\n"), modelWidget);
+    {
+        bt_compress->setMaximumWidth(bt_compress->fontMetrics().averageCharWidth() * 4);
+        auto plc_bt_sync = bt_compress->sizePolicy();
+        plc_bt_sync.setVerticalPolicy(QSizePolicy::Expanding);
+        bt_compress->setSizePolicy(plc_bt_sync);
+    }
+
+    auto preview_w = new PreviewWidget(editor->getOriginInfo(), 1, 3, PreviewWidget::PreviewType::MODEL, Qt::Vertical, true, true, modelWidget);
+
+    ly_total->addLayout(ly_pp,       0, 1);
+    ly_total->addWidget(bt_compress, 1, 0);
+    ly_total->addWidget(preview_w,   1, 1);
+
+    connect(bt_pull, &QPushButton::clicked, this, [=]() {
+        editor->pull_org();
+    });
+    connect(bt_push, &QPushButton::clicked, this, [=]() {
+        editor->push_org();
+    });
+    connect(bt_compress, &QPushButton::clicked, this, [=]() {
+        editor->compressToIndex();
+    });
+    connect(preview_w, &PreviewWidget::onPreview, this, [=](const std::vector<int> &index) {
+        //
+    });
+
+    return modelWidget;
 }
 
 void IndexWindow::closeEvent(QCloseEvent *event)

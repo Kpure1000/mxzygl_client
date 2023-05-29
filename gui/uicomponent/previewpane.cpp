@@ -120,7 +120,25 @@ void PreviewPane::doPreviewModel(const QString &filePath, const QString& preview
 void PreviewPane::doPreviewBVH(const QString &filePath, const QString &previewInfo, bool cache)
 {
     doShowPreparing(previewInfo);
-    // TODO load BVH file
+    if (cache) {
+        BVHLoader::getInstance()->cachedAsyncLoad(filePath, [filePath, previewInfo, this](bool is_loaded) {
+            if (is_loaded) {
+                emit onPreviewPrepared(previewInfo);
+                emit onBVHCached(filePath);
+            } else {
+                emit onPreviewFailed(previewInfo);
+            }
+        });
+    } else {
+        BVHLoader::getInstance()->tempAsyncLoad(filePath, [filePath, previewInfo, this](std::shared_ptr<res::BVH> bvh) {
+            if (nullptr != bvh) {
+                emit onPreviewPrepared(previewInfo);
+                emit onBVHLoaded(bvh);
+            } else {
+                emit onPreviewFailed(previewInfo);
+            }
+        });
+    }
 }
 
 void PreviewPane::doClear()

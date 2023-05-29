@@ -81,7 +81,8 @@ Renderer::~Renderer()
 void Renderer::initialize()
 {
     m_is_initialized = true;
-    m_phongShader   = new PhongShader("Phong", this);
+    m_staticShader   = new StaticModelLightShader("Static", this);
+    m_animationShader = new AnimationModelLightShader("Animation", this);
     m_skyShader     = new SkyShader("Skybox", this);
     m_skyData = std::make_shared<SkyData>(m_renderConfig.skyColor, m_renderConfig.groundColor);
 }
@@ -128,6 +129,8 @@ void Renderer::push_input(const InputData &input)
 void Renderer::logic_tick(float dt)
 {
     if (m_meshesData) {
+        // 绘制数据处理
+        m_meshesData->tick(dt);
         // 缩放处理
         auto zoom = m_input.scrolly;
         auto scale = &trans_model.scale;
@@ -161,7 +164,14 @@ void Renderer::render_tick(QOpenGLContext *context)
     RenderAPI::getInstance()->drawTriangle(context, m_skyData->triangleData->triangle_nums);
 
     RenderAPI::getInstance()->clearDepth(context);
-    auto shPhong = m_phongShader->sprog;
+
+    std::shared_ptr<QOpenGLShaderProgram> shPhong = nullptr;
+    if (m_meshesData->triangleDatas.size() > 0 && m_meshesData->boneData == nullptr) {
+        // 渲染模型
+        shPhong = m_staticShader->sprog;
+    } else {
+        shPhong = m_animationShader->sprog;
+    }
     shPhong->bind();
     // 模型变换
     auto modelMat = trans_model.get_trans_mat();
@@ -203,10 +213,16 @@ void Renderer::render_tick(QOpenGLContext *context)
     shPhong->setUniformValue("_light_3._constant",  1.0f);
     shPhong->setUniformValue("_light_3._linear",    0.22f);
     shPhong->setUniformValue("_light_3._quadratic", 0.2f);
-
-    for (auto tri_data : m_meshesData->triangleDatas) {
-        tri_data->bind(shPhong.get());
-        RenderAPI::getInstance()->drawTriangle(context, tri_data->triangle_nums);
+    if (m_meshesData->triangleDatas.size() > 0 && m_meshesData->boneData == nullptr) {
+        // 绘制静态模型
+        for (auto tri_data : m_meshesData->triangleDatas) {
+            tri_data->bind(shPhong.get());
+            RenderAPI::getInstance()->drawTriangle(context, tri_data->triangle_nums);
+        }
+    } else {
+        // 绘制动画
+        m_meshesData->boneData->bind(shPhong.get());
+        RenderAPI::getInstance()->drawTriangle(context, m_meshesData->boneData->triangle_nums);
     }
 }
 

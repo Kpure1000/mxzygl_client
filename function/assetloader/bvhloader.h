@@ -1,18 +1,26 @@
 #ifndef MX_BVHLOADER_H
 #define MX_BVHLOADER_H
 
-#include <QObject>
+#include <memory>
+#include <functional>
 
-#include "resource/bvh.h"
+#include "assetcache.h"
 
-class BVHLoader : public QObject
+namespace res {
+struct BVH;
+}
+
+class BVHLoader : public AssetCache
 {
     Q_OBJECT
 public:
     explicit BVHLoader(QObject *parent = nullptr);
 
-    std::shared_ptr<res::BVH> loadBVH(const QString& filePath, const QString& bvhName) const;
-    
+    static std::shared_ptr<res::BVH> loadBVH(const QString& filePath);
+
+    void cachedAsyncLoad(const QString &filePath, std::function<void(bool)> loadCallBack);
+    void tempAsyncLoad(const QString &filePath, std::function<void(std::shared_ptr<res::BVH>)> loadCallBack);
+
 public:
 
     static BVHLoader* getInstance(QObject *parent = nullptr)
