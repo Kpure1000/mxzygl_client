@@ -179,7 +179,7 @@ void RenderWidget::mousePressEvent(QMouseEvent *event)
             input.mouseButton = InputData::MouseButton::RIGHT;
             input.pos = event->pos();
             m_renderer->push_input(input);
-        } else if (event->button() == Qt::MouseButton::MidButton) {
+        } else if (event->button() == Qt::MouseButton::MiddleButton) {
             InputData input{InputData::InputType::MOUSE};
             input.mouse.press = true;
             input.mouseButton = InputData::MouseButton::MIDDLE;
@@ -205,7 +205,7 @@ void RenderWidget::mouseReleaseEvent(QMouseEvent *event)
             input.mouseButton = InputData::MouseButton::RIGHT;
             input.pos = event->pos();
             m_renderer->push_input(input);
-        } else if (event->button() == Qt::MouseButton::MidButton) {
+        } else if (event->button() == Qt::MouseButton::MiddleButton) {
             InputData input{InputData::InputType::MOUSE};
             input.mouse.release = true;
             input.mouseButton = InputData::MouseButton::MIDDLE;
@@ -228,7 +228,7 @@ void RenderWidget::mouseMoveEvent(QMouseEvent *event)
             input.mouse.move = true;
             input.mouseButtons |= InputData::MouseButton::RIGHT;
         }
-        if (event->buttons() & Qt::MouseButton::MidButton) {
+        if (event->buttons() & Qt::MouseButton::MiddleButton) {
             input.mouse.move = true;
             input.mouseButtons |= InputData::MouseButton::MIDDLE;
         }

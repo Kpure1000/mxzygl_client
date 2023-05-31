@@ -62,3 +62,15 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/3rd_part/as
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/3rd_part/assimp/lib/Windows/assimp.lib
 #else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/3rd_part/assimp/lib/Windows/assimpd.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/3rd_part/assimp/lib/Windows/assimp.lib
+
+
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.6
+
+macx: LIBS += -L$$PWD/3rd_part/assimp/lib/MacOS/ -lassimp \
+              -L$$PWD/3rd_part/assimp/lib/MacOS/zlib/ -lzlibstatic
+
+INCLUDEPATH += $$PWD/3rd_part/assimp/include
+DEPENDPATH += $$PWD/3rd_part/assimp/include
+
+macx: PRE_TARGETDEPS += $$PWD/3rd_part/assimp/lib/MacOS/libassimp.a \
+                        $$PWD/3rd_part/assimp/lib/MacOS/zlib/libzlibstatic.a
