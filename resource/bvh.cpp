@@ -8,25 +8,36 @@ res::BoneMesh::BoneMesh(size_t nBones)
     size_t nIndi = 6 * 3;
     vertices.reserve(nBones * nVert);
     normals.reserve(nBones * nVert);
-    trans_r0.reserve(nBones * nVert);
-    trans_r1.reserve(nBones * nVert);
-    trans_r2.reserve(nBones * nVert);
-    trans_r3.reserve(nBones * nVert);
-    trans_nor_r0.reserve(nBones * nVert);
-    trans_nor_r1.reserve(nBones * nVert);
-    trans_nor_r2.reserve(nBones * nVert);
-//    trans.reserve(nBones * nVert);
-//    trans_nor.reserve(nBones * nVert);
+
+    for (size_t i = 0; i < 4; i++) {
+        trans[i].reserve(nBones * nVert);
+    }
+    for (size_t i = 0; i < 3; i++) {
+        trans_nor[i].reserve(nBones * nVert);
+    }
     indices.reserve(nBones * nIndi);
 }
 
-res::BoneMesh::BoneMesh(const QMatrix4x4 &trans_mat, const QMatrix3x3 &trans_nor)
+res::BoneMesh::BoneMesh(const QMatrix4x4 &trans_source, const QMatrix4x4 &trans_target)
 {
-    float width = 0.5f; // half width
+    float width = 0.2f; // half width
     float height = 2.0f;
     float inv_magnitude = 1.0f / std::sqrt(width * width + height * height);
     float nor_w = width * inv_magnitude;
     float nor_h = height * inv_magnitude;
+
+    auto pos_source = trans_source * QVector3D{.0f,.0f,.0f};
+    auto pos_target = trans_target * QVector3D{.0f,.0f,.0f};
+    auto direction = pos_target - pos_source;
+    auto position = pos_source;
+    auto rotation = QQuaternion::rotationTo({.0f, 1.f, .0f}, direction);
+    auto scale = direction.length() / height;
+    QMatrix4x4 trans_mat;
+    trans_mat.translate(position);
+    trans_mat.rotate(rotation);
+    trans_mat.scale(scale);
+    auto trans_mat_nor = trans_mat.normalMatrix();
+
     //cone
     vertices = {
         { width,  0.0f  ,  width}, // 0
@@ -80,15 +91,15 @@ res::BoneMesh::BoneMesh(const QMatrix4x4 &trans_mat, const QMatrix3x3 &trans_nor
         10, 11, 12,
         13, 14, 15,
     };
-//    trans.resize(vertices.size(), trans_mat);
-//    this->trans_nor.resize(vertices.size(), trans_nor);
-    trans_r0.resize(vertices.size(), trans_mat.row(0));
-    trans_r1.resize(vertices.size(), trans_mat.row(1));
-    trans_r2.resize(vertices.size(), trans_mat.row(2));
-    trans_r3.resize(vertices.size(), trans_mat.row(3));
-    trans_nor_r0.resize(vertices.size(), {trans_nor.data()[0], trans_nor.data()[1], trans_nor.data()[2]});
-    trans_nor_r1.resize(vertices.size(), {trans_nor.data()[3], trans_nor.data()[4], trans_nor.data()[5]});
-    trans_nor_r2.resize(vertices.size(), {trans_nor.data()[6], trans_nor.data()[7], trans_nor.data()[8]});
+
+    for (size_t i = 0; i < 4; i++) {
+        trans[i].resize(vertices.size(), trans_mat.column(i));
+    }
+
+    for (size_t i = 0; i < 3; i++) {
+        trans_nor[i].resize(vertices.size(), {trans_mat_nor.data()[0 + i], trans_mat_nor.data()[3 + i], trans_mat_nor.data()[6 + i]});
+    }
+
 }
 
 void res::BoneMesh::operator<<(const BoneMesh &boneMesh)
@@ -100,15 +111,12 @@ void res::BoneMesh::operator<<(const BoneMesh &boneMesh)
     for (size_t i = 0; i < boneMesh.vertices.size(); i++) {
         vertices.emplace_back(boneMesh.vertices[i]);
         normals.emplace_back(boneMesh.normals[i]);
-        trans_r0.emplace_back(boneMesh.trans_r0[i]);
-        trans_r1.emplace_back(boneMesh.trans_r1[i]);
-        trans_r2.emplace_back(boneMesh.trans_r2[i]);
-        trans_r3.emplace_back(boneMesh.trans_r3[i]);
-        trans_nor_r0.emplace_back(boneMesh.trans_nor_r0[i]);
-        trans_nor_r1.emplace_back(boneMesh.trans_nor_r1[i]);
-        trans_nor_r2.emplace_back(boneMesh.trans_nor_r2[i]);
-//        trans.emplace_back(boneMesh.trans[i]);
-//        trans_nor.emplace_back(boneMesh.trans_nor[i]);
+        for (size_t col = 0; col < 4; col++) {
+            trans[col].emplace_back(boneMesh.trans[col][i]);
+        }
+        for (size_t col = 0; col < 3; col++) {
+            trans_nor[col].emplace_back(boneMesh.trans_nor[col][i]);
+        }
     }
 }
 

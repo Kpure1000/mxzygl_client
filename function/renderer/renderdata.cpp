@@ -72,7 +72,7 @@ BoneData::BoneData(std::shared_ptr<res::BVH> bvh)
     }
     vbo_v->bind();
     vbo_v->setUsagePattern(QOpenGLBuffer::UsagePattern::DynamicDraw);
-    vbo_v->allocate(vertices_nums * sizeof(QVector3D));
+    vbo_v->allocate(vertices_nums * sizeof(float) * 3);
 
     vbo_n = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::Type::VertexBuffer);
     if (!vbo_n->create()) {
@@ -80,7 +80,7 @@ BoneData::BoneData(std::shared_ptr<res::BVH> bvh)
     }
     vbo_n->bind();
     vbo_n->setUsagePattern(QOpenGLBuffer::UsagePattern::DynamicDraw);
-    vbo_n->allocate(vertices_nums * sizeof(QVector3D));
+    vbo_n->allocate(vertices_nums * sizeof(float) * 3);
 
     vbo_t = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::Type::VertexBuffer);
     if (!vbo_t->create()) {
@@ -88,7 +88,7 @@ BoneData::BoneData(std::shared_ptr<res::BVH> bvh)
     }
     vbo_t->bind();
     vbo_t->setUsagePattern(QOpenGLBuffer::UsagePattern::DynamicDraw);
-    vbo_t->allocate(vertices_nums * sizeof(QMatrix4x4));
+    vbo_t->allocate(vertices_nums * sizeof(float) * 16);
 
     vbo_tn = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::Type::VertexBuffer);
     if (!vbo_tn->create()) {
@@ -96,7 +96,7 @@ BoneData::BoneData(std::shared_ptr<res::BVH> bvh)
     }
     vbo_tn->bind();
     vbo_tn->setUsagePattern(QOpenGLBuffer::UsagePattern::DynamicDraw);
-    vbo_tn->allocate(vertices_nums * sizeof(QMatrix3x3));
+    vbo_tn->allocate(vertices_nums * sizeof(float) * 9);
 
     ibo = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::Type::IndexBuffer);
     if (!ibo->create()) {
@@ -118,17 +118,17 @@ void BoneData::resetBuffer(std::shared_ptr<res::BoneMesh> boneMesh)
     vbo_n->write(0, boneMesh->normals.data(), boneMesh->normals.size() * sizeof(QVector3D));
 
     vbo_t->bind();
-    auto trans_size = boneMesh->trans_r0.size() * sizeof(QVector4D);
-    vbo_t->write(0             , boneMesh->trans_r0.data(), trans_size);
-    vbo_t->write(trans_size    , boneMesh->trans_r1.data(), trans_size);
-    vbo_t->write(trans_size * 2, boneMesh->trans_r2.data(), trans_size);
-    vbo_t->write(trans_size * 3, boneMesh->trans_r3.data(), trans_size);
+    auto trans_size = vertices_nums * sizeof(float) * 4;
+    vbo_t->write(0             , boneMesh->trans[0].data(), trans_size);
+    vbo_t->write(trans_size    , boneMesh->trans[1].data(), trans_size);
+    vbo_t->write(trans_size * 2, boneMesh->trans[2].data(), trans_size);
+    vbo_t->write(trans_size * 3, boneMesh->trans[3].data(), trans_size);
 
     vbo_tn->bind();
-    auto trans_nor_size = boneMesh->trans_nor_r0.size() * sizeof(QVector3D);
-    vbo_tn->write(0                 , boneMesh->trans_nor_r0.data(), trans_nor_size);
-    vbo_tn->write(trans_nor_size    , boneMesh->trans_nor_r1.data(), trans_nor_size);
-    vbo_tn->write(trans_nor_size * 2, boneMesh->trans_nor_r2.data(), trans_nor_size);
+    auto trans_nor_size = vertices_nums * sizeof(float) * 3;
+    vbo_tn->write(0                 , boneMesh->trans_nor[0].data(), trans_nor_size);
+    vbo_tn->write(trans_nor_size    , boneMesh->trans_nor[1].data(), trans_nor_size);
+    vbo_tn->write(trans_nor_size * 2, boneMesh->trans_nor[2].data(), trans_nor_size);
 
     ibo->bind();
     ibo->write(0, boneMesh->indices.data(), boneMesh->indices.size() * sizeof(unsigned int));
@@ -195,14 +195,14 @@ RenderData::RenderData(std::shared_ptr<res::Model> model, int sw, int sh)
 }
 
 RenderData::RenderData(std::shared_ptr<res::BVH> bvh, int sw, int sh)
-    : camera(std::make_shared<PerspectiveCamera>(static_cast<float>(sw) / sh, .1f, 100.f, 60.f)), boneData(std::make_shared<BoneData>(bvh))
+    : boneData(std::make_shared<BoneData>(bvh)), camera(std::make_shared<PerspectiveCamera>(static_cast<float>(sw) / sh, .1f, 100.f, 60.f))
 {
 }
 
 void RenderData::tick(float dt)
 {
     if (boneData && triangleDatas.size() == 0) { // render bvh
-        qDebug("ctime=%f , cframe=%d", boneData->current_time, boneData->current_frame);
+//        qDebug("ctime=%f , cframe=%d", boneData->current_time, boneData->current_frame);
         boneData->current_time += dt;
         if (boneData->current_time >= 1000.0f / boneData->bvh->ssp) {
             boneData->current_time = 0;

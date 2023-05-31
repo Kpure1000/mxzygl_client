@@ -14,19 +14,19 @@ namespace res
 
 struct Bone
 {
+    std::vector<Bone *> children;
     std::vector<QMatrix4x4> trans_mats;
 };
 
 struct BoneMesh {
     std::vector<QVector3D> vertices, normals;
-    std::vector<QVector4D> trans_r0,trans_r1,trans_r2,trans_r3;
-    std::vector<QVector3D> trans_nor_r0,trans_nor_r1,trans_nor_r2;
-//    std::vector<QMatrix4x4> trans;
-//    std::vector<QMatrix3x3> trans_nor;
+    std::vector<QVector4D> trans[4];
+    std::vector<QVector3D> trans_nor[3];
     std::vector<unsigned int> indices;
     BoneMesh(size_t nBones);
-    BoneMesh(const QMatrix4x4 &trans_mat, const QMatrix3x3 &trans_nor);
-    void operator<<(const BoneMesh& boneMesh);
+    BoneMesh(const QMatrix4x4 &trans_source, const QMatrix4x4 &trans_target);
+    ~BoneMesh() {}
+    void operator<<(const BoneMesh &boneMesh);
 };
 
 struct BVH

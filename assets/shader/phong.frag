@@ -49,7 +49,7 @@ vec3 shading(in PointLight light)
     vec3 ambient = _material.albedo * light.ambient;
 
     float distance = length(light.position - fragPos);
-    float attenuation = 1.0 / (light._constant + light._linear * distance + light._quadratic * (distance * distance));
+    float attenuation = 0.33;// / (light._constant + light._linear * distance + light._quadratic * (distance * distance));
 
     return (ambient + diffuse + specular) * light.intensity * attenuation;
 }

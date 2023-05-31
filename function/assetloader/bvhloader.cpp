@@ -35,6 +35,14 @@ void readNode(aiNode *node, const std::function<void(aiNode *)> &processor)
     }
 }
 
+void readBone(res::Bone *bone, const std::function<void(res::Bone *)> &proc)
+{
+    proc(bone);
+    for (auto child : bone->children) {
+        readBone(child, proc);
+    }
+}
+
 aiBone* findChildBone(aiBone *bone, std::unordered_map<std::string, aiNode *> &node_map, std::unordered_map<std::string, aiBone *> &bone_map)
 {
     if (node_map.find(bone->mName.C_Str()) != node_map.end()) {
@@ -98,12 +106,16 @@ std::shared_ptr<res::BVH> BVHLoader::loadBVH(const QString &filePath)
     bvh->ssp = animation->mTicksPerSecond;
     bvh->nFrames = nFrames;
 
-    readNode(scene->mRootNode, [=, &joint_map, &bone_map](aiNode *node) {
+    res::Bone *rootBone = nullptr;
+
+    readNode(scene->mRootNode, [=, &rootBone, &joint_map, &bone_map](aiNode *node) {
         // If the node is marked as necessary, copy it into the skeleton and check its children.
         // If the node is marked as not necessary, skip it and do not iterate over its children.
         if (joint_map.find(node->mName.C_Str()) != joint_map.end()) {
             auto cur_joint = joint_map[node->mName.C_Str()];
             auto bone = std::make_shared<res::Bone>();
+            if (!rootBone)
+                rootBone = bone.get();
             bone_map.insert({node->mName.C_Str(), bone});
 
             aiNode *parent = node->mParent;
@@ -115,32 +127,35 @@ std::shared_ptr<res::BVH> BVHLoader::loadBVH(const QString &filePath)
                 parent = parent->mParent;
             }
             std::shared_ptr<res::Bone> bone_parent = parent ? bone_map[parent->mName.C_Str()] : nullptr;
+            if (bone_parent)
+                bone_parent->children.emplace_back(bone.get());
 
             for (unsigned int k = 0; k < nFrames; k++) {
-                unsigned int pk = std::min(k, cur_joint->mNumPositionKeys);
+                unsigned int pk = std::min(k, cur_joint->mNumPositionKeys - 1);
                 QVector3D position {cur_joint->mPositionKeys[pk].mValue.x, cur_joint->mPositionKeys[pk].mValue.y, cur_joint->mPositionKeys[pk].mValue.z};
-                unsigned int rk = std::min(k, cur_joint->mNumRotationKeys);
-                QVector3D rotation {cur_joint->mRotationKeys[rk].mValue.x, cur_joint->mRotationKeys[rk].mValue.y, cur_joint->mRotationKeys[rk].mValue.z};
-                unsigned int sk = std::min(k, cur_joint->mNumScalingKeys);
+                unsigned int rk = std::min(k, cur_joint->mNumRotationKeys - 1);
+                QQuaternion rotation {cur_joint->mRotationKeys[rk].mValue.w, cur_joint->mRotationKeys[rk].mValue.x, cur_joint->mRotationKeys[rk].mValue.y,cur_joint->mRotationKeys[rk].mValue.z};
+                unsigned int sk = std::min(k, cur_joint->mNumScalingKeys - 1);
                 QVector3D scale    {cur_joint->mScalingKeys[sk].mValue.x,  cur_joint->mScalingKeys[sk].mValue.y,  cur_joint->mScalingKeys[sk].mValue.z};
 
                 QMatrix4x4 trans;
                 trans.translate(position);
-                trans.rotate(QQuaternion::fromEulerAngles(rotation));
+                trans.rotate(rotation);
                 trans.scale(scale);
                 if (nullptr != bone_parent)
                     trans = bone_parent->trans_mats[k] * trans;
                 bone->trans_mats.emplace_back(trans);
             }
-            qDebug() << node->mName.C_Str() << ": " << bone->trans_mats[0];
         }
     });
 
     for (size_t k = 0; k < nFrames; k++) {
         auto boneMesh = std::make_shared<res::BoneMesh>(bone_map.size());
-        for (auto &bone : bone_map) {
-            (*boneMesh) << res::BoneMesh(bone.second->trans_mats[k], bone.second->trans_mats[k].normalMatrix());
-        }
+        readBone(rootBone, [=](res::Bone *bone) {
+            for (auto child : bone->children) {
+                (*boneMesh) << res::BoneMesh(bone->trans_mats[k], child->trans_mats[k]);
+            }
+        });
         bvh->boneMeshes.emplace_back(boneMesh);
     }
 
