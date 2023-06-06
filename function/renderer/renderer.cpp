@@ -80,6 +80,8 @@ Renderer::~Renderer()
 
 void Renderer::initialize()
 {
+    RenderAPI::getInstance()->init();
+
     m_is_initialized = true;
     m_staticShader   = new StaticModelLightShader("Static", this);
     m_animationShader = new AnimationModelLightShader("Animation", this);

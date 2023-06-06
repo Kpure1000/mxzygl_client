@@ -6,9 +6,13 @@
 #include "resource/bvh.h"
 #include "shadermanager.h"
 #include "camera.h"
+#include "renderapi.h"
 
 TriangleData::TriangleData(std::shared_ptr<res::Mesh> mesh)
 {
+    auto &f = RenderAPI::getInstance()->f_330C;
+    f.glGenVertexArrays(1, &vao);
+
     triangle_nums = mesh->facesNum();
     vertices_nums = mesh->verticesNum();
 
@@ -39,6 +43,9 @@ TriangleData::TriangleData(std::shared_ptr<res::Mesh> mesh)
 
 void TriangleData::bind(QOpenGLShaderProgram *sprog)
 {
+    auto &f = RenderAPI::getInstance()->f_330C;
+    f.glBindVertexArray(vao);
+
     vbo_v->bind();
     sprog->enableAttributeArray(0);
     sprog->setAttributeBuffer(0, GL_FLOAT, 0, 3, 0);
@@ -64,6 +71,10 @@ BoneData::BoneData(std::shared_ptr<res::BVH> bvh)
         qDebug("BoneData::BoneData>> BVH is empty");
         return;
     }
+
+    auto &f = RenderAPI::getInstance()->f_330C;
+    f.glGenVertexArrays(1, &vao);
+
     triangle_nums = bvh->boneMeshes[0]->indices.size() / 3;
     vertices_nums = bvh->boneMeshes[0]->vertices.size();
     vbo_v = std::make_shared<QOpenGLBuffer>(QOpenGLBuffer::Type::VertexBuffer);
@@ -136,6 +147,9 @@ void BoneData::resetBuffer(std::shared_ptr<res::BoneMesh> boneMesh)
 
 void BoneData::bind(QOpenGLShaderProgram *sprog)
 {
+    auto &f = RenderAPI::getInstance()->f_330C;
+    f.glBindVertexArray(vao);
+
     vbo_v->bind();
     sprog->enableAttributeArray(0);
     sprog->setAttributeBuffer(0, GL_FLOAT, 0, 3, 0);

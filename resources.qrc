@@ -6,5 +6,6 @@
         <file>assets/shader/skybox.vert</file>
         <file>assets/shader/skybox.frag</file>
         <file>assets/shader/animation.vert</file>
+        <file>assets/css/app.css</file>
     </qresource>
 </RCC>

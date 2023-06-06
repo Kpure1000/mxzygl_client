@@ -19,6 +19,11 @@ RenderAPI::RenderAPI(QObject *parent) : QObject(parent)
     doRendererConfigModified();
 }
 
+void RenderAPI::init()
+{
+    f_330C.initializeOpenGLFunctions();
+}
+
 void RenderAPI::resize(QOpenGLContext *context, int w, int h)
 {
     QOpenGLFunctions f(context);

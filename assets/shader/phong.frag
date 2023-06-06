@@ -1,5 +1,8 @@
-varying vec3 fragPos;
-varying vec3 fragNor;
+#version 330 core
+
+in vec3 fragPos;
+in vec3 fragNor;
+out vec4 fragCol;
 
 struct Material
 {
@@ -58,5 +61,5 @@ void main()
 {
     vec3 color = shading(_light_1) + shading(_light_2) + shading(_light_3);
     color = min(vec3(1.0), color);
-    gl_FragColor = vec4(color, 1.0);
+    fragCol = vec4(color, 1.0);
 }

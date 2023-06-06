@@ -1,6 +1,9 @@
-attribute vec3 aPos;
+#version 330 core
 
-varying vec3 fragPos;
+layout (location = 0) in vec3 aPos;
+
+//varying vec3 fragPos;
+out vec3 fragPos;
 
 void main()
 {

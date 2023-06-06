@@ -23,6 +23,7 @@ struct Effect;
 
 struct TriangleData {
     std::shared_ptr<QOpenGLBuffer> vbo_v = nullptr, vbo_n = nullptr, ibo = nullptr;
+    unsigned int vao;
 
     int triangle_nums, vertices_nums;
 
@@ -35,6 +36,8 @@ struct TriangleData {
 
 struct BoneData {
     std::shared_ptr<QOpenGLBuffer> vbo_v = nullptr, vbo_n = nullptr, vbo_t = nullptr, vbo_tn = nullptr, ibo = nullptr;
+    unsigned int vao;
+
     std::shared_ptr<res::BVH> bvh;
 
     int current_frame = 0;

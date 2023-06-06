@@ -11,6 +11,12 @@
 
 int main(int argc, char *argv[])
 {
+    auto format = QSurfaceFormat::defaultFormat();
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setVersion(3, 3);
+    QSurfaceFormat::setDefaultFormat(format);
+
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication a(argc, argv);
 
@@ -18,7 +24,7 @@ int main(int argc, char *argv[])
     RenderAPI::getInstance();
     JobSystem::getInstance(std::max(get_core_numbers() - 2, 2u));
 
-    auto css = QssLoader::getInstance()->loadStyleSheet("assets/css/app.css");
+    auto css = QssLoader::getInstance()->loadStyleSheet(":/assets/assets/css/app.css");
     a.setStyleSheet(css);
 
     auto homeWin = std::make_shared<HomeWindow>(nullptr, &a);

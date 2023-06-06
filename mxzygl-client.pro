@@ -48,11 +48,6 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/3rd_part/assimp/lib/Win
 INCLUDEPATH += $$PWD/3rd_part/assimp/include
 DEPENDPATH += $$PWD/3rd_part/assimp/include
 
-css.files += $$PWD/assets/css/app.css
-css.path  += $$DESTDIR/assets/css/
-
-COPIES += css
-
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/3rd_part/assimp/lib/Windows/libassimp.a \
                                                             $$PWD/3rd_part/assimp/lib/Windows/zlib/libzlibstatic.a
 #else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/3rd_part/assimp/lib/Windows/libassimpd.a \

@@ -60,6 +60,7 @@ QTableWidget {
     color:black;
 }
 QHeaderView {
+    background-color:white;
     color:black;
 }
 

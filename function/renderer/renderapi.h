@@ -4,12 +4,15 @@
 #include <QObject>
 #include <QVector3D>
 #include <QOpenGLContext>
+#include <QOpenGLFunctions_3_3_Core>
 
 class RenderAPI : public QObject
 {
     Q_OBJECT
 public:
     explicit RenderAPI(QObject *parent = nullptr);
+
+    void init();
 
     void resize(QOpenGLContext *context, int w, int h);
 
@@ -27,6 +30,8 @@ public:
         static RenderAPI instance(parent);
         return &instance;
     }
+
+    QOpenGLFunctions_3_3_Core f_330C;
 
 private:
     QVector3D m_clearColor;
