@@ -60,7 +60,7 @@ aiBone* findChildBone(aiBone *bone, std::unordered_map<std::string, aiNode *> &n
 std::shared_ptr<res::BVH> BVHLoader::loadBVH(const QString &filePath)
 {
     Assimp::Importer importer;
-    auto importFlag = aiProcessPreset_TargetRealtime_Fast | aiProcess_PopulateArmatureData;
+    auto importFlag = aiProcessPreset_TargetRealtime_Fast;
 
     auto scene = importer.ReadFile(filePath.toStdString(), importFlag);
 
@@ -108,7 +108,10 @@ std::shared_ptr<res::BVH> BVHLoader::loadBVH(const QString &filePath)
 
     res::Bone *rootBone = nullptr;
 
-    readNode(scene->mRootNode, [=, &rootBone, &joint_map, &bone_map](aiNode *node) {
+    QVector3D pmin{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+    QVector3D pmax{std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min()};
+
+    readNode(scene->mRootNode, [=, &pmin, &pmax, &rootBone, &joint_map, &bone_map](aiNode *node) {
         // If the node is marked as necessary, copy it into the skeleton and check its children.
         // If the node is marked as not necessary, skip it and do not iterate over its children.
         if (joint_map.find(node->mName.C_Str()) != joint_map.end()) {
@@ -145,15 +148,31 @@ std::shared_ptr<res::BVH> BVHLoader::loadBVH(const QString &filePath)
                 if (nullptr != bone_parent)
                     trans = bone_parent->trans_mats[k] * trans;
                 bone->trans_mats.emplace_back(trans);
+
+                QVector3D pos{trans.data()[12],trans.data()[13],trans.data()[14]};
+                pmin.setX(std::min(pos.x(), pmin.x()));
+                pmin.setY(std::min(pos.y(), pmin.y()));
+                pmin.setZ(std::min(pos.z(), pmin.z()));
+                pmax.setX(std::max(pos.x(), pmax.x()));
+                pmax.setY(std::max(pos.y(), pmax.y()));
+                pmax.setZ(std::max(pos.z(), pmax.z()));
+
             }
         }
     });
+
+    QVector3D centroid = (pmin + pmax) * 0.5f;
+    float inv_semi_diagonal = 1.f / ((pmax - pmin).length() * 0.5f);
+    QMatrix4x4 obj2org;
+    obj2org.scale({inv_semi_diagonal, inv_semi_diagonal, inv_semi_diagonal});
+    obj2org.translate(-centroid);
+    obj2org.rotate({.0f, .0f, .0f, .0f});
 
     for (size_t k = 0; k < nFrames; k++) {
         auto boneMesh = std::make_shared<res::BoneMesh>(bone_map.size());
         readBone(rootBone, [=](res::Bone *bone) {
             for (auto child : bone->children) {
-                (*boneMesh) << res::BoneMesh(bone->trans_mats[k], child->trans_mats[k]);
+                (*boneMesh) << res::BoneMesh(obj2org * bone->trans_mats[k], obj2org * child->trans_mats[k]);
             }
         });
         bvh->boneMeshes.emplace_back(boneMesh);
