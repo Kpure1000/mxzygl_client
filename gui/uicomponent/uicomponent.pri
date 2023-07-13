@@ -10,6 +10,8 @@ SOURCES += \
     $$PWD/previewpane.cpp \
     $$PWD/previewwidget.cpp \
     $$PWD/renderwidget.cpp \
+    $$PWD/versionpainter.cpp \
+    $$PWD/versionwidget.cpp \
     $$PWD/wizardwidget.cpp
 HEADERS += \
     $$PWD/categoryselector.h \
@@ -24,6 +26,8 @@ HEADERS += \
     $$PWD/previewwidget.h \
     $$PWD/renderwidget.h \
     $$PWD/uicomponent.h \
+    $$PWD/versionpainter.h \
+    $$PWD/versionwidget.h \
     $$PWD/wizardwidget.h
 
 FORMS += \
@@ -34,4 +38,5 @@ FORMS += \
     $$PWD/optionwidget_asset.ui \
     $$PWD/optionwidget_render.ui \
     $$PWD/optionwidget_server.ui \
+    $$PWD/versionwidget.ui \
     $$PWD/wizardwidget.ui

@@ -134,7 +134,7 @@ QWidget *IndexWindow::initModelWidget(IndexEditor *editor)
 
     auto bt_pull = new QPushButton(tr("↓↓↓拉取数据↓↓↓"), modelWidget);
 
-    auto bt_push = new QPushButton(tr("↑↑↑拉取数据↑↑↑"), modelWidget);
+    auto bt_push = new QPushButton(tr("↑↑↑推送数据↑↑↑"), modelWidget);
 
     auto ly_pp = new QHBoxLayout();
     ly_pp->addWidget(bt_pull);

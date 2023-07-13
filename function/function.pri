@@ -6,7 +6,8 @@ HEADERS += \
     $$PWD/metacategory.h \
     $$PWD/modelsearch.h \
     $$PWD/tagsmanager.h \
-    $$PWD/typemanager.h
+    $$PWD/typemanager.h \
+    $$PWD/versioncontroller.h
 
 include(configer/configer.pri)
 include(renderer/renderer.pri)
@@ -21,4 +22,5 @@ SOURCES += \
     $$PWD/metacategory.cpp \
     $$PWD/modelsearch.cpp \
     $$PWD/tagsmanager.cpp \
-    $$PWD/typemanager.cpp
+    $$PWD/typemanager.cpp \
+    $$PWD/versioncontroller.cpp

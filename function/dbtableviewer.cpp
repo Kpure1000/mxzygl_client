@@ -59,5 +59,5 @@ void DBTableViewer::setInfoData(const QJsonObject &data)
     }
     (*m_info)["headers"] = headers;
     (*m_info)["data"] = data["data"];
-    qDebug() << (*m_info);
+//    qDebug() << (*m_info);
 }

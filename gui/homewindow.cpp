@@ -24,6 +24,7 @@
 #include "gui/typemanagerwindow.h"
 #include "gui/tagsmanagerwindow.h"
 #include "gui/dbtablewindow.h"
+#include "gui/versionwindow.h"
 
 HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow(parent)
 {
@@ -232,7 +233,13 @@ void HomeWindow::makeMenu()
         menu_version->addAction(tr("属性编辑"));
 
         // ----------------版本管理----------------
-        menu_version->addAction(tr("版本管理"));
+        menu_version->addAction(tr("版本管理"), this, [=]() {
+            auto winName = "版本管理";
+            auto fm = FunctionWnidowManager::getInstance();
+            if (!fm->show(winName, this->isMaximized(), true)) {
+                fm->create(winName, new VersionWindow(this));
+            }
+        });
         m_top_menubar->addMenu(menu_version);
     }
 

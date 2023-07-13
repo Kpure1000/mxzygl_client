@@ -54,6 +54,26 @@ public:
         REQUEST_SHOWTBMODEL     = 0x0000000E,   // 请求显示模型数据表
         RESPONSE_SHOWTBMODEL    = 0x1000000E,   // 显示模型数据表
 
+        REQUEST_INDEXPULL        = 0x0000000F,  // 请求拉取索引
+        RESPONSE_INDEXPULL       = 0x1000000F,  // 拉取索引
+        REQUEST_INDEXPUSH        = 0x00000010,  // 请求推送索引
+        RESPONSE_INDEXPUSH       = 0x10000010,  // 推送索引
+
+        REQUEST_VERSIONCREATE    = 0x00000011,  // 版本库创建
+        RESPONSE_VERSIONCREATE   = 0x10000011,
+        REQUEST_VERSIONPULL      = 0x00000012,  // 版本库拉取
+        RESPONSE_VERSIONPULL     = 0x10000012,
+        REQUEST_VERSIONADD       = 0x00000013,  // 版本增加
+        RESPONSE_VERSIONADD      = 0x10000013,
+        REQUEST_VERSIONSYNC      = 0x00000014,  // 版本同步
+        RESPONSE_VERSIONSYNC     = 0x10000014,
+        REQUEST_VERSIONQUERY     = 0x00000015,  // 版本查询
+        RESPONSE_VERSIONQUERY    = 0x10000015,
+        REQUEST_VERSIONDELETE    = 0x00000016,  // 版本删除
+        RESPONSE_VERSIONDELETE   = 0x10000016,
+        REQUEST_VERSIONROLLBACK  = 0x00000017,  // 版本回退
+        RESPONSE_VERSIONROLLBACK = 0x10000017,
+
     };
     Q_ENUM(HeaderField)
 

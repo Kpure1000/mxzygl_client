@@ -6,7 +6,8 @@ SOURCES += \
     $$PWD/indexwindow.cpp \
     $$PWD/optionwindow.cpp \
     $$PWD/tagsmanagerwindow.cpp \
-    $$PWD/typemanagerwindow.cpp
+    $$PWD/typemanagerwindow.cpp \
+    $$PWD/versionwindow.cpp
 HEADERS += \
     $$PWD/dbtablewindow.h \
     $$PWD/gui.h \
@@ -16,7 +17,8 @@ HEADERS += \
     $$PWD/indexwindow.h \
     $$PWD/optionwindow.h \
     $$PWD/tagsmanagerwindow.h \
-    $$PWD/typemanagerwindow.h
+    $$PWD/typemanagerwindow.h \
+    $$PWD/versionwindow.h
 
 include(uicomponent/uicomponent.pri)
 
