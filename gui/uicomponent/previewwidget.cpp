@@ -55,6 +55,7 @@ PreviewWidget::PreviewWidget(QJsonObject *info, int row, int column, PreviewType
 
 void PreviewWidget::refreshInfo()
 {
+    disconnect(m_infoTable, &InfoTableWidget::onGroupSelected, this, 0);
     connect(m_infoTable, &InfoTableWidget::onGroupSelected, this, &PreviewWidget::doPreviewPrepare);
     m_infoTable->refresh();
 }
@@ -79,7 +80,7 @@ void PreviewWidget::previewFiles(const QStringList &filePaths, const QStringList
             } else if (m_type == PreviewType::BVH) {
                 m_previewPanes[i]->doPreviewBVH(filePaths[i], assetNames[i], cache);
             } else if (m_type == PreviewType::EFFECT) {
-                // TODO: preview effect
+                m_previewPanes[i]->doPreviewEffect(filePaths[i], assetNames[i]);
             }
         }
     }
@@ -88,6 +89,11 @@ void PreviewWidget::previewFiles(const QStringList &filePaths, const QStringList
 std::vector<PreviewPane *> PreviewWidget::getPreviewPane() const
 {
     return m_previewPanes;
+}
+
+InfoTableWidget *PreviewWidget::getInfoTable() const
+{
+    return m_infoTable;
 }
 
 void PreviewWidget::doPreviewPrepare(const std::vector<int> &index)

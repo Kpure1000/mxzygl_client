@@ -23,6 +23,7 @@ private:
 
 signals:
     void onPreviewPrepared(const QString& assetName);
+    void onEffectPrepared(const QString& assetName);
     void onPreviewFailed(const QString& assetName);
     void onSelectedPane();
     void onModelCached(const QString& modelName);
@@ -34,10 +35,12 @@ signals:
 public slots:
     void doPreviewModel(const QString &filePath, const QString& previewInfo, bool cache);
     void doPreviewBVH(const QString &filePath, const QString& previewInfo, bool cache);
+    void doPreviewEffect(const QString &filePath, const QString& previewInfo);
     void doClear();
 
 private:
     void doShowRenderer(const QString& previewInfo);
+    void doShowEffect(const QString& previewInfo);
     void doShowPreparing(const QString& previewInfo);
     void doShowError(const QString& previewInfo);
     void doShowDefault();

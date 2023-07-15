@@ -34,6 +34,13 @@ public:
 
     std::vector<PreviewPane *> getPreviewPane() const;
 
+    InfoTableWidget *getInfoTable() const;
+
+    int getPreviewNum() const
+    {
+        return m_previewNum;
+    }
+
 signals:
     void onPreview(const std::vector<int> &index);
 

@@ -282,3 +282,35 @@ void Renderer::setCameraTransform(const Transform &trans)
     trans_camera = trans;
     m_fpsCamera->reset();
 }
+
+float Renderer::getBVHSampleFreq() const
+{
+    if (m_meshesData)
+        return m_meshesData->boneData ? m_meshesData->boneData->bvh->ssp : 1.0f;
+    else
+        return 1.0f;
+}
+
+void Renderer::setBVHSampleFreq(float spp)
+{
+    if (m_meshesData->boneData)
+    {
+        m_meshesData->boneData->bvh->ssp = spp;
+    }
+}
+
+int Renderer::getBVHFrames() const
+{
+    if (m_meshesData)
+        return m_meshesData->boneData ? m_meshesData->boneData->bvh->nFrames : 0;
+    else
+        return 0;
+}
+
+void Renderer::setBVHFrames(int frames)
+{
+    if (m_meshesData->boneData)
+    {
+        m_meshesData->boneData->bvh->nFrames = frames;
+    }
+}

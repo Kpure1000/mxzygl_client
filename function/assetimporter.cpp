@@ -80,6 +80,8 @@ AssetImporter::AssetImporter(ImportType type, QObject *parent)
     QJsonArray data;
     m_info.insert("headers", headers);
     m_info.insert("data", data);
+
+    m_info["assetType"] = static_cast<int>(m_type);
 }
 
 AssetImporter::~AssetImporter()
@@ -104,7 +106,7 @@ void AssetImporter::addPathsNotExist(const QStringList &filePaths)
             if (m_type == ImportType::MODEL || m_type == ImportType::BVH) {
                 fileType = fileInfo.filePath().split('.').back();
             } else {
-                // TODO: Effect Asset fileType
+                fileType = fileInfo.filePath().split('.').back();
             }
             item.insert("fileType", fileType);
             item.insert("path", filePath);

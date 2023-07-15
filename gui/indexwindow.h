@@ -4,6 +4,8 @@
 #include "gui/ifunctionwindow.h"
 
 class IndexEditor;
+class LoggingWidget;
+class InfoTableWidget;
 
 class IndexWindow : public IFunctionWindow
 {
@@ -15,10 +17,12 @@ signals:
 
 private:
     QWidget *initModelWidget(IndexEditor *editor);
+    QWidget *initIndexWidget(QTabWidget *tab_w, IndexEditor *index_editor_cont, IndexEditor *index_editor_tags, IndexEditor *index_editor_type);
     void closeEvent(QCloseEvent *event) override;
     void showEvent(QShowEvent *event) override;
     bool _is_first_paint = true;
-
+    LoggingWidget *m_logging_widget;
+    InfoTableWidget *m_index_infotable;
 };
 
 #endif // MX_INDEXWINDOW_H

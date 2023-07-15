@@ -2,6 +2,7 @@
 
 #include <QFileInfo>
 #include <QVBoxLayout>
+#include <QDir>
 
 #include <QMouseEvent>
 #include <QDebug>
@@ -43,6 +44,7 @@ PreviewPane::PreviewPane(QWidget *parent, bool linkTableItem)
     connect(this, &PreviewPane::onBVHLoaded, m_renderWidget, QOverload<std::shared_ptr<res::BVH>>::of(&RenderWidget::doBVHRendering), Qt::QueuedConnection);
 
     connect(this, &PreviewPane::onPreviewPrepared, this, &PreviewPane::doShowRenderer, Qt::QueuedConnection);
+    connect(this, &PreviewPane::onEffectPrepared, this, &PreviewPane::doShowEffect, Qt::QueuedConnection);
     connect(this, &PreviewPane::onPreviewFailed, this, &PreviewPane::doShowError, Qt::QueuedConnection);
 
 }
@@ -64,6 +66,15 @@ void PreviewPane::doShowRenderer(const QString& previewInfo)
 
     m_default->hide();
     m_renderWidget->show();
+}
+
+void PreviewPane::doShowEffect(const QString &previewInfo)
+{
+    m_default->setText(tr("双击此处\n打开特效文件"));
+    m_info->setText(previewInfo);
+
+    m_renderWidget->hide();
+    m_default->show();
 }
 
 void PreviewPane::doShowPreparing(const QString& previewInfo)
@@ -138,6 +149,21 @@ void PreviewPane::doPreviewBVH(const QString &filePath, const QString &previewIn
                 emit onPreviewFailed(previewInfo);
             }
         });
+    }
+}
+
+void PreviewPane::doPreviewEffect(const QString &filePath, const QString &previewInfo)
+{
+    doShowPreparing(previewInfo);
+    QDir dir(filePath);
+    qDebug() << dir;
+    if (dir.exists(filePath))
+    {
+        emit onEffectPrepared(previewInfo);
+    }
+    else
+    {
+        emit onPreviewFailed(previewInfo);
     }
 }
 

@@ -16,8 +16,8 @@ public:
     enum class HeaderField : int {
         RESPONSE_ERROR          = 0x11111111,   // 发生错误
 
-        REQUEST_GETFEATURE      = 0x00000001,   // 计算特征
-        RESPONSE_GETFEATURE     = 0x10000001,   // 计算特征
+//        REQUEST_GETFEATURE      = 0x00000001,   // 计算特征
+//        RESPONSE_GETFEATURE     = 0x10000001,   // 计算特征
 
         REQUEST_SEARCHMODEL     = 0x00000002,   // 搜索模型
         RESPONSE_SEARCHMODEL    = 0x10000002,   // 搜索模型

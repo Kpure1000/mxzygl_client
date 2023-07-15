@@ -16,6 +16,7 @@
 #include <QMenu>
 #include <QSplitter>
 #include <QProgressDialog>
+#include <QDesktopServices>
 
 #include "uicomponent/previewwidget.h"
 #include "function/configer/configmanager.h"
@@ -28,6 +29,7 @@
 #include "gui/uicomponent/previewpane.h"
 #include "gui/uicomponent/renderwidget.h"
 #include "function/renderer/renderer.h"
+#include "gui/uicomponent/sspeditor.h"
 
 ImportWindow::ImportWindow(QWidget *parent)
     : IFunctionWindow("", {800, 600}, true, false, true, parent)
@@ -118,12 +120,18 @@ WizardWidget *ImportWindow::setupModelWizard(AssetImporter *importer)
 WizardWidget *ImportWindow::setupBVHWizard(AssetImporter *importer)
 {
     auto ww = new WizardWidget(this);
-    // 1. 浏览文件 + 编辑类型和标签属性
+    // 1. 添加骨骼动画文件
     auto firstStep = setupBrowseWidget(importer, ww);
-    ww->pushStep(firstStep, tr("浏览文件 + 编辑类型和标签属性"));
-    // 2. 对齐原点 + 覆盖原模型文件
-    // 3. 三维模型变换 + 摄像机位置调整
-    // 4. 缩略图创建 + 资源上传
+    ww->pushStep(firstStep, tr("添加骨骼动画文件"));
+    // 2. 几何尺度编辑
+    auto secondStep = setupBVH_GeometryScale(importer, ww);
+    ww->pushStep(secondStep, tr("几何尺度编辑"));
+    // 3. 采样频率编辑
+    auto thirdStep = setupBVH_SampleFreq(importer, ww);
+    ww->pushStep(thirdStep, tr("采样频率编辑"));
+    // 4. 编辑类型和标签属性 + 缩略图创建 + 资源上传
+    auto fourthStep = setupBVH_ThumbUpload(importer, ww);
+    ww->pushStep(fourthStep, tr("编辑类型和标签属性 + 缩略图创建 + 资源上传"));
 
     connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
         is_continue ? m_logging_widget->info(info) : m_logging_widget->warning(info);
@@ -135,13 +143,12 @@ WizardWidget *ImportWindow::setupBVHWizard(AssetImporter *importer)
 WizardWidget *ImportWindow::setupEffectWizard(AssetImporter *importer)
 {
     auto ww = new WizardWidget(this);
-    // 1. 浏览文件 + 编辑类型和标签属性
+    // 1. 添加特效图形文件
     auto firstStep = setupBrowseWidget(importer, ww);
-    ww->pushStep(firstStep, "浏览文件 + 编辑类型和标签属性");
-    // 2. 对齐原点, + 覆盖原模型文件
-    ww->pushStep(new QPushButton("asd", this), "asd");
-    // 3. 三维模型变换 + 摄像机位置调整
-    // 4. 缩略图创建 + 资源上传
+    ww->pushStep(firstStep, "添加特效图形文件");
+    // 2. 编辑类型和标签属性 + 资源上传
+    auto secondStep = setupEffect_Upload(importer, ww);
+    ww->pushStep(secondStep, tr("编辑类型和标签属性 + 资源上传"));
 
     connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
         is_continue ? m_logging_widget->info(info) : m_logging_widget->warning(info);
@@ -172,6 +179,22 @@ QWidget *ImportWindow::setupBrowseWidget(AssetImporter *importer, WizardWidget* 
                                                      true,
                                                      true,
                                                      totalWidget);
+
+    if (importer->type() == AssetImporter::ImportType::EFFECT)
+    {
+        connect(previewWidget->getInfoTable(), &InfoTableWidget::onGroupSelected, this, [=](const std::vector<int> &index){
+            auto m_previewPanes = previewWidget->getPreviewPane();
+            for (size_t i = 0; i < m_previewPanes.size(); i++) {
+                disconnect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, 0);
+                if (i < index.size()) {
+                    connect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, [=]() {
+                        auto effectPaths = importer->getFilePaths(index);
+                        QDesktopServices::openUrl(effectPaths[i]);
+                    });
+                }
+            }
+        });
+    }
 
     connect(importer, &AssetImporter::onAddPaths, totalWidget, [=]() {
         wizard->setNextButtonEnable(true);
@@ -206,7 +229,7 @@ QWidget *ImportWindow::setupBrowseWidget(AssetImporter *importer, WizardWidget* 
         case AssetImporter::ImportType::EFFECT: {
             config_key = "FileBrowser/ImportType_EFFECT";
             open_title = tr("浏览特效文件");
-            open_option = "*.obj;*.fbx;*.bvh";
+            open_option = "*.exe;*.bat";
             break;
         }
         }
@@ -468,6 +491,270 @@ QWidget *ImportWindow::setupModel_ThumbUpload(AssetImporter *importer, WizardWid
         importer->clear();
         m_logging_widget->trace("简单上传成功");
         QMessageBox::information(this, tr("模型资源简单上传"), tr("简单上传成功!"));
+    });
+
+    return totalWidget;
+}
+
+QWidget *ImportWindow::setupBVH_GeometryScale(AssetImporter *importer, WizardWidget *wizard)
+{
+    auto totalWidget = new QWidget(this);
+    auto ly_total = new QHBoxLayout(totalWidget);
+
+    auto infotable = new InfoTableWidget(importer->getInfoRef(), 1, false, true, totalWidget);
+
+    auto splitter = new QSplitter(Qt::Horizontal, totalWidget);
+    ly_total->addWidget(splitter);
+
+    //    ly_total->addWidget(infotable, 1);
+    splitter->addWidget(infotable);
+
+    auto interact = new InteractiveWidget(totalWidget);
+    //    ly_total->addWidget(interact, 2);
+    splitter->addWidget(interact);
+
+    splitter->setStretchFactor(0, 1);
+    splitter->setStretchFactor(1, 1);
+
+    connect(wizard, &WizardWidget::onSwitchStep, this, [=]() {
+        // 当进行到当前步骤时
+        if (totalWidget == wizard->currentStep()->widget) {
+            infotable->refresh();
+            auto renderer = interact->getPreviewPane()->getRenderWidget()->getRenderer();
+            importer->initAllTransform(renderer->getModelTransform(), renderer->getCameraTransform());
+            infotable->selectGroup(0);
+        }
+    });
+
+    connect(infotable, &InfoTableWidget::onGroupSelected, this, [=](const std::vector<int> &rows) {
+        auto previewPane = interact->getPreviewPane();
+        previewPane->doClear();
+        disconnect(previewPane, &PreviewPane::onSelectedPane, this, 0);
+        if (!rows.empty()) {
+            m_transform_row_selected = rows[0];
+            connect(previewPane, &PreviewPane::onSelectedPane, this, [=]() {
+                infotable->jumpTo(m_transform_row_selected);
+            });
+            QString filePaht = importer->getFilePaths()[m_transform_row_selected];
+            QString fileInfo = importer->getFileNames({m_transform_row_selected})[0];
+
+            if (importer->type() == AssetImporter::ImportType::MODEL) {
+                previewPane->doPreviewModel(filePaht, fileInfo, true);
+            } else if (importer->type() == AssetImporter::ImportType::BVH) {
+                previewPane->doPreviewBVH(filePaht, fileInfo, true);
+            } else if (importer->type() == AssetImporter::ImportType::EFFECT) {
+                // TODO: preview effect
+            }
+
+            auto renderer = interact->getPreviewPane()->getRenderWidget()->getRenderer();
+            auto trans_pair = importer->getTransform(m_transform_row_selected);
+            renderer->setModelTransform(trans_pair.first);
+            renderer->setCameraTransform(trans_pair.second);
+        }
+    });
+    connect(interact, &InteractiveWidget::onSaveTransform, this, [=](){
+        auto renderer = interact->getPreviewPane()->getRenderWidget()->getRenderer();
+        if (m_transform_row_selected >= 0) {
+            importer->saveTransform(m_transform_row_selected, renderer->getModelTransform(), renderer->getCameraTransform());
+        }
+    });
+
+    return totalWidget;
+}
+
+QWidget *ImportWindow::setupBVH_SampleFreq(AssetImporter *importer, WizardWidget *wizard)
+{
+    auto totalWidget = new QWidget(this);
+    auto ly_total = new QHBoxLayout(totalWidget);
+    PreviewWidget *previewWidget = new PreviewWidget(importer->getInfoRef(),
+                                                     1,
+                                                     1,
+                                                     static_cast<PreviewWidget::PreviewType>(importer->type()),
+                                                     Qt::Orientation::Horizontal,
+                                                     true,
+                                                     true,
+                                                     totalWidget);
+    auto sspeditor = new SSPEditor(previewWidget, totalWidget);
+    ly_total->addWidget(previewWidget, 1);
+    ly_total->addWidget(sspeditor, 0);
+
+    connect(previewWidget, &PreviewWidget::onPreview, totalWidget, [importer, previewWidget](const std::vector<int> &index) {
+        previewWidget->previewFiles(importer->getFilePaths(index), importer->getFileNames(index), true);
+//        auto panes = previewWidget->getPreviewPane();
+//        for (size_t i = 0; i < panes.size(); i++) {
+//            if (i < index.size()) {
+//                auto renderer = panes[i]->getRenderWidget()->getRenderer();
+//                auto trans_pair = importer->getTransform(index[i]);
+//                renderer->setModelTransform(trans_pair.first);
+//                renderer->setCameraTransform(trans_pair.second);
+//            }
+//        }
+    });
+
+    connect(wizard, &WizardWidget::onSwitchStep, this, [=]() {
+        // 当进行到当前步骤时
+        if (totalWidget == wizard->currentStep()->widget) {
+            previewWidget->refreshInfo();
+            previewWidget->selectGroup(0);
+        }
+    });
+
+    return totalWidget;
+}
+
+QWidget *ImportWindow::setupBVH_ThumbUpload(AssetImporter *importer, WizardWidget *wizard)
+{
+    auto totalWidget = new QWidget(this);
+    auto ly_total = new QVBoxLayout(totalWidget);
+
+    auto ly_top = new QHBoxLayout();
+//    ly_top->setContentsMargins(12, 12, 12, 1);
+
+    auto bt_pull = new QPushButton(tr("拉取类型和标签信息"), totalWidget);
+    connect(bt_pull, &QPushButton::clicked, totalWidget, [=](){
+        importer->pullTypeAndTags();
+    });
+    ly_top->addWidget(bt_pull, 1);
+
+    auto bt_upload = new QPushButton(tr("上传"), totalWidget);
+    bt_upload->setEnabled(false);
+    ly_top->addWidget(bt_upload, 1);
+
+    ly_total->addLayout(ly_top);
+
+    PreviewWidget *previewWidget = new PreviewWidget(importer->getInfoRef(),
+                                                     2,
+                                                     3,
+                                                     static_cast<PreviewWidget::PreviewType>(importer->type()),
+                                                     Qt::Orientation::Horizontal,
+                                                     true,
+                                                     true,
+                                                     totalWidget);
+    ly_total->addWidget(previewWidget);
+
+    connect(previewWidget, &PreviewWidget::onPreview, totalWidget, [importer, previewWidget](const std::vector<int> &index) {
+        previewWidget->previewFiles(importer->getFilePaths(index), importer->getFileNames(index), true);
+        auto panes = previewWidget->getPreviewPane();
+        for (size_t i = 0; i < panes.size(); i++) {
+            if (i < index.size()) {
+                auto renderer = panes[i]->getRenderWidget()->getRenderer();
+                auto trans_pair = importer->getTransform(index[i]);
+                renderer->setModelTransform(trans_pair.first);
+                renderer->setCameraTransform(trans_pair.second);
+            }
+        }
+    });
+
+    connect(bt_upload, &QPushButton::clicked, totalWidget, [=]() {
+        // 上传
+        bt_upload->setEnabled(false);
+        importer->upload();
+    });
+
+    connect(importer, &AssetImporter::onClear, this, [=](){
+        previewWidget->clearInfo();
+    });
+
+    connect(wizard, &WizardWidget::onSwitchStep, this, [=]() {
+        // 当进行到当前步骤时
+        if (totalWidget == wizard->currentStep()->widget) {
+            previewWidget->refreshInfo();
+            previewWidget->selectGroup(0);
+        }
+    });
+
+    connect(importer, &AssetImporter::onTypeAndTagsLoaded, this, [=](){
+        bt_upload->setEnabled(true);
+        m_logging_widget->trace("类型与标签拉取成功");
+        previewWidget->refreshInfo();
+    });
+
+    connect(importer, &AssetImporter::onUploadSuccessful, this, [=](){
+        bt_upload->setEnabled(false);
+        importer->clear();
+        m_logging_widget->trace("上传成功");
+        QMessageBox::information(this, tr("骨骼动画资源上传"), tr("上传成功!"));
+    });
+
+    return totalWidget;
+}
+
+QWidget *ImportWindow::setupEffect_Upload(AssetImporter *importer, WizardWidget *wizard)
+{
+    auto totalWidget = new QWidget(this);
+    auto ly_total = new QVBoxLayout(totalWidget);
+
+    auto ly_top = new QHBoxLayout();
+//    ly_top->setContentsMargins(12, 12, 12, 1);
+
+    auto bt_pull = new QPushButton(tr("拉取类型和标签信息"), totalWidget);
+    connect(bt_pull, &QPushButton::clicked, totalWidget, [=](){
+        importer->pullTypeAndTags();
+    });
+    ly_top->addWidget(bt_pull, 1);
+
+    auto bt_upload = new QPushButton(tr("上传"), totalWidget);
+    bt_upload->setEnabled(false);
+    ly_top->addWidget(bt_upload, 1);
+
+    ly_total->addLayout(ly_top);
+
+    PreviewWidget *previewWidget = new PreviewWidget(importer->getInfoRef(),
+                                                     2,
+                                                     3,
+                                                     static_cast<PreviewWidget::PreviewType>(importer->type()),
+                                                     Qt::Orientation::Horizontal,
+                                                     true,
+                                                     true,
+                                                     totalWidget);
+    ly_total->addWidget(previewWidget);
+
+    connect(previewWidget->getInfoTable(), &InfoTableWidget::onGroupSelected, this, [=](const std::vector<int> &index){
+        auto m_previewPanes = previewWidget->getPreviewPane();
+        for (size_t i = 0; i < m_previewPanes.size(); i++) {
+            disconnect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, 0);
+            if (i < index.size()) {
+                connect(m_previewPanes[i], &PreviewPane::onSelectedPane, this, [=]() {
+                    auto effectPaths = importer->getFilePaths(index);
+                    QDesktopServices::openUrl(effectPaths[i]);
+                });
+            }
+        }
+    });
+
+    connect(previewWidget, &PreviewWidget::onPreview, totalWidget, [importer, previewWidget](const std::vector<int> &index) {
+        previewWidget->previewFiles(importer->getFilePaths(index), importer->getFileNames(index), true);
+    });
+
+    connect(bt_upload, &QPushButton::clicked, totalWidget, [=]() {
+        // 上传
+        bt_upload->setEnabled(false);
+        importer->upload();
+    });
+
+    connect(importer, &AssetImporter::onClear, this, [=](){
+        previewWidget->clearInfo();
+    });
+
+    connect(wizard, &WizardWidget::onSwitchStep, this, [=]() {
+        // 当进行到当前步骤时
+        if (totalWidget == wizard->currentStep()->widget) {
+            previewWidget->refreshInfo();
+            previewWidget->selectGroup(0);
+        }
+    });
+
+    connect(importer, &AssetImporter::onTypeAndTagsLoaded, this, [=](){
+        bt_upload->setEnabled(true);
+        m_logging_widget->trace("类型与标签拉取成功");
+        previewWidget->refreshInfo();
+    });
+
+    connect(importer, &AssetImporter::onUploadSuccessful, this, [=](){
+        bt_upload->setEnabled(false);
+        importer->clear();
+        m_logging_widget->trace("上传成功");
+        QMessageBox::information(this, tr("特效图形资源上传"), tr("上传成功!"));
     });
 
     return totalWidget;

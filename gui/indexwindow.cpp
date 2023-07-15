@@ -11,6 +11,7 @@
 #include <QCloseEvent>
 #include <QMenuBar>
 #include <QMenu>
+#include <QMessageBox>
 
 #include "gui/uicomponent/categoryselector.h"
 #include "gui/uicomponent/infotablewidget.h"
@@ -63,7 +64,7 @@ IndexWindow::IndexWindow(QWidget *parent)
 
     auto ly_index = new QHBoxLayout(indexWidget);
 
-    auto infotable = new InfoTableWidget(index_editor_cont->getIndexInfo(), 1, true, true, center_widget);
+    m_index_infotable = new InfoTableWidget(index_editor_cont->getIndexInfo(), 1, true, true, center_widget);
 
     auto bt_sync = new QPushButton(tr("→\n→\n→\n同\n步\n修\n改\n到\n原\n始\n数\n据\n→\n→\n→\n"),center_widget);
     {
@@ -72,7 +73,7 @@ IndexWindow::IndexWindow(QWidget *parent)
         plc_bt_sync.setVerticalPolicy(QSizePolicy::Expanding);
         bt_sync->setSizePolicy(plc_bt_sync);
     }
-    ly_index->addWidget(infotable, 1);
+    ly_index->addWidget(m_index_infotable, 1);
     ly_index->addWidget(bt_sync,   0);
 
     connect(bt_sync, &QPushButton::clicked, this, [=]() {
@@ -87,11 +88,11 @@ IndexWindow::IndexWindow(QWidget *parent)
 
     connect(tab_w, &QTabWidget::currentChanged, this, [=](int index) {
         if (model_cont == tab_w->widget(index)) {
-            infotable->resetInfo(index_editor_cont->getIndexInfo());
+            m_index_infotable->resetInfo(index_editor_cont->getIndexInfo());
         } else if (model_tags == tab_w->widget(index)) {
-            infotable->resetInfo(index_editor_tags->getIndexInfo());
+            m_index_infotable->resetInfo(index_editor_tags->getIndexInfo());
         } else if (model_type == tab_w->widget(index)) {
-            infotable->resetInfo(index_editor_type->getIndexInfo());
+            m_index_infotable->resetInfo(index_editor_type->getIndexInfo());
         }
     });
 
@@ -115,15 +116,14 @@ IndexWindow::IndexWindow(QWidget *parent)
     }
 
     {
-        auto logging_widget = new LoggingWidget(center_widget);
+        m_logging_widget = new LoggingWidget(center_widget);
         auto docker_logging = new QDockWidget(tr("索引编辑 - 信息输出"), center_widget);
         docker_logging->setObjectName("docker_logging");
         docker_logging->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
-        docker_logging->setWidget(logging_widget);
+        docker_logging->setWidget(m_logging_widget);
         docker_logging->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
         addDockWidget(Qt::RightDockWidgetArea, docker_logging);
     }
-
 }
 
 QWidget *IndexWindow::initModelWidget(IndexEditor *editor)
@@ -164,8 +164,30 @@ QWidget *IndexWindow::initModelWidget(IndexEditor *editor)
         editor->compressToIndex();
     });
     connect(preview_w, &PreviewWidget::onPreview, this, [=](const std::vector<int> &index) {
-        //
+        preview_w->previewFiles(editor->getFilePaths(index), editor->getPreviewInfo(index), false);
     });
+
+    connect(editor, &IndexEditor::onResponsing, this, [=](const QString & info, bool is_continue){
+        is_continue ? m_logging_widget->info(info) : m_logging_widget->warning(info);
+    });
+    connect(editor, &IndexEditor::onPullSuccessful, this, [=]() {
+        preview_w->refreshInfo();
+        QMessageBox::information(this, tr("数据拉取"), tr("数据拉取成功!"));
+    });
+    connect(editor, &IndexEditor::onPushSuccessful, this, [=]() {
+        preview_w->refreshInfo();
+        QMessageBox::information(this, tr("数据推送"), tr("数据推送成功!"));
+    });
+    connect(editor, &IndexEditor::onCompressed, this, [=]() {
+        m_logging_widget->info(tr("压缩为索引成功"));
+        m_index_infotable->resetInfo(editor->getIndexInfo());
+        QMessageBox::information(this, tr("压缩为索引"), tr("压缩为索引成功!"));
+    });
+    connect(editor, &IndexEditor::onSyncToOrg, this, [=]() {
+        m_logging_widget->info(tr("索引同步成功"));
+        QMessageBox::information(this, tr("索引同步"), tr("索引同步成功!"));
+    });
+
 
     return modelWidget;
 }

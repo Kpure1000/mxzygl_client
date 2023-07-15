@@ -31,9 +31,16 @@ public:
 
     void push_org();
 
+    QStringList getFilePaths(const std::vector<int> &index) const;
+
+    QStringList getPreviewInfo(const std::vector<int> &index) const;
+
 signals:
+    void onResponsing(const QString &info, bool is_continue);
     void onPullSuccessful();
     void onPushSuccessful();
+    void onCompressed();
+    void onSyncToOrg();
 
 private:
     void setOrgData(const QJsonObject &data);

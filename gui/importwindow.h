@@ -30,7 +30,13 @@ private:
     QWidget *setupModel_UniformFormat(AssetImporter *importer, WizardWidget* wizard);
     QWidget *setupModel_TransformCamera(AssetImporter *importer, WizardWidget* wizard);
     QWidget *setupModel_ThumbUpload(AssetImporter *importer, WizardWidget* wizard);
-    //
+    // 骨骼动画界面
+    QWidget *setupBVH_GeometryScale(AssetImporter *importer, WizardWidget* wizard);
+    QWidget *setupBVH_SampleFreq(AssetImporter *importer, WizardWidget* wizard);
+    QWidget *setupBVH_ThumbUpload(AssetImporter *importer, WizardWidget* wizard);
+    // 特效图形界面
+    QWidget *setupEffect_Upload(AssetImporter *importer, WizardWidget* wizard);
+
     void closeEvent(QCloseEvent *event) override;
     void showEvent(QShowEvent *event) override;
 

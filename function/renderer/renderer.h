@@ -52,6 +52,11 @@ public:
     void setModelTransform(const Transform &trans);
     void setCameraTransform(const Transform &trans);
 
+    float getBVHSampleFreq() const;
+    void setBVHSampleFreq(float spp);
+    int getBVHFrames() const;
+    void setBVHFrames(int frames);
+
 signals:
     void onRenderDataSet();
     void onRenderDataCleared();
