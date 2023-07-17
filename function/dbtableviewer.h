@@ -5,13 +5,18 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include "resource/assetinfo.h"
+
 class Client;
 
 class DBTableViewer : public QObject
 {
     Q_OBJECT
 public:
-    explicit DBTableViewer(QObject *parent = nullptr);
+
+    using TableType = res::AssetInfo::AssetType;
+
+    explicit DBTableViewer(TableType type, QObject *parent = nullptr);
     ~DBTableViewer();
 
     void pullTBInfo();
@@ -24,6 +29,8 @@ signals:
 
 private:
     void setInfoData(const QJsonObject &data);
+
+    TableType m_type;
 
     Client *m_client;
 

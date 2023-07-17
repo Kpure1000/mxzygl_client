@@ -5,6 +5,7 @@
 #include <QMainWindow>
 
 class LoggingWidget;
+class DBTableViewer;
 
 class DBTableWindow : public IFunctionWindow
 {
@@ -18,6 +19,8 @@ public:
 private:
     bool _is_first_paint = true;
     LoggingWidget *m_logging_widget;
+
+    QWidget *setupTableWidget(DBTableViewer *);
 };
 
 #endif // DBTABLEWINDOW_H

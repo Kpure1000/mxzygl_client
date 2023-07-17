@@ -3,7 +3,7 @@
 #include "function/network/client.h"
 #include "function/network/protocal.h"
 
-DBTableViewer::DBTableViewer(QObject *parent) : QObject(parent), m_info(new QJsonObject())
+DBTableViewer::DBTableViewer(TableType type, QObject *parent) : QObject(parent), m_type(type), m_info(new QJsonObject())
 {
     m_client = new Client(this);
 
@@ -18,7 +18,7 @@ DBTableViewer::DBTableViewer(QObject *parent) : QObject(parent), m_info(new QJso
             if (!status.isEmpty()) {
                 emit onResponsing(tr("数据表拉取失败. Info: ") + status, false);
             } else {
-                if (Protocal::HeaderField::RESPONSE_SHOWTBMODEL == response_type) {
+                if (Protocal::HeaderField::RESPONSE_SHOWTABLE == response_type) {
                     emit onResponsing(tr("数据表拉取成功!"), false);
                     setInfoData(data);
                     emit onTBPullSuccessful();
@@ -38,7 +38,8 @@ void DBTableViewer::pullTBInfo()
 {
     emit onResponsing(tr("开始拉取数据表信息"), true);
     QJsonObject data = {{
-        {"type",       static_cast<int>(Protocal::HeaderField::REQUEST_SHOWTBMODEL)},
+                         {"type",       static_cast<int>(Protocal::HeaderField::REQUEST_SHOWTABLE)},
+        {"assetType", static_cast<int>(m_type)},
         {"headers",    QJsonArray() << QJsonObject()},
         {"data",       QJsonArray() << QJsonObject()}
     }};
