@@ -55,6 +55,7 @@ PreviewWidget::PreviewWidget(QJsonObject *info, int row, int column, PreviewType
 
 void PreviewWidget::refreshInfo()
 {
+    emit onRefresh();
     disconnect(m_infoTable, &InfoTableWidget::onGroupSelected, this, 0);
     connect(m_infoTable, &InfoTableWidget::onGroupSelected, this, &PreviewWidget::doPreviewPrepare);
     m_infoTable->refresh();
@@ -62,6 +63,7 @@ void PreviewWidget::refreshInfo()
 
 void PreviewWidget::clearInfo()
 {
+    emit onClear();
     m_infoTable->clearInfos();
     disconnect(m_infoTable, &InfoTableWidget::onGroupSelected, this, 0);
 }

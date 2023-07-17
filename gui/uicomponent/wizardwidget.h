@@ -15,9 +15,14 @@ class WizardWidget : public QWidget
 
 public:
     struct WizardStep {
+        std::function<QWidget *()> widget_creator;
         QWidget *widget;
         QString name;
-        explicit WizardStep(QWidget *widget, const QString &name);
+        explicit WizardStep(std::function<QWidget *()> widget_creator, const QString &name);
+
+        template<class T>
+        void show(T*layout);
+        void hide();
     };
 
     explicit WizardWidget(QWidget *parent = nullptr);
@@ -25,7 +30,7 @@ public:
 
     void setNextButtonEnable(bool cango);
 
-    void pushStep(QWidget *widget, const QString &name);
+    void pushStep(std::function<QWidget *()> func, const QString &name);
 
     std::shared_ptr<WizardStep> currentStep();
 

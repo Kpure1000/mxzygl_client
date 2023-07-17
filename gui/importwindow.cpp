@@ -99,20 +99,15 @@ WizardWidget *ImportWindow::setupModelWizard(AssetImporter *importer)
 {
     auto ww = new WizardWidget(this);
     // 1. 添加模型文件
-    auto firstStep = setupBrowseWidget(importer, ww);
-    ww->pushStep(firstStep, "添加模型文件");
+    ww->pushStep([=](){return setupBrowseWidget(importer, ww);}, "添加模型文件");
     // 2. 对齐原点, + 覆盖原模型文件
-    auto secondStep = setupModel_UniformFormat(importer, ww);
-    ww->pushStep(secondStep, tr("对齐原点 + 覆盖原模型文件"));
+    ww->pushStep([=](){return setupModel_UniformFormat(importer, ww);}, tr("对齐原点 + 覆盖原模型文件"));
     // 3. 三维模型变换 + 摄像机位置调整
-    auto thirdStep = setupModel_TransformCamera(importer, ww);
-    ww->pushStep(thirdStep, tr("三维模型变换 + 摄像机位置调整"));
+    ww->pushStep([=](){return setupModel_TransformCamera(importer, ww);}, tr("三维模型变换 + 摄像机位置调整"));
     // 4. 缩略图创建
-    auto fourthStep = setup_Thumb(importer, ww);
-    ww->pushStep(fourthStep, tr("缩略图创建"));
+    ww->pushStep([=](){return setup_Thumb(importer, ww);}, tr("缩略图创建"));
     // 5. 编辑类型和标签属性 + 资源上传
-    auto fifthStep = setupModel_Upload(importer, ww);
-    ww->pushStep(fifthStep, tr("编辑类型和标签属性 + 资源上传"));
+    ww->pushStep([=](){return setupModel_Upload(importer, ww);}, tr("编辑类型和标签属性 + 资源上传"));
 
     connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
         is_continue ? m_logging_widget->info(info) : m_logging_widget->warning(info);
@@ -125,20 +120,15 @@ WizardWidget *ImportWindow::setupBVHWizard(AssetImporter *importer)
 {
     auto ww = new WizardWidget(this);
     // 1. 添加骨骼动画文件
-    auto firstStep = setupBrowseWidget(importer, ww);
-    ww->pushStep(firstStep, tr("添加骨骼动画文件"));
+    ww->pushStep([=](){return setupBrowseWidget(importer, ww);}, tr("添加骨骼动画文件"));
     // 2. 几何尺度编辑
-    auto secondStep = setupBVH_GeometryScale(importer, ww);
-    ww->pushStep(secondStep, tr("几何尺度编辑"));
+    ww->pushStep([=](){return setupBVH_GeometryScale(importer, ww);}, tr("几何尺度编辑"));
     // 3. 采样频率编辑
-    auto thirdStep = setupBVH_SampleFreq(importer, ww);
-    ww->pushStep(thirdStep, tr("采样频率编辑"));
+    ww->pushStep([=](){return setupBVH_SampleFreq(importer, ww);}, tr("采样频率编辑"));
     // 4. 缩略图创建
-    auto fourthStep = setup_Thumb(importer, ww);
-    ww->pushStep(fourthStep, tr("缩略图创建"));
+    ww->pushStep([=](){return setup_Thumb(importer, ww);}, tr("缩略图创建"));
     // 5. 编辑类型和标签属性 + 资源上传
-    auto fifthStep = setupBVH_Upload(importer, ww);
-    ww->pushStep(fifthStep, tr("编辑类型和标签属性 + 资源上传"));
+    ww->pushStep([=](){return setupBVH_Upload(importer, ww);}, tr("编辑类型和标签属性 + 资源上传"));
 
     connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
         is_continue ? m_logging_widget->info(info) : m_logging_widget->warning(info);
@@ -151,11 +141,9 @@ WizardWidget *ImportWindow::setupEffectWizard(AssetImporter *importer)
 {
     auto ww = new WizardWidget(this);
     // 1. 添加特效图形文件
-    auto firstStep = setupBrowseWidget(importer, ww);
-    ww->pushStep(firstStep, "添加特效图形文件");
+    ww->pushStep([=](){return setupBrowseWidget(importer, ww);}, "添加特效图形文件");
     // 2. 编辑类型和标签属性 + 资源上传
-    auto secondStep = setupEffect_Upload(importer, ww);
-    ww->pushStep(secondStep, tr("编辑类型和标签属性 + 资源上传"));
+    ww->pushStep([=](){return setupEffect_Upload(importer, ww);}, tr("编辑类型和标签属性 + 资源上传"));
 
     connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
         is_continue ? m_logging_widget->info(info) : m_logging_widget->warning(info);
@@ -629,11 +617,11 @@ QWidget *ImportWindow::setupBVH_SampleFreq(AssetImporter *importer, WizardWidget
                                                      true,
                                                      totalWidget);
     auto sspeditor = new SSPEditor(previewWidget, totalWidget);
-    ly_total->addWidget(previewWidget, 1);
-    ly_total->addWidget(sspeditor, 0);
+    ly_total->addWidget(previewWidget, 3);
+    ly_total->addWidget(sspeditor, 1);
 
     connect(previewWidget, &PreviewWidget::onPreview, totalWidget, [importer, previewWidget](const std::vector<int> &index) {
-        previewWidget->previewFiles(importer->getFilePaths(index), importer->getFileNames(index), true);
+        previewWidget->previewFiles(importer->getFilePaths(index), importer->getFileNames(index), false);
 //        auto panes = previewWidget->getPreviewPane();
 //        for (size_t i = 0; i < panes.size(); i++) {
 //            if (i < index.size()) {

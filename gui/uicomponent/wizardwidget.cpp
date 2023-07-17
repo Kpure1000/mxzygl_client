@@ -3,8 +3,22 @@
 
 #include <QDebug>
 
-WizardWidget::WizardStep::WizardStep(QWidget *widget, const QString &name) : widget(widget), name(name)
+WizardWidget::WizardStep::WizardStep(std::function<QWidget *()> widget_creator, const QString &name)
+    : widget_creator(widget_creator), widget(nullptr), name(name)
 {}
+
+template<class T>
+void WizardWidget::WizardStep::show(T *layout)
+{
+    widget = widget_creator();
+    layout->addWidget(widget);
+    widget->show();
+}
+
+void WizardWidget::WizardStep::hide()
+{
+    widget->hide();
+}
 
 WizardWidget::WizardWidget(QWidget *parent) : QWidget(parent), ui(new Ui::WizardWidget)
 {
@@ -22,15 +36,13 @@ void WizardWidget::setNextButtonEnable(bool cango)
     ui->bt_next->setEnabled(cango);
 }
 
-void WizardWidget::pushStep(QWidget *widget, const QString &name)
-{
-    ui->gb_stepName->layout()->addWidget(widget);
-    widget->hide();
-    m_steps.emplace_back(std::make_shared<WizardStep>(widget, name));
+void WizardWidget::pushStep(std::function<QWidget *()> func, const QString &name)
+{   
+    m_steps.emplace_back(std::make_shared<WizardStep>(func, name));
     if (m_steps.size() == 1) {
         ui->bt_next->setEnabled(true);
         m_currentIndex = 0;
-        widget->show();
+        m_steps[m_currentIndex]->show(ui->gb_stepName->layout());
         ui->gb_stepName->setTitle(QString().asprintf("第%d步: %s", m_currentIndex + 1, name.toStdString().c_str()));
         emit onSwitchStep();
     }
@@ -48,8 +60,8 @@ void WizardWidget::on_bt_next_clicked()
 {
     m_currentIndex++;
     if (m_currentIndex < static_cast<int>(m_steps.size())) {
-        m_steps[m_currentIndex - 1]->widget->hide();
-        m_steps[m_currentIndex]->widget->show();
+        m_steps[m_currentIndex]->show(ui->gb_stepName->layout());
+        m_steps[m_currentIndex - 1]->hide();
         ui->gb_stepName->setTitle(QString().asprintf("第%d步: %s", m_currentIndex + 1, m_steps[m_currentIndex]->name.toStdString().c_str()));
         emit onSwitchStep();
     }

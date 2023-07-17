@@ -11,6 +11,23 @@ SSPEditor::SSPEditor(PreviewWidget *prewviewer, QWidget *parent)
 {
     ui->setupUi(this);
 
+    ui->groupBox->setEnabled(false);
+    ui->bt_confirm->setEnabled(false);
+
+    connect(m_prewviewer, &PreviewWidget::onRefresh, this, [=](){
+        ui->groupBox->setEnabled(false);
+        ui->bt_confirm->setEnabled(false);
+    });
+
+    connect(m_prewviewer->getPreviewPane()[0]->getRenderWidget()->getRenderer(),
+            &Renderer::onRenderDataSet,
+            this,
+            [=]() {
+                ui->groupBox->setEnabled(true);
+                ui->bt_confirm->setEnabled(true);
+                this->fresh();
+            });
+
     float spp = m_prewviewer->getPreviewPane()[0]->getRenderWidget()->getRenderer()->getBVHSampleFreq();
     int frames = m_prewviewer->getPreviewPane()[0]->getRenderWidget()->getRenderer()->getBVHFrames();
 
@@ -29,9 +46,7 @@ SSPEditor::SSPEditor(PreviewWidget *prewviewer, QWidget *parent)
     connect(ui->bt_confirm, &QPushButton::clicked, this, [=](){
         m_prewviewer->getPreviewPane()[0]->getRenderWidget()->getRenderer()->setBVHSampleFreq(ui->spb_spp->value());
     });
-    connect(ui->bt_getinfo, &QPushButton::clicked, this, [=](){
-        this->fresh();
-    });
+
 }
 
 SSPEditor::~SSPEditor()

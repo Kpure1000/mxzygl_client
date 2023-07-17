@@ -43,6 +43,8 @@ public:
 
 signals:
     void onPreview(const std::vector<int> &index);
+    void onRefresh();
+    void onClear();
 
 private slots:
     void doPreviewPrepare(const std::vector<int> &index);
