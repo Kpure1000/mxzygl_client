@@ -26,14 +26,15 @@ private:
     WizardWidget *setupEffectWizard(AssetImporter *importer);
 
     QWidget *setupBrowseWidget(AssetImporter *importer, WizardWidget* wizard);
+    QWidget *setup_Thumb(AssetImporter *importer, WizardWidget* wizard);
     // 模型部分界面
     QWidget *setupModel_UniformFormat(AssetImporter *importer, WizardWidget* wizard);
     QWidget *setupModel_TransformCamera(AssetImporter *importer, WizardWidget* wizard);
-    QWidget *setupModel_ThumbUpload(AssetImporter *importer, WizardWidget* wizard);
+    QWidget *setupModel_Upload(AssetImporter *importer, WizardWidget* wizard);
     // 骨骼动画界面
     QWidget *setupBVH_GeometryScale(AssetImporter *importer, WizardWidget* wizard);
     QWidget *setupBVH_SampleFreq(AssetImporter *importer, WizardWidget* wizard);
-    QWidget *setupBVH_ThumbUpload(AssetImporter *importer, WizardWidget* wizard);
+    QWidget *setupBVH_Upload(AssetImporter *importer, WizardWidget* wizard);
     // 特效图形界面
     QWidget *setupEffect_Upload(AssetImporter *importer, WizardWidget* wizard);
 

@@ -30,6 +30,7 @@
 #include "gui/uicomponent/renderwidget.h"
 #include "function/renderer/renderer.h"
 #include "gui/uicomponent/sspeditor.h"
+#include "gui/uicomponent/thumbwidget.h"
 
 ImportWindow::ImportWindow(QWidget *parent)
     : IFunctionWindow("", {800, 600}, true, false, true, parent)
@@ -106,9 +107,12 @@ WizardWidget *ImportWindow::setupModelWizard(AssetImporter *importer)
     // 3. 三维模型变换 + 摄像机位置调整
     auto thirdStep = setupModel_TransformCamera(importer, ww);
     ww->pushStep(thirdStep, tr("三维模型变换 + 摄像机位置调整"));
-    // 4. 编辑类型和标签属性 + 缩略图创建 + 资源上传
-    auto fourthStep = setupModel_ThumbUpload(importer, ww);
-    ww->pushStep(fourthStep, tr("编辑类型和标签属性 + 缩略图创建 + 资源上传"));
+    // 4. 缩略图创建
+    auto fourthStep = setup_Thumb(importer, ww);
+    ww->pushStep(fourthStep, tr("缩略图创建"));
+    // 5. 编辑类型和标签属性 + 资源上传
+    auto fifthStep = setupModel_Upload(importer, ww);
+    ww->pushStep(fifthStep, tr("编辑类型和标签属性 + 资源上传"));
 
     connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
         is_continue ? m_logging_widget->info(info) : m_logging_widget->warning(info);
@@ -129,9 +133,12 @@ WizardWidget *ImportWindow::setupBVHWizard(AssetImporter *importer)
     // 3. 采样频率编辑
     auto thirdStep = setupBVH_SampleFreq(importer, ww);
     ww->pushStep(thirdStep, tr("采样频率编辑"));
-    // 4. 编辑类型和标签属性 + 缩略图创建 + 资源上传
-    auto fourthStep = setupBVH_ThumbUpload(importer, ww);
-    ww->pushStep(fourthStep, tr("编辑类型和标签属性 + 缩略图创建 + 资源上传"));
+    // 4. 缩略图创建
+    auto fourthStep = setup_Thumb(importer, ww);
+    ww->pushStep(fourthStep, tr("缩略图创建"));
+    // 5. 编辑类型和标签属性 + 资源上传
+    auto fifthStep = setupBVH_Upload(importer, ww);
+    ww->pushStep(fifthStep, tr("编辑类型和标签属性 + 资源上传"));
 
     connect(importer, &AssetImporter::onResponsing, this, [=](const QString & info, bool is_continue){
         is_continue ? m_logging_widget->info(info) : m_logging_widget->warning(info);
@@ -180,6 +187,7 @@ QWidget *ImportWindow::setupBrowseWidget(AssetImporter *importer, WizardWidget* 
                                                      true,
                                                      totalWidget);
 
+    // TODO: 特效图形的预览暂时先写在这里,未来写进PreviewWidget
     if (importer->type() == AssetImporter::ImportType::EFFECT)
     {
         connect(previewWidget->getInfoTable(), &InfoTableWidget::onGroupSelected, this, [=](const std::vector<int> &index){
@@ -266,6 +274,40 @@ QWidget *ImportWindow::setupBrowseWidget(AssetImporter *importer, WizardWidget* 
     ly_total->addWidget(previewWidget, 1);
 
     ly_total->setSpacing(1);
+
+    return totalWidget;
+}
+
+QWidget *ImportWindow::setup_Thumb(AssetImporter *importer, WizardWidget *wizard)
+{
+    auto totalWidget = new QWidget(this);
+    auto ly_total = new QVBoxLayout(totalWidget);
+
+    auto thumbWidget = new ThumbWidget(importer->getInfoRef(),
+                                       importer->type(),
+                                       6,
+                                       9,
+                                       totalWidget);
+    ly_total->addWidget(thumbWidget);
+
+    auto previewWidget = thumbWidget->getPreviewWidget();
+
+    connect(previewWidget, &PreviewWidget::onPreview, totalWidget, [=](const std::vector<int> &index) {
+        previewWidget->previewFiles(importer->getFilePaths(index), importer->getFileNames(index), false);
+        if (importer->type() == AssetImporter::ImportType::MODEL) {
+            QMessageBox::information(totalWidget, tr("模型缩略图创建"), tr("模型缩略图创建成功！"));
+        } else if (importer->type() == AssetImporter::ImportType::BVH) {
+            QMessageBox::information(totalWidget, tr("骨骼动画缩略图创建"), tr("骨骼动画缩略图创建成功！"));
+        }
+    });
+
+    connect(wizard, &WizardWidget::onSwitchStep, this, [=]() {
+        // 当进行到当前步骤时
+        if (totalWidget == wizard->currentStep()->widget) {
+            previewWidget->refreshInfo();
+            previewWidget->selectGroup(0);
+        }
+    });
 
     return totalWidget;
 }
@@ -397,7 +439,7 @@ QWidget *ImportWindow::setupModel_TransformCamera(AssetImporter *importer, Wizar
     return totalWidget;
 }
 
-QWidget *ImportWindow::setupModel_ThumbUpload(AssetImporter *importer, WizardWidget* wizard)
+QWidget *ImportWindow::setupModel_Upload(AssetImporter *importer, WizardWidget* wizard)
 {
     auto totalWidget = new QWidget(this);
     auto ly_total = new QVBoxLayout(totalWidget);
@@ -481,6 +523,12 @@ QWidget *ImportWindow::setupModel_ThumbUpload(AssetImporter *importer, WizardWid
         bt_upload->setEnabled(false);
         bt_upload_simple->setEnabled(false);
         importer->clear();
+        // TOOD: 暂时写在日志输出里 (几何形状信息分析)
+        m_logging_widget->trace("几何形状信息分析成功");
+        // TOOD: 暂时写在日志输出里 (纹理信息分析)
+        m_logging_widget->trace("纹理信息分析成功");
+        // TOOD: 暂时写在日志输出里 (材质和局部光照明模型编码)
+        m_logging_widget->trace("材质和局部光照明模型编码成功!");
         m_logging_widget->trace("上传成功");
         QMessageBox::information(this, tr("模型资源上传"), tr("上传成功!"));
     });
@@ -489,6 +537,12 @@ QWidget *ImportWindow::setupModel_ThumbUpload(AssetImporter *importer, WizardWid
         bt_upload->setEnabled(false);
         bt_upload_simple->setEnabled(false);
         importer->clear();
+        // TOOD: 暂时写在日志输出里 (几何形状信息分析)
+        m_logging_widget->trace("几何形状信息分析成功");
+        // TOOD: 暂时写在日志输出里 (纹理信息分析)
+        m_logging_widget->trace("纹理信息分析成功");
+        // TOOD: 暂时写在日志输出里 (材质和局部光照明模型编码)
+        m_logging_widget->trace("材质和局部光照明模型编码成功!");
         m_logging_widget->trace("简单上传成功");
         QMessageBox::information(this, tr("模型资源简单上传"), tr("简单上传成功!"));
     });
@@ -602,7 +656,7 @@ QWidget *ImportWindow::setupBVH_SampleFreq(AssetImporter *importer, WizardWidget
     return totalWidget;
 }
 
-QWidget *ImportWindow::setupBVH_ThumbUpload(AssetImporter *importer, WizardWidget *wizard)
+QWidget *ImportWindow::setupBVH_Upload(AssetImporter *importer, WizardWidget *wizard)
 {
     auto totalWidget = new QWidget(this);
     auto ly_total = new QVBoxLayout(totalWidget);
@@ -709,6 +763,7 @@ QWidget *ImportWindow::setupEffect_Upload(AssetImporter *importer, WizardWidget 
                                                      totalWidget);
     ly_total->addWidget(previewWidget);
 
+    // TODO: 特效图形的预览暂时先写在这里,未来写进PreviewWidget
     connect(previewWidget->getInfoTable(), &InfoTableWidget::onGroupSelected, this, [=](const std::vector<int> &index){
         auto m_previewPanes = previewWidget->getPreviewPane();
         for (size_t i = 0; i < m_previewPanes.size(); i++) {

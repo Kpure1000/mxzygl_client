@@ -11,6 +11,7 @@ SOURCES += \
     $$PWD/previewwidget.cpp \
     $$PWD/renderwidget.cpp \
     $$PWD/sspeditor.cpp \
+    $$PWD/thumbwidget.cpp \
     $$PWD/versionpainter.cpp \
     $$PWD/versionwidget.cpp \
     $$PWD/wizardwidget.cpp
@@ -27,6 +28,7 @@ HEADERS += \
     $$PWD/previewwidget.h \
     $$PWD/renderwidget.h \
     $$PWD/sspeditor.h \
+    $$PWD/thumbwidget.h \
     $$PWD/uicomponent.h \
     $$PWD/versionpainter.h \
     $$PWD/versionwidget.h \
@@ -41,5 +43,6 @@ FORMS += \
     $$PWD/optionwidget_render.ui \
     $$PWD/optionwidget_server.ui \
     $$PWD/sspeditor.ui \
+    $$PWD/thumbwidget.ui \
     $$PWD/versionwidget.ui \
     $$PWD/wizardwidget.ui
