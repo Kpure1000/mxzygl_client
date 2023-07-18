@@ -2,8 +2,8 @@
 #define MX_INDEXWINDOW_H
 
 #include "gui/ifunctionwindow.h"
+#include "function/indexeditor.h"
 
-class IndexEditor;
 class LoggingWidget;
 class InfoTableWidget;
 
@@ -14,6 +14,7 @@ public:
     explicit IndexWindow(QWidget *parent = nullptr);
 
 signals:
+    void onIndexSelected(IndexEditor::IndexType type);
 
 private:
     QWidget *initModelWidget(IndexEditor *editor);
@@ -23,6 +24,7 @@ private:
     bool _is_first_paint = true;
     LoggingWidget *m_logging_widget;
     InfoTableWidget *m_index_infotable;
+    int m_selected_row = -1;
 };
 
 #endif // MX_INDEXWINDOW_H

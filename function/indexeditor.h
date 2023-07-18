@@ -35,12 +35,19 @@ public:
 
     QStringList getPreviewInfo(const std::vector<int> &index) const;
 
+    QString index(int row)const;
+
+    void modify(int index, const QString &name);
+
 signals:
     void onResponsing(const QString &info, bool is_continue);
     void onPullSuccessful();
     void onPushSuccessful();
     void onCompressed();
     void onSyncToOrg();
+
+    void onModifyRepeat(const QString &name);
+    void onModifySuccessed();
 
 private:
     void setOrgData(const QJsonObject &data);

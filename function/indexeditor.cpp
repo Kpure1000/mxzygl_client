@@ -65,16 +65,16 @@ void IndexEditor::compressToIndex()
     QJsonArray index_data;
     if (IndexEditor::IndexType::CONTENT == m_type) {
         index_headers << QJsonObject{
-            {"name", "name"},
+            {"name", "content"},
             {"editable", true},
             {"is_array", false},
             {"visible",  true}
         };
         for (const auto &d : (*m_org_info)["data"].toArray()) {
             const auto &row = d.toObject();
-            if (index_map.find(row["name"].toString().toStdString()) == index_map.end()) {
-                index_map.insert({row["name"].toString().toStdString(), ""});
-                index_data << QJsonObject{{"name", row["name"]}};
+            if (!row["content"].toString().isEmpty() && index_map.find(row["content"].toString().toStdString()) == index_map.end()) {
+                index_map.insert({row["content"].toString().toStdString(), ""});
+                index_data << QJsonObject{{"content", row["content"]}};
             }
         }
     } else if (IndexEditor::IndexType::TYPE == m_type) {
@@ -86,7 +86,7 @@ void IndexEditor::compressToIndex()
         };
         for (const auto &d : (*m_org_info)["data"].toArray()) {
             const auto &row = d.toObject();
-            if (index_map.find(row["type"].toString().toStdString()) == index_map.end()) {
+            if (!row["type"].toString().isEmpty() && index_map.find(row["type"].toString().toStdString()) == index_map.end()) {
                 index_map.insert({row["type"].toString().toStdString(), ""});
                 index_data << QJsonObject{{"type", row["type"]}};
             }
@@ -100,7 +100,7 @@ void IndexEditor::compressToIndex()
         };
         for (const auto &d : (*m_org_info)["data"].toArray()) {
             const auto &row = d.toObject();
-            if (index_map.find(row["tags"].toString().toStdString()) == index_map.end()) {
+            if (!row["tags"].toString().isEmpty() && index_map.find(row["tags"].toString().toStdString()) == index_map.end()) {
                 index_map.insert({row["tags"].toString().toStdString(), ""});
                 index_data << QJsonObject{{"tags", row["tags"]}};
             }
@@ -108,8 +108,8 @@ void IndexEditor::compressToIndex()
     }
     (*m_index_info)["headers"] = index_headers;
     (*m_index_info)["data"] = index_data;
-    qDebug() << (*m_org_info);
-    qDebug() << (*m_index_info);
+//    qDebug() << (*m_org_info);
+//    qDebug() << (*m_index_info);
     emit onCompressed();
 }
 
@@ -121,17 +121,27 @@ void IndexEditor::syncToOrg()
 void IndexEditor::push_org()
 {
     int indexType = 0;
+    QString keyName;
     switch (m_type) {
-    case IndexEditor::IndexType::CONTENT: indexType = static_cast<int>(Protocal::HeaderField::REQUEST_MODELINDEX); break;
-    case IndexEditor::IndexType::TYPE: indexType = static_cast<int>(Protocal::HeaderField::REQUEST_TYPEINDEX); break;
-    case IndexEditor::IndexType::TAGS: indexType = static_cast<int>(Protocal::HeaderField::REQUEST_LABELINDEX); break;
+    case IndexEditor::IndexType::CONTENT:
+        indexType = static_cast<int>(Protocal::HeaderField::REQUEST_MODELINDEX);
+        keyName = "content";
+        break;
+    case IndexEditor::IndexType::TYPE:
+        indexType = static_cast<int>(Protocal::HeaderField::REQUEST_TYPEINDEX);
+        keyName = "type";
+        break;
+    case IndexEditor::IndexType::TAGS:
+        indexType = static_cast<int>(Protocal::HeaderField::REQUEST_LABELINDEX);
+        keyName = "tags";
+        break;
     }
     QJsonObject send = {{
         {"type", static_cast<int>(Protocal::HeaderField::REQUEST_INDEXPUSH)},
         {"category",   MetaCategory::getInstance()->getCategoryInt()},
         {"indexType", static_cast<int>(indexType)},
-        {"headers",    QJsonArray() << QJsonObject()},
-        {"data",       QJsonArray() << QJsonObject()}
+        {"headers",    QJsonArray() << res::AssetInfo::toHeaderElement(keyName, false, false, false)},
+        {"data",       (*m_index_info)["data"]}
     }};
     m_client->sendData(send);
 }
@@ -145,7 +155,7 @@ QStringList IndexEditor::getFilePaths(const std::vector<int> &index) const
         auto row = data[id].toObject();
         ret << row["hash"].toString();
     }
-    qDebug() << ret;
+//    qDebug() << ret;
     return ret;
 }
 
@@ -158,6 +168,43 @@ QStringList IndexEditor::getPreviewInfo(const std::vector<int> &index) const
         ret << (row["name"].toString());
     }
     return ret;
+}
+
+QString IndexEditor::index(int row) const
+{
+    auto data = (*m_index_info)["data"].toArray();
+    switch (m_type) {
+    case IndexEditor::IndexType::CONTENT:
+        return data[row].toObject()["content"].toString();
+    case IndexEditor::IndexType::TAGS:
+        return data[row].toObject()["tags"].toString();
+    case IndexEditor::IndexType::TYPE:
+        return data[row].toObject()["type"].toString();
+    }
+}
+
+void IndexEditor::modify(int index, const QString &name)
+{
+    QString keyName;
+    switch (m_type) {
+    case IndexEditor::IndexType::CONTENT: keyName = "content"; break;
+    case IndexEditor::IndexType::TAGS: keyName = "tags"; break;
+    case IndexEditor::IndexType::TYPE: keyName = "type"; break;
+    }
+    auto data = (*m_index_info)["data"].toArray();
+    for (const auto &r : data) {
+        const auto &rObj = r.toObject();
+        if (name == rObj[keyName].toString()) {
+            emit onModifyRepeat(name);
+            return;
+        }
+    }
+    // modify name in data
+    auto newObj = data[index].toObject();
+    newObj[keyName] = name;
+    data[index] = newObj;
+    (*m_index_info)["data"] = data;
+    emit onModifySuccessed();
 }
 
 void IndexEditor::setOrgData(const QJsonObject &data)

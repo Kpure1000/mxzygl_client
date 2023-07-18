@@ -12,13 +12,15 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QMessageBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLineEdit>
 
 #include "gui/uicomponent/categoryselector.h"
 #include "gui/uicomponent/infotablewidget.h"
 #include "gui/uicomponent/previewwidget.h"
 #include "gui/uicomponent/loggingwidget.h"
 #include "function/layoutmanager.h"
-#include "function/indexeditor.h"
 
 IndexWindow::IndexWindow(QWidget *parent)
     : IFunctionWindow(tr("索引编辑"), {800, 600}, true, false, true, parent)
@@ -50,6 +52,8 @@ IndexWindow::IndexWindow(QWidget *parent)
 
     auto ly_total = new QGridLayout(center_widget);
 
+    m_index_infotable = new InfoTableWidget(index_editor_cont->getIndexInfo(), 1, false, true, center_widget);
+
     auto tab_w = new QTabWidget(center_widget);
     auto model_cont = initModelWidget(index_editor_cont);
     auto model_tags = initModelWidget(index_editor_tags);
@@ -64,8 +68,6 @@ IndexWindow::IndexWindow(QWidget *parent)
 
     auto ly_index = new QHBoxLayout(indexWidget);
 
-    m_index_infotable = new InfoTableWidget(index_editor_cont->getIndexInfo(), 1, true, true, center_widget);
-
     auto bt_sync = new QPushButton(tr("→\n→\n→\n同\n步\n修\n改\n到\n原\n始\n数\n据\n→\n→\n→\n"),center_widget);
     {
         bt_sync->setMaximumWidth(bt_sync->fontMetrics().averageCharWidth() * 4);
@@ -75,6 +77,23 @@ IndexWindow::IndexWindow(QWidget *parent)
     }
     ly_index->addWidget(m_index_infotable, 1);
     ly_index->addWidget(bt_sync,   0);
+
+    // 选中索引功能
+    connect(m_index_infotable, &InfoTableWidget::itemDoubleClicked, this, [=](QTableWidgetItem *item) {
+        auto row = item->row();
+        if (row < 0) {
+            qDebug() << "IndexWindow>>InfoTableWidget::itemDoubleClicked>> row < 0";
+            return;
+        }
+        m_selected_row = row;
+        if (model_cont == tab_w->currentWidget()) {
+            emit onIndexSelected(IndexEditor::IndexType::CONTENT);
+        } else if (model_tags == tab_w->currentWidget()) {
+            emit onIndexSelected(IndexEditor::IndexType::TAGS);
+        } else if (model_type == tab_w->currentWidget()) {
+            emit onIndexSelected(IndexEditor::IndexType::TYPE);
+        }
+    });
 
     connect(bt_sync, &QPushButton::clicked, this, [=]() {
         if (model_cont == tab_w->currentWidget()) {
@@ -148,11 +167,45 @@ QWidget *IndexWindow::initModelWidget(IndexEditor *editor)
         bt_compress->setSizePolicy(plc_bt_sync);
     }
 
-    auto preview_w = new PreviewWidget(editor->getOriginInfo(), 1, 3, PreviewWidget::PreviewType::MODEL, Qt::Vertical, true, true, modelWidget);
+    // 不可编辑
+    auto preview_w = new PreviewWidget(editor->getOriginInfo(), 1, 3, PreviewWidget::PreviewType::MODEL, Qt::Vertical, false, true, modelWidget);
 
-    ly_total->addLayout(ly_pp,       0, 1);
-    ly_total->addWidget(bt_compress, 1, 0);
-    ly_total->addWidget(preview_w,   1, 1);
+    // editor-modify
+    auto gb_modify = new QGroupBox(tr("索引编辑"), modelWidget);
+    gb_modify->setEnabled(false);
+
+    auto lb_modify_hint = new QLabel(tr("→更改为→"), gb_modify);
+    auto lb_toModify = new QLabel("\"\"", gb_modify);
+
+    auto le_modify_input = new QLineEdit(gb_modify);
+    le_modify_input->setPlaceholderText("请输入索引名称, 不能为空");
+
+    auto ly_modify_hint = new QHBoxLayout();
+
+    ly_modify_hint->addWidget(lb_toModify, 0);
+    ly_modify_hint->addWidget(lb_modify_hint, 0);
+    ly_modify_hint->addWidget(le_modify_input, 0);
+    ly_modify_hint->addSpacerItem(new QSpacerItem(40, 20, QSizePolicy::Expanding));
+
+    auto bt_modify = new QPushButton(tr("更改索引名"), gb_modify);
+
+    auto ly_gb_modify = new QVBoxLayout(gb_modify);
+    ly_gb_modify->addSpacerItem(
+        new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Expanding));
+    ly_gb_modify->addLayout(ly_modify_hint, 0);
+    ly_gb_modify->addWidget(bt_modify, 0);
+    ly_gb_modify->addSpacerItem(
+        new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Expanding));
+    ly_gb_modify->setStretch(0, 1);
+    ly_gb_modify->setStretch(3, 2);
+
+    ly_total->addWidget(gb_modify,   1, 0);
+    ly_total->addLayout(ly_pp,       0, 2);
+    ly_total->addWidget(bt_compress, 1, 1);
+    ly_total->addWidget(preview_w,   1, 2);
+    ly_total->setColumnStretch(0, 0);
+    ly_total->setColumnStretch(1, 0);
+    ly_total->setColumnStretch(2, 1);
 
     connect(bt_pull, &QPushButton::clicked, this, [=]() {
         editor->pull_org();
@@ -173,10 +226,14 @@ QWidget *IndexWindow::initModelWidget(IndexEditor *editor)
     connect(editor, &IndexEditor::onPullSuccessful, this, [=]() {
         preview_w->refreshInfo();
         QMessageBox::information(this, tr("数据拉取"), tr("数据拉取成功!"));
+        // 自动压缩
+        bt_compress->click();
     });
     connect(editor, &IndexEditor::onPushSuccessful, this, [=]() {
         preview_w->refreshInfo();
         QMessageBox::information(this, tr("数据推送"), tr("数据推送成功!"));
+        // 自动拉取
+        bt_pull->click();
     });
     connect(editor, &IndexEditor::onCompressed, this, [=]() {
         m_logging_widget->info(tr("压缩为索引成功"));
@@ -186,6 +243,46 @@ QWidget *IndexWindow::initModelWidget(IndexEditor *editor)
     connect(editor, &IndexEditor::onSyncToOrg, this, [=]() {
         m_logging_widget->info(tr("索引同步成功"));
         QMessageBox::information(this, tr("索引同步"), tr("索引同步成功!"));
+    });
+
+    // 更改索引功能
+    connect(this, &IndexWindow::onIndexSelected, this, [=](IndexEditor::IndexType type) {
+        if (type == editor->getType()) {
+            gb_modify->setEnabled(true);
+            lb_toModify->setText(QString().asprintf("\"%s\"", editor->index(m_selected_row).toStdString().c_str()));
+        }
+    });
+
+    connect(bt_modify, &QPushButton::clicked, this, [=]() {
+        if (m_selected_row == -1) {
+            auto info = tr("未选择要更改的标签, 更改失败! 请<b>点击目录根节点</b>进行选择!");
+            m_logging_widget->error(info);
+            QMessageBox::warning(this, tr("未选择要更改的标签, 更改失败"), info);
+            return;
+        }
+        auto tagName = le_modify_input->text();
+        if (tagName == "") {
+            auto info = tr("标签目录名<b>不能为空</b>, 更改失败!");
+            m_logging_widget->error(info);
+            QMessageBox::warning(this, tr("标签目录名为空, 更改失败"), info);
+            return;
+        }
+        editor->modify(m_selected_row, tagName);
+    });
+    connect(editor, &IndexEditor::onModifyRepeat, this, [=](const QString &scName) {
+        auto info = tr("无法更改为<b>同名标签</b>\" ") + scName + tr(" \", 更改失败!");
+                    m_logging_widget->error(info);
+        QMessageBox::warning(this, tr("无法更改同名标签, 更改失败"), info);
+    });
+    connect(editor, &IndexEditor::onModifySuccessed, this, [=]() {
+        preview_w->clearInfo();
+        preview_w->refreshInfo();
+        le_modify_input->clear();
+        lb_toModify->setText("\"\"");
+        m_selected_row = -1;
+        m_logging_widget->info(tr("标签更改成功，上传数据中..."));
+        QMessageBox::information(this, tr("标签更改"), tr("标签更改成功"));
+        editor->push_org();
     });
 
 

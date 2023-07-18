@@ -51,8 +51,8 @@ public:
         REQUEST_UPLOADMODEL_SIMPLE  = 0x0000000D, // 上传模型(不计算特征值)
         RESPONSE_UPLOADMODEL_SIMPLE = 0x1000000D, // 上传模型(不计算特征值)
 
-        REQUEST_SHOWTBMODEL     = 0x0000000E,   // 请求显示模型数据表
-        RESPONSE_SHOWTBMODEL    = 0x1000000E,   // 显示模型数据表
+        REQUEST_SHOWTABLE     = 0x0000000E,   // 请求显示模型数据表
+        RESPONSE_SHOWTABLE    = 0x1000000E,   // 显示模型数据表
 
         REQUEST_INDEXPULL        = 0x0000000F,  // 请求拉取索引
         RESPONSE_INDEXPULL       = 0x1000000F,  // 拉取索引
@@ -73,6 +73,14 @@ public:
         RESPONSE_VERSIONDELETE   = 0x10000016,
         REQUEST_VERSIONROLLBACK  = 0x00000017,  // 版本回退
         RESPONSE_VERSIONROLLBACK = 0x10000017,
+
+        REQUEST_SC               = 0x00000018,   // 标准分类
+        RESPONSE_SC              = 0x10000018,
+
+        REQUEST_PULLSC           = 0x00000019,   // 拉取标准分类
+        RESPONSE_PULLSC          = 0x10000019,
+        REQUEST_PUSHSC           = 0x0000001A,   // 推送标准分类
+        RESPONSE_PUSHSC          = 0x1000001A,
 
     };
     Q_ENUM(HeaderField)

@@ -25,6 +25,8 @@
 #include "gui/tagsmanagerwindow.h"
 #include "gui/dbtablewindow.h"
 #include "gui/versionwindow.h"
+#include "gui/directorywindow.h"
+#include "gui/scmanagerwindow.h"
 
 HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow(parent)
 {
@@ -163,7 +165,7 @@ void HomeWindow::makeMenu()
         m_top_menubar->addMenu(menu_file);
 
         // ----------------查看资源数据库----------------
-        menu_file->addAction(tr("模型数据表预览(&I)"), this, [this](){
+        menu_file->addAction(tr("模型数据表预览(&T)"), this, [this](){
             auto winName = "模型数据表预览";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName, this->isMaximized(), true)) {
@@ -179,6 +181,8 @@ void HomeWindow::makeMenu()
                 fm->create(winName, new ImportWindow(this));
             }
         }, QKeySequence("Ctrl+I"));
+
+        menu_file->addSeparator();
 
         // ----------------选项----------------
         menu_file->addAction(tr("选项(&O)"), this, [this](){
@@ -220,6 +224,8 @@ void HomeWindow::makeMenu()
             }
         });
 
+        menu_version->addSeparator();
+
         // ----------------索引----------------
         menu_version->addAction(tr("索引管理"), this, [=](){
             auto winName = "索引管理";
@@ -229,8 +235,32 @@ void HomeWindow::makeMenu()
             }
         });
 
-        // ----------------属性编辑----------------
-        menu_version->addAction(tr("属性编辑"));
+        menu_version->addSeparator();
+
+        // ----------------目录管理----------------
+        menu_version->addAction(tr("标准分类管理"), this, [=](){
+            auto winName = "标准分类管理";
+            auto fm = FunctionWnidowManager::getInstance();
+            if (!fm->show(winName, this->isMaximized(), true)){
+                fm->create(winName, new SCManagerWindow(this));
+            }
+        });
+        menu_version->addAction(tr("标准分类目录管理"), this, [=](){
+            auto winName = "标准分类目录管理";
+            auto fm = FunctionWnidowManager::getInstance();
+            if (!fm->show(winName, this->isMaximized(), true)){
+                fm->create(winName, new SCDirWindow(this));
+            }
+        });
+        menu_version->addAction(tr("标签目录管理"), this, [=](){
+            auto winName = "标签目录管理";
+            auto fm = FunctionWnidowManager::getInstance();
+            if (!fm->show(winName, this->isMaximized(), true)){
+                fm->create(winName, new TagDirWindow(this));
+            }
+        });
+
+        menu_version->addSeparator();
 
         // ----------------版本管理----------------
         menu_version->addAction(tr("版本管理"), this, [=]() {

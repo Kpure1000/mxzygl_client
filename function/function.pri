@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/layoutmanager.h \
     $$PWD/metacategory.h \
     $$PWD/modelsearch.h \
+    $$PWD/scmanager.h \
     $$PWD/tagsmanager.h \
     $$PWD/typemanager.h \
     $$PWD/versioncontroller.h
@@ -21,6 +22,7 @@ SOURCES += \
     $$PWD/layoutmanager.cpp \
     $$PWD/metacategory.cpp \
     $$PWD/modelsearch.cpp \
+    $$PWD/scmanager.cpp \
     $$PWD/tagsmanager.cpp \
     $$PWD/typemanager.cpp \
     $$PWD/versioncontroller.cpp

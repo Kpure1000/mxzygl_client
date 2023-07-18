@@ -1,6 +1,7 @@
 SOURCES += \
     $$PWD/categoryselector.cpp \
     $$PWD/infotablewidget.cpp \
+    $$PWD/infotreewidget.cpp \
     $$PWD/interactivewidget.cpp \
     $$PWD/loggingwidget.cpp \
     $$PWD/modelsearchwidget.cpp \
@@ -18,6 +19,7 @@ SOURCES += \
 HEADERS += \
     $$PWD/categoryselector.h \
     $$PWD/infotablewidget.h \
+    $$PWD/infotreewidget.h \
     $$PWD/interactivewidget.h \
     $$PWD/loggingwidget.h \
     $$PWD/modelsearchwidget.h \
