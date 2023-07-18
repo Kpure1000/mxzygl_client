@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <vector>
 #include <memory>
+#include <functional>
 
 namespace Ui {
 class WizardWidget;

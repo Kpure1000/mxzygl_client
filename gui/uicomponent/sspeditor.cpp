@@ -36,7 +36,7 @@ SSPEditor::SSPEditor(PreviewWidget *prewviewer, QWidget *parent)
     ui->lb_frames->setText(QString().asprintf("%d", frames));
     ui->lb_totalTime->setText(QString().asprintf("%.3f (ms)", frames * 1000.0f / spp));
 
-    connect(ui->spb_spp, &QSpinBox::valueChanged, this, [=](int val){
+    connect(ui->spb_spp, QOverload<int>::of(&QSpinBox::valueChanged), this, [=](int val){
         int frames = m_prewviewer->getPreviewPane()[0]->getRenderWidget()->getRenderer()->getBVHFrames();
         ui->lb_freq->setText(QString().asprintf("%.3f (fps)", 1.0f / val));
         ui->lb_frames->setText(QString().asprintf("%d", frames));

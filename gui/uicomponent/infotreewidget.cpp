@@ -1,6 +1,7 @@
 #include "infotreewidget.h"
 #include <QHeaderView>
 #include <QJsonArray>
+#include <QDebug>
 
 InfoTreeWidget::InfoTreeWidget(QJsonObject *root, QJsonObject *detail, bool resizeAsContent, QWidget *parent)
     : QTreeWidget{parent}, m_root{root}, m_detail{detail}, m_resizeAsContent{resizeAsContent}

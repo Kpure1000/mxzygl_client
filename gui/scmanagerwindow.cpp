@@ -14,6 +14,7 @@
 #include <QKeyEvent>
 #include <QShowEvent>
 #include <QCloseEvent>
+#include <QDebug>
 
 #include "gui/uicomponent/categoryselector.h"
 #include "gui/uicomponent/infotablewidget.h"
