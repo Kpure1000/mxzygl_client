@@ -1,9 +1,13 @@
-#ifndef VERSIONPAINTER_H
-#define VERSIONPAINTER_H
+#ifndef MX_VERSIONPAINTER_H
+#define MX_VERSIONPAINTER_H
 
 #include <QWidget>
 #include <QGraphicsItem>
 #include <QGraphicsSceneHoverEvent>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QGraphicsView>
+#include <QGraphicsScene>
 
 #include <unordered_map>
 
@@ -15,11 +19,29 @@ class VersionPainter : public QWidget
 public:
     explicit VersionPainter(QWidget *parent = nullptr);
 
+//    void setRepoInfo(QJsonObject *info);
+//    void setVersionInfo(QJsonObject *info);
+
+    void refreshVersion(const QJsonArray &version_data);
+    void clearVersion();
+
+    void setCurrentVersion(int index);
+
 signals:
+    void onVersionSelected(int index);
+    void onVersionSelectionCleared();
 
 private:
-    std::unordered_map<QGraphicsItem*, int> m_itemsMap;
+    QString versionText(const QString &name,
+                        const QString &hash,
+                        const QString &time,
+                        const QString &repo,
+                        bool is_head = false);
 
+    QGraphicsView *m_gview;
+    QGraphicsScene *m_gscene;
+    std::unordered_map<QGraphicsItem*, int> m_itemsMap;
+//    QJsonObject *m_repo = nullptr, *m_version = nullptr;
 };
 
 class VersionRect : public QObject, public QGraphicsItem
@@ -31,6 +53,8 @@ public:
     ~VersionRect();
 
     void setBrushColor(const QColor& color);
+    void setSize(qreal w, qreal h);
+    QRectF rect() const { return m_rect; }
 
     QRectF boundingRect() const override;
 
@@ -39,6 +63,7 @@ public:
 //    void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
     void setVersionSelected(bool selected);
+    bool isVersionSelected() const { return m_is_selected; }
 
 signals:
     void onHover();
@@ -47,7 +72,7 @@ private:
     qreal m_radius;
     QRectF m_rect;
     QColor m_brushColor;
-    bool m_is_selected;
+    bool m_is_selected, m_is_zoomin = false;
 
     // QGraphicsItem interface
 protected:

@@ -2,6 +2,7 @@ SOURCES += \
     $$PWD/categoryselector.cpp \
     $$PWD/infotablewidget.cpp \
     $$PWD/infotreewidget.cpp \
+    $$PWD/inputdailog.cpp \
     $$PWD/interactivewidget.cpp \
     $$PWD/loggingwidget.cpp \
     $$PWD/modelsearchwidget.cpp \
@@ -20,6 +21,7 @@ HEADERS += \
     $$PWD/categoryselector.h \
     $$PWD/infotablewidget.h \
     $$PWD/infotreewidget.h \
+    $$PWD/inputdailog.h \
     $$PWD/interactivewidget.h \
     $$PWD/loggingwidget.h \
     $$PWD/modelsearchwidget.h \
@@ -38,6 +40,7 @@ HEADERS += \
 
 FORMS += \
     $$PWD/categoryselector.ui \
+    $$PWD/inputdailog.ui \
     $$PWD/interactivewidget.ui \
     $$PWD/loggingwidget.ui \
     $$PWD/modelsearchwidget.ui \
