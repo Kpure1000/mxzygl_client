@@ -1,5 +1,5 @@
-#ifndef SSPEDITOR_H
-#define SSPEDITOR_H
+#ifndef MX_SSPEDITOR_H
+#define MX_SSPEDITOR_H
 
 #include <QWidget>
 

@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QShowEvent>
 #include <QCloseEvent>
+#include <QJsonObject>
 
 #include "uicomponent/versionwidget.h"
 #include "gui/uicomponent/loggingwidget.h"
@@ -46,7 +47,7 @@ VersionWindow::VersionWindow(QWidget *parent)
 
     {
         m_logging_widget = new LoggingWidget(center_widget);
-        auto docker_logging = new QDockWidget(tr("索引编辑 - 信息输出"), center_widget);
+        auto docker_logging = new QDockWidget(tr("版本管理 - 信息输出"), center_widget);
         docker_logging->setObjectName("docker_logging");
         docker_logging->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
         docker_logging->setWidget(m_logging_widget);
@@ -56,6 +57,28 @@ VersionWindow::VersionWindow(QWidget *parent)
 
     connect(vctrl, &VersionController::onResponsing, this, [=](const QString & info, bool is_continue){
         is_continue ? m_logging_widget->info(info) : m_logging_widget->warning(info);
+    });
+
+    connect(vctrl, &VersionController::onPullReopSuccessful, this, [=]() {
+        m_logging_widget->trace("版本库拉取成功");
+    });
+    connect(vctrl, &VersionController::onCreateReopSuccessful, this, [=](const QJsonObject &info) {
+        m_logging_widget->trace(QString("版本库'%1'创建成功").arg(info["name"].toString()));
+    });
+    connect(vctrl, &VersionController::onAddVersionSuccessful, this, [=]() {
+        m_logging_widget->trace("版本增加成功");
+    });
+    connect(vctrl, &VersionController::onQueryVersionSuccessful, this, [=](const QJsonObject &info) {
+        m_logging_widget->trace("版本查询成功");
+    });
+    connect(vctrl, &VersionController::onSyncVersionSuccessful, this, [=]() {
+        m_logging_widget->trace("版本同步成功");
+    });
+    connect(vctrl, &VersionController::onDeleteVersionSuccessful, this, [=]() {
+        m_logging_widget->trace("版本删除成功");
+    });
+    connect(vctrl, &VersionController::onRollbackVersionSuccessful, this, [=]() {
+        m_logging_widget->trace("版本回退成功");
     });
 
 }

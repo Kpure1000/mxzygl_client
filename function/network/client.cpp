@@ -71,9 +71,17 @@ Client::~Client()
 
 void Client::sendData(const QJsonObject &data, const QByteArray &extraData)
 {
-
     if (QTcpSocket::UnconnectedState != m_socket->state()) {
-        qDebug() << "Client::sendData>> 还没发完别急!!!!!!!!!!";
+        const int retry_timeout = 1000;
+        qDebug() << "Client::sendData>> 还没发完, 尝试在" << retry_timeout << "ms后重发";
+        auto send_retry = new QTimer();
+        send_retry->start(retry_timeout);
+        send_retry->callOnTimeout([=]() {
+            qDebug() << "Client::sendData>> QTimer::timeout>> 重发";
+            send_retry->stop();
+            send_retry->deleteLater();
+            sendData(data, extraData);
+        });
         return;
     }
 
