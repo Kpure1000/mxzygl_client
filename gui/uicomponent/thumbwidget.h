@@ -1,5 +1,5 @@
-#ifndef THUMBWIDGET_H
-#define THUMBWIDGET_H
+#ifndef MX_THUMBWIDGET_H
+#define MX_THUMBWIDGET_H
 
 #include <QWidget>
 
@@ -37,4 +37,4 @@ private:
     //    std::vector<PreviewPane*> m_PreviewPanes;
 };
 
-#endif // THUMBWIDGET_H
+#endif // MX_THUMBWIDGET_H
