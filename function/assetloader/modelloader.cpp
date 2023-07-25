@@ -110,11 +110,11 @@ void ModelLoader::cachedAsyncLoad(const QString &filePath, std::function<void(bo
             auto fileExt = filePath.split('.').back();
             std::shared_ptr<res::Model> model;
             if (fileExt == "fbx") {
-                model = ModelLoader::getInstance()->loadFBX(filePath, true, false);
+                model = ModelLoader::getInstance()->loadFBX(filePath, true, true);
             } else if (fileExt == "obj") {
-                model = ModelLoader::getInstance()->loadOBJ(filePath, false);
+                model = ModelLoader::getInstance()->loadOBJ(filePath, true);
             } else if (fileExt == "off") {
-                model = ModelLoader::getInstance()->loadOFF(filePath, false);
+                model = ModelLoader::getInstance()->loadOFF(filePath, true);
             } else {
                 qDebug() << "ModelLoader::asyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .off is Legal)";
                 loadCallBack(false);
@@ -126,10 +126,21 @@ void ModelLoader::cachedAsyncLoad(const QString &filePath, std::function<void(bo
                 return;
             }
             ModelManager::getInstance()->add(filePath.toStdString(), model);
+            int v_count = 0;
+            for (auto &mesh : model->meshes) {
+                v_count += mesh->verticesNum();
+            }
+            qDebug() << QString("模型 '%1' 顶点数: %2.").arg(filePath, v_count);
             emit onAssetLoaded(filePath);
             loadCallBack(true);
         });
     } else {
+        int v_count = 0;
+        auto model = ModelManager::getInstance()->get(filePath.toStdString());
+        for (auto &mesh : model->meshes) {
+            v_count += mesh->verticesNum();
+        }
+        qDebug() << QString("模型 '%1' 顶点数: %2.").arg(filePath, v_count);
         emit onAssetLoaded(filePath);
         loadCallBack(true);
     }
@@ -151,6 +162,13 @@ void ModelLoader::tempAsyncLoad(const QString &filePath, std::function<void (std
         }
         if (model == nullptr) {
             qDebug() << "ModelLoader::tempAsyncLoad>> Model" << filePath << "Load Failed";
+        }
+        if (model) {
+            int v_count = 0;
+            for (auto &mesh : model->meshes) {
+                v_count += mesh->verticesNum();
+            }
+            qDebug() << QString(R"(模型 '%1', 顶点数: %2)").arg(filePath).arg(v_count);
         }
         loadCallBack(model);
     });

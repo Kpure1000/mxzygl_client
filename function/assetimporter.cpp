@@ -30,14 +30,14 @@ AssetImporter::AssetImporter(ImportType type, QObject *parent)
                 if (Protocal::HeaderField::RESPONSE_UPLOADMODEL == response_type) {
                     emit onResponsing(tr("上传失败. Info: ") + status, false);
                 } else if (Protocal::HeaderField::REQUEST_UPLOADMODEL_SIMPLE == response_type){
-                    emit onResponsing(tr("简单上传失败. Info: ") + status, false);
+                    emit onResponsing(tr("上传失败. Info: ") + status, false);
                 }
             } else {
                 if (Protocal::HeaderField::RESPONSE_UPLOADMODEL == response_type) {
                     emit onResponsing(tr("上传成功, 耗时 ") + QString().asprintf("%f", upload_cost) + tr(" 秒"), false);
                     emit onUploadSuccessful();
                 } else if (Protocal::HeaderField::RESPONSE_UPLOADMODEL_SIMPLE == response_type){
-                    emit onResponsing(tr("简单上传成功, 耗时 ") + QString().asprintf("%f", upload_cost) + tr(" 秒"), false);
+                    emit onResponsing(tr("上传成功, 耗时 ") + QString().asprintf("%f", upload_cost) + tr(" 秒"), false);
                     emit onUploadSimpleSuccessful();
                 }
             }
@@ -279,9 +279,9 @@ void AssetImporter::__upload()
 {
     m_upload_start = std::chrono::steady_clock::now();
     switch (m_type) {
-    case ImportType::MODEL:  emit onResponsing(tr("模型资源简单上传开始"), true); break;
-    case ImportType::BVH:    emit onResponsing(tr("骨骼动画资源简单上传开始"), true); break;
-    case ImportType::EFFECT: emit onResponsing(tr("特效资源简单上传开始"), true); break;
+    case ImportType::MODEL:  emit onResponsing(tr("模型资源上传开始"), true); break;
+    case ImportType::BVH:    emit onResponsing(tr("骨骼动画资源上传开始"), true); break;
+    case ImportType::EFFECT: emit onResponsing(tr("特效资源上传开始"), true); break;
     }
     m_client->sendData(m_info);
 }

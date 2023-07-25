@@ -144,6 +144,11 @@ void Renderer::logic_tick(float dt)
         // ArcBall处理
         m_arcBall->tick(m_input, m_fpsCamera->getFront(), dt);
     }
+    m_ouput_time += dt;
+    if (m_ouput_time > 2000.f) {
+        qDebug() << "实时帧率: " << 1000.f / dt << " fps";
+        m_ouput_time = .0f;
+    }
 }
 
 void Renderer::render_tick(QOpenGLContext *context)

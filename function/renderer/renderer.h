@@ -84,6 +84,8 @@ private:
     InputData m_input;
 
     bool m_is_initialized;
+
+    float m_ouput_time = .0f;
 };
 
 #endif // MX_RENDERER_H
