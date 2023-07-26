@@ -203,10 +203,8 @@ void VersionWidget::refresh()
 
     ui->bt_create       ->setEnabled(true);
     ui->bt_add          ->setEnabled(true);
-    ui->bt_delet        ->setEnabled(true);
     ui->bt_query        ->setEnabled(true);
-    ui->bt_sync         ->setEnabled(true);
-    ui->bt_rollback     ->setEnabled(true);
+
     ui->gb_repoSel      ->setEnabled(true);
     ui->gb_versionInfo  ->setEnabled(true);
 
