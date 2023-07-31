@@ -70,7 +70,7 @@ HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow
             return;
         }
     });
-    QUrl authorization_url("http://localhost:9722/auth?appcode=APP1601&pincode=1234567890");
+    QUrl authorization_url("http://localhost:9722/auth?appcode=APP1605&pincode=1234567890");
     QNetworkRequest authorization_request(authorization_url);
     network_access_manager_authorization->get(authorization_request);
 
