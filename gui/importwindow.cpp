@@ -213,7 +213,7 @@ QWidget *ImportWindow::setupBrowseWidget(AssetImporter *importer, WizardWidget* 
         case AssetImporter::ImportType::MODEL: {
             config_key = "FileBrowser/ImportType_MODEL";
             open_title = tr("浏览模型文件");
-            open_option = "*.obj;*.fbx";
+            open_option = "*.obj;*.fbx;*.3ds";
             break;
         }
         case AssetImporter::ImportType::BVH: {

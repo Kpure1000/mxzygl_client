@@ -97,7 +97,7 @@ std::shared_ptr<Model> ModelLoader::loadOBJ(const QString &filePath, bool doNorm
     return loadFBX(filePath, true, doNormalize);
 }
 
-std::shared_ptr<Model> ModelLoader::loadOFF(const QString &filePath, bool doNormalize)
+std::shared_ptr<Model> ModelLoader::load3DS(const QString &filePath, bool doNormalize)
 {
     return loadFBX(filePath, true, doNormalize);
 }
@@ -113,10 +113,10 @@ void ModelLoader::cachedAsyncLoad(const QString &filePath, std::function<void(bo
                 model = ModelLoader::getInstance()->loadFBX(filePath, true, false);
             } else if (fileExt == "obj") {
                 model = ModelLoader::getInstance()->loadOBJ(filePath, false);
-            } else if (fileExt == "off") {
-                model = ModelLoader::getInstance()->loadOFF(filePath, false);
+            } else if (fileExt == "3ds") {
+                model = ModelLoader::getInstance()->load3DS(filePath, false);
             } else {
-                qDebug() << "ModelLoader::asyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .off is Legal)";
+                qDebug() << "ModelLoader::asyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .3ds is Legal)";
                 loadCallBack(false);
                 return;
             }
@@ -145,9 +145,9 @@ void ModelLoader::tempAsyncLoad(const QString &filePath, std::function<void (std
         } else if (fileExt == "obj") {
             model = ModelLoader::getInstance()->loadOBJ(filePath, false);
         } else if (fileExt == "off") {
-            model = ModelLoader::getInstance()->loadOFF(filePath, false);
+            model = ModelLoader::getInstance()->load3DS(filePath, false);
         } else {
-            qDebug() << "ModelLoader::tempAsyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .off is Legal)";
+            qDebug() << "ModelLoader::tempAsyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .3ds is Legal)";
         }
         if (model == nullptr) {
             qDebug() << "ModelLoader::tempAsyncLoad>> Model" << filePath << "Load Failed";

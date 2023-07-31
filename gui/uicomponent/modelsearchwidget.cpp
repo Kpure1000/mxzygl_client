@@ -115,7 +115,7 @@ void ModelSearchWidget::on_le_input_textChanged(const QString &input)
 void ModelSearchWidget::on_bt_browser_clicked()
 {
     QString open_dir = ConfigManager::getInstance()->getConfig("FileBrowser/ModelSearch").toString();
-    m_selectedFile = QFileDialog::getOpenFileName(this, tr("浏览模型文件"), open_dir, "*.obj;*.fbx");
+    m_selectedFile = QFileDialog::getOpenFileName(this, tr("浏览模型文件"), open_dir, "*.obj;*.fbx;*.3ds");
     if (m_selectedFile == "")
         return;
     if (nullptr == m_single_preview) {

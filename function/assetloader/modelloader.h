@@ -21,7 +21,7 @@ public:
      */
     static std::shared_ptr<res::Model> loadFBX(const QString& filePath, bool doGlobalTransform = true, bool doNormalize = false);
     static std::shared_ptr<res::Model> loadOBJ(const QString& filePath, bool doNormalize);
-    static std::shared_ptr<res::Model> loadOFF(const QString& filePath, bool doNormalize);
+    static std::shared_ptr<res::Model> load3DS(const QString& filePath, bool doNormalize);
 
     void cachedAsyncLoad(const QString &filePath, std::function<void(bool)> loadCallBack);
     void tempAsyncLoad(const QString &filePath, std::function<void(std::shared_ptr<res::Model>)> loadCallBack);
