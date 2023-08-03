@@ -263,6 +263,7 @@ void VersionController::setPullData(const QJsonObject &data)
 
     const auto &data_repo = (*m_repo);
     for (const auto &d : data_repo) {
-        m_repoSet.insert(d["name"].toString().toStdString());
+        auto dObj = d.toObject();
+        m_repoSet.insert(dObj["name"].toString().toStdString());
     }
 }
