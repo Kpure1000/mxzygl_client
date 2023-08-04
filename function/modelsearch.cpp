@@ -132,6 +132,17 @@ QStringList ModelSearch::getPreviewInfo(const std::vector<int> &index) const
     return ret;
 }
 
+QStringList ModelSearch::getFilePaths() const
+{
+    QStringList ret;
+    auto data = (*m_result_info)["data"].toArray();
+    for (const auto &d : data) {
+        auto dObj = d.toObject();
+        ret << dObj["hash"].toString();
+    }
+    return ret;
+}
+
 std::pair<Transform, Transform> ModelSearch::getTransform(int row) const
 {
     auto data = (*m_result_info)["data"].toArray();

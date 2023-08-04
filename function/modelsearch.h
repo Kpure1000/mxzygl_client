@@ -33,6 +33,8 @@ public:
 
     QStringList getPreviewInfo(const std::vector<int> &index) const;
 
+    QStringList getFilePaths() const;
+
     /**
      * return pair[trans_model, trans_camera]
      */

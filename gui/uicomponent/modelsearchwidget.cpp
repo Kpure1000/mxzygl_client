@@ -5,6 +5,7 @@
 #include <QSplitter>
 #include <QDebug>
 #include <QMessageBox>
+#include <QTextEdit>
 
 #include "gui/uicomponent/previewwidget.h"
 #include "function/configer/configmanager.h"
@@ -16,6 +17,8 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
     QWidget(parent), ui(new Ui::ModelSearchWidget), m_single_preview(nullptr)
 {
     ui->setupUi(this);
+
+    ui->bt_export->setEnabled(false);
 
     m_modelSearch = new ModelSearch(searchType, this);
     connect(m_modelSearch, &ModelSearch::onResultUpdate, this, [=](){
@@ -30,6 +33,7 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
         ui->bt_search->setEnabled(!is_continue);
     });
     connect(m_modelSearch, &ModelSearch::onSearchSuccessful, this, [=](){
+        ui->bt_export->setEnabled(true);
         switch (searchType) {
         case ModelSearch::SearchType::CONTENT:
             QMessageBox::information(this, tr("模型内容检索"), tr("内容检索成功!"));
@@ -141,5 +145,29 @@ void ModelSearchWidget::on_bt_search_clicked()
         m_modelSearch->setSearchInfo(ui->le_input->text());
     }
     m_modelSearch->search();
+}
+
+
+void ModelSearchWidget::on_bt_export_clicked()
+{
+    auto exportDia = new QDialog(this);
+    exportDia->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
+    exportDia->setAttribute(Qt::WA_DeleteOnClose, true);
+    exportDia->setWindowTitle(tr("导出模型路径列表"));
+
+    auto ly_total = new QGridLayout(exportDia);
+
+    auto te_out = new QTextEdit(exportDia);
+    te_out->setReadOnly(true);
+
+    ly_total->addWidget(new QLabel(tr("全选复制文件路径")));
+    ly_total->addWidget(te_out);
+
+    const auto & ex_list = m_modelSearch->getFilePaths();
+    for (auto &str : ex_list) {
+        te_out->append(str);
+    }
+
+    exportDia->show();
 }
 

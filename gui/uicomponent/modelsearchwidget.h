@@ -28,6 +28,8 @@ private slots:
 
     void on_bt_search_clicked();
 
+    void on_bt_export_clicked();
+
 private:
     Ui::ModelSearchWidget *ui;
 
