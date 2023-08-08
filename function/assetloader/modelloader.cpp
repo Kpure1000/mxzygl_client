@@ -109,11 +109,11 @@ void ModelLoader::cachedAsyncLoad(const QString &filePath, std::function<void(bo
         JobSystem::getInstance()->submit([filePath, loadCallBack, this]() {
             auto fileExt = filePath.split('.').back();
             std::shared_ptr<res::Model> model;
-            if (fileExt == "fbx") {
+            if (fileExt == "fbx" || fileExt == "FBX") {
                 model = ModelLoader::getInstance()->loadFBX(filePath, true, false);
-            } else if (fileExt == "obj") {
+            } else if (fileExt == "obj" || fileExt == "OBJ") {
                 model = ModelLoader::getInstance()->loadOBJ(filePath, false);
-            } else if (fileExt == "3ds") {
+            } else if (fileExt == "3ds" || fileExt == "3DS") {
                 model = ModelLoader::getInstance()->load3DS(filePath, false);
             } else {
                 qDebug() << "ModelLoader::asyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .3ds is Legal)";
@@ -140,11 +140,11 @@ void ModelLoader::tempAsyncLoad(const QString &filePath, std::function<void (std
     JobSystem::getInstance()->submit([filePath, loadCallBack]() {
         auto fileExt = filePath.split('.').back();
         std::shared_ptr<res::Model> model = nullptr;
-        if (fileExt == "fbx") {
+        if (fileExt == "fbx" || fileExt == "FBX") {
             model = ModelLoader::getInstance()->loadFBX(filePath, true, false);
-        } else if (fileExt == "obj") {
+        } else if (fileExt == "obj" || fileExt == "OBJ") {
             model = ModelLoader::getInstance()->loadOBJ(filePath, false);
-        } else if (fileExt == "off") {
+        } else if (fileExt == "3ds" || fileExt == "3DS") {
             model = ModelLoader::getInstance()->load3DS(filePath, false);
         } else {
             qDebug() << "ModelLoader::tempAsyncLoad>> Unsupported Model" << filePath << "(.fbx, .obj, .3ds is Legal)";

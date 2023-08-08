@@ -18,11 +18,13 @@
 
 #include "gui/uicomponent/categoryselector.h"
 #include "gui/uicomponent/infotreewidget.h"
-#include "gui/uicomponent/infotablewidget.h"
+#include "gui/uicomponent/previewpane.h"
+#include "gui/uicomponent/renderwidget.h"
 #include "gui/uicomponent/previewwidget.h"
 #include "gui/uicomponent/loggingwidget.h"
 #include "function/layoutmanager.h"
 #include "function/indexeditor.h"
+#include "function/renderer/renderer.h"
 
 ////////////////////////
 //// DirectoryWindow
@@ -208,7 +210,16 @@ QWidget *SCDirWindow::initModelWidget(IndexEditor *editor)
         editor->compressToIndex();
     });
     connect(preview_w, &PreviewWidget::onPreview, this, [=](const std::vector<int> &index) {
-        preview_w->previewFiles(editor->getFilePaths(index), editor->getPreviewInfo(index), false);
+        preview_w->previewFiles(editor->getFilePaths(index), editor->getPreviewInfo(index), true);
+        auto panes = preview_w->getPreviewPane();
+        for (size_t i = 0; i < panes.size(); i++) {
+            if (i < index.size()) {
+                auto renderer = panes[i]->getRenderWidget()->getRenderer();
+                auto trans_pair = editor->getTransform(index[i]);
+                renderer->setModelTransform(trans_pair.first);
+                renderer->setCameraTransform(trans_pair.second);
+            }
+        }
     });
 
     connect(editor, &IndexEditor::onResponsing, this, [=](const QString & info, bool is_continue){
@@ -240,8 +251,12 @@ QWidget *SCDirWindow::initModelWidget(IndexEditor *editor)
     // 更改标签功能
     connect(m_dir_tree, &InfoTreeWidget::onRootSelected, this, [=](int row) {
         m_selected_row = row;
-        gb_modify->setEnabled(true);
-        lb_toModify->setText(QString().asprintf("\"%s\"", editor->index(row).toStdString().c_str()));
+        if (m_selected_row == -1) {
+            lb_toModify->setText("\"\"");
+        } else {
+            gb_modify->setEnabled(true);
+            lb_toModify->setText(QString().asprintf("\"%s\"", editor->index(row).toStdString().c_str()));
+        }
     });
 
     // 更改功能
@@ -454,7 +469,16 @@ QWidget *TagDirWindow::initModelWidget(IndexEditor *editor)
         editor->compressToIndex();
     });
     connect(preview_w, &PreviewWidget::onPreview, this, [=](const std::vector<int> &index) {
-        preview_w->previewFiles(editor->getFilePaths(index), editor->getPreviewInfo(index), false);
+        preview_w->previewFiles(editor->getFilePaths(index), editor->getPreviewInfo(index), true);
+        auto panes = preview_w->getPreviewPane();
+        for (size_t i = 0; i < panes.size(); i++) {
+            if (i < index.size()) {
+                auto renderer = panes[i]->getRenderWidget()->getRenderer();
+                auto trans_pair = editor->getTransform(index[i]);
+                renderer->setModelTransform(trans_pair.first);
+                renderer->setCameraTransform(trans_pair.second);
+            }
+        }
     });
 
     connect(editor, &IndexEditor::onResponsing, this, [=](const QString & info, bool is_continue){
