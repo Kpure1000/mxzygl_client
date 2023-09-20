@@ -156,7 +156,7 @@ void PreviewPane::doPreviewEffect(const QString &filePath, const QString &previe
 {
     doShowPreparing(previewInfo);
     QDir dir(filePath);
-    qDebug() << dir;
+//    qDebug() << dir;
     if (dir.exists(filePath))
     {
         emit onEffectPrepared(previewInfo);

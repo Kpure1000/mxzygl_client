@@ -11,6 +11,7 @@
 #include "function/assetloader/modelloader.h"
 #include "function/assetloader/modelconverter.h"
 #include "utils/jobsystem.h"
+#include "function/versioncontroller.h"
 
 AssetImporter::AssetImporter(ImportType type, QObject *parent)
     : QObject{parent}, m_type(type)
@@ -47,6 +48,8 @@ AssetImporter::AssetImporter(ImportType type, QObject *parent)
     m_typeManager = new TypeManager(type, this);
     m_tagsManager = new TagsManager(type, this);
 
+    m_versionCtrl = new VersionController(this);
+
     connect(m_typeManager, &TypeManager::onResponsing, this, &AssetImporter::onResponsing);
     connect(m_tagsManager, &TagsManager::onResponsing, this, &AssetImporter::onResponsing);
 
@@ -63,6 +66,11 @@ AssetImporter::AssetImporter(ImportType type, QObject *parent)
         }
     }, Qt::QueuedConnection);
 
+    connect(m_versionCtrl, &VersionController::onResponsing, this, &AssetImporter::onResponsing);
+    connect(m_versionCtrl, &VersionController::onPullReopSuccessful, this, [=]() {
+        addVersionInfo();
+    });
+
     m_info.insert("category", MetaCategory::getInstance()->getCategoryInt());
     // TODO: 连接MetaCategory修改信号
     connect(MetaCategory::getInstance(), &MetaCategory::onCategoryModyfied, this, [=](){
@@ -73,6 +81,7 @@ AssetImporter::AssetImporter(ImportType type, QObject *parent)
     headers << res::AssetInfo::toHeaderElement("name",          false,  false,  true);
     headers << res::AssetInfo::toHeaderElement("type",          true,   true,   false);
     headers << res::AssetInfo::toHeaderElement("tags",          true,   true,   false);
+    headers << res::AssetInfo::toHeaderElement("version",       false,   false,   false);
     headers << res::AssetInfo::toHeaderElement("fileType",      false,  false,  true);
     headers << res::AssetInfo::toHeaderElement("path",          false,  false,  true);
     headers << res::AssetInfo::toHeaderElement("trans_model",   false,  false,  false);
@@ -231,6 +240,11 @@ void AssetImporter::pullTypeAndTags()
     m_tagsManager->pull();
 }
 
+void AssetImporter::pullVersionInfo()
+{
+    m_versionCtrl->pullRepo();
+}
+
 void AssetImporter::upload()
 {
     m_info["type"] = static_cast<int>(Protocal::HeaderField::REQUEST_UPLOADMODEL);
@@ -273,6 +287,34 @@ void AssetImporter::addTypeAndTagsData()
     }
     m_info["data"] = data;
     emit onTypeAndTagsLoaded();
+}
+
+void AssetImporter::addVersionInfo()
+{
+    auto headers = m_info["headers"].toArray();
+    for (auto header : headers) {
+        auto obj = header.toObject();
+        if (obj["name"].toString() == "version") {
+            obj["visible"] = true;
+            header = obj;
+        }
+    }
+    m_info["headers"] = headers;
+
+    auto vArray = m_versionCtrl->getVersions(0);
+    QString vName = "";
+    if (!vArray.empty()) {
+        auto vObj = vArray.begin()->toObject();
+        vName = vObj[ "name"  ].toString();
+    }
+    auto data = m_info["data"].toArray();
+    for (auto row : data) {
+        auto obj = row.toObject();
+        obj["version"] = vName;
+        row = obj;
+    }
+    m_info["data"] = data;
+    emit onVersionLoaded();
 }
 
 void AssetImporter::__upload()

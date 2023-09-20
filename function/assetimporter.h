@@ -14,6 +14,7 @@
 #include "function/renderer/transform.h"
 
 class Client;
+class VersionController;
 
 class AssetImporter : public QObject
 {
@@ -38,6 +39,8 @@ public:
     std::pair<Transform, Transform> getTransform(int row) const;
 
     void pullTypeAndTags();
+
+    void pullVersionInfo();
 
     void upload();
 
@@ -68,9 +71,11 @@ signals:
     void onUploadSuccessful();
     void onUploadSimpleSuccessful();
     void onTypeAndTagsLoaded();
+    void onVersionLoaded();
 
 private:
     void addTypeAndTagsData();
+    void addVersionInfo();
 
     void __upload();
 
@@ -84,6 +89,7 @@ private:
 
     TypeManager *m_typeManager;
     TagsManager *m_tagsManager;
+    VersionController *m_versionCtrl;
 
     bool is_typeLoaded = false, is_tagsLoaded = false;
     std::atomic_int m_saveCount = 0;

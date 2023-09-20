@@ -441,6 +441,12 @@ QWidget *ImportWindow::setupModel_Upload(AssetImporter *importer, WizardWidget* 
     });
     ly_top->addWidget(bt_pull, 1);
 
+    auto bt_version = new QPushButton(tr("拉取版本信息"), totalWidget);
+    connect(bt_version, &QPushButton::clicked, totalWidget, [=](){
+        importer->pullVersionInfo();
+    });
+    ly_top->addWidget(bt_version, 1);
+
     auto bt_upload_simple = new QPushButton(tr("简单上传(不计算特征)"), totalWidget);
     bt_upload_simple->setEnabled(false);
     ly_top->addWidget(bt_upload_simple, 1);
@@ -500,12 +506,26 @@ QWidget *ImportWindow::setupModel_Upload(AssetImporter *importer, WizardWidget* 
         }
     });
 
+    bool *onTypeAndTagsLoaded = new bool{false}, *onVersionLoaded = new bool{false};
     connect(importer, &AssetImporter::onTypeAndTagsLoaded, this, [=](){
-        bt_upload->setEnabled(true);
-        bt_upload_simple->setEnabled(true);
+        (*onTypeAndTagsLoaded) = true;
+        if ((*onVersionLoaded)) {
+            bt_upload->setEnabled(true);
+            bt_upload_simple->setEnabled(true);
+        }
         m_logging_widget->trace("类型与标签拉取成功");
         previewWidget->refreshInfo();
     });
+    connect(importer, &AssetImporter::onVersionLoaded, this, [=](){
+        (*onVersionLoaded) = true;
+        if ((*onTypeAndTagsLoaded)) {
+            bt_upload->setEnabled(true);
+            bt_upload_simple->setEnabled(true);
+        }
+        m_logging_widget->trace("版本拉取成功");
+        previewWidget->refreshInfo();
+    });
+
 
     connect(importer, &AssetImporter::onUploadSuccessful, this, [=](){
         bt_upload->setEnabled(false);
@@ -658,6 +678,12 @@ QWidget *ImportWindow::setupBVH_Upload(AssetImporter *importer, WizardWidget *wi
     });
     ly_top->addWidget(bt_pull, 1);
 
+    auto bt_version = new QPushButton(tr("拉取版本信息"), totalWidget);
+    connect(bt_version, &QPushButton::clicked, totalWidget, [=]() {
+        importer->pullVersionInfo();
+    });
+    ly_top->addWidget(bt_version, 1);
+
     auto bt_upload = new QPushButton(tr("上传"), totalWidget);
     bt_upload->setEnabled(false);
     ly_top->addWidget(bt_upload, 1);
@@ -705,9 +731,21 @@ QWidget *ImportWindow::setupBVH_Upload(AssetImporter *importer, WizardWidget *wi
         }
     });
 
+    bool *onTypeAndTagsLoaded = new bool{false}, *onVersionLoaded = new bool{false};
     connect(importer, &AssetImporter::onTypeAndTagsLoaded, this, [=](){
-        bt_upload->setEnabled(true);
+        (*onTypeAndTagsLoaded) = true;
+        if ((*onVersionLoaded)) {
+            bt_upload->setEnabled(true);
+        }
         m_logging_widget->trace("类型与标签拉取成功");
+        previewWidget->refreshInfo();
+    });
+    connect(importer, &AssetImporter::onVersionLoaded, this, [=](){
+        (*onVersionLoaded) = true;
+        if ((*onTypeAndTagsLoaded)) {
+            bt_upload->setEnabled(true);
+        }
+        m_logging_widget->trace("版本拉取成功");
         previewWidget->refreshInfo();
     });
 
@@ -734,6 +772,12 @@ QWidget *ImportWindow::setupEffect_Upload(AssetImporter *importer, WizardWidget 
         importer->pullTypeAndTags();
     });
     ly_top->addWidget(bt_pull, 1);
+
+    auto bt_version = new QPushButton(tr("拉取版本信息"), totalWidget);
+    connect(bt_version, &QPushButton::clicked, totalWidget, [=]() {
+        importer->pullVersionInfo();
+    });
+    ly_top->addWidget(bt_version, 1);
 
     auto bt_upload = new QPushButton(tr("上传"), totalWidget);
     bt_upload->setEnabled(false);
@@ -787,9 +831,21 @@ QWidget *ImportWindow::setupEffect_Upload(AssetImporter *importer, WizardWidget 
         }
     });
 
+    bool *onTypeAndTagsLoaded = new bool{false}, *onVersionLoaded = new bool{false};
     connect(importer, &AssetImporter::onTypeAndTagsLoaded, this, [=](){
-        bt_upload->setEnabled(true);
+        (*onTypeAndTagsLoaded) = true;
+        if ((*onVersionLoaded)) {
+            bt_upload->setEnabled(true);
+        }
         m_logging_widget->trace("类型与标签拉取成功");
+        previewWidget->refreshInfo();
+    });
+    connect(importer, &AssetImporter::onVersionLoaded, this, [=](){
+        (*onVersionLoaded) = true;
+        if ((*onTypeAndTagsLoaded)) {
+            bt_upload->setEnabled(true);
+        }
+        m_logging_widget->trace("版本拉取成功");
         previewWidget->refreshInfo();
     });
 
