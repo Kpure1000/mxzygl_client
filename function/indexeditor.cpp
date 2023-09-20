@@ -170,6 +170,16 @@ QStringList IndexEditor::getPreviewInfo(const std::vector<int> &index) const
     return ret;
 }
 
+std::pair<Transform, Transform> IndexEditor::getTransform(int row) const
+{
+    auto data = (*m_org_info)["data"].toArray();
+    auto obj = data[row].toObject();
+    return {
+        Transform::fromJson(obj["trans_model" ].toArray()),
+        Transform::fromJson(obj["trans_camera"].toArray())
+    };
+}
+
 QString IndexEditor::index(int row) const
 {
     auto data = (*m_index_info)["data"].toArray();

@@ -363,6 +363,7 @@ QWidget *ImportWindow::setupModel_UniformFormat(AssetImporter *importer, WizardW
         m_logging_widget->trace("保存成功");
 
         previewWidget->refreshInfo();
+        previewWidget->selectGroup(0);
     });
     return totalWidget;
 }

@@ -19,8 +19,11 @@
 #include "gui/uicomponent/categoryselector.h"
 #include "gui/uicomponent/infotablewidget.h"
 #include "gui/uicomponent/previewwidget.h"
+#include "gui/uicomponent/previewpane.h"
+#include "gui/uicomponent/renderwidget.h"
 #include "gui/uicomponent/loggingwidget.h"
 #include "function/layoutmanager.h"
+#include "function/renderer/renderer.h"
 
 IndexWindow::IndexWindow(QWidget *parent)
     : IFunctionWindow(tr("索引编辑"), {800, 600}, true, false, true, parent)
@@ -217,7 +220,16 @@ QWidget *IndexWindow::initModelWidget(IndexEditor *editor)
         editor->compressToIndex();
     });
     connect(preview_w, &PreviewWidget::onPreview, this, [=](const std::vector<int> &index) {
-        preview_w->previewFiles(editor->getFilePaths(index), editor->getPreviewInfo(index), false);
+        preview_w->previewFiles(editor->getFilePaths(index), editor->getPreviewInfo(index), true);
+        auto panes = preview_w->getPreviewPane();
+        for (size_t i = 0; i < panes.size(); i++) {
+            if (i < index.size()) {
+                auto renderer = panes[i]->getRenderWidget()->getRenderer();
+                auto trans_pair = editor->getTransform(index[i]);
+                renderer->setModelTransform(trans_pair.first);
+                renderer->setCameraTransform(trans_pair.second);
+            }
+        }
     });
 
     connect(editor, &IndexEditor::onResponsing, this, [=](const QString & info, bool is_continue){

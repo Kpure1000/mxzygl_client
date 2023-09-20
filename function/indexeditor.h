@@ -5,6 +5,7 @@
 #include <QJsonObject>
 
 #include "resource/indexinfo.h"
+#include "function/renderer/transform.h"
 
 class Client;
 
@@ -34,6 +35,10 @@ public:
     QStringList getFilePaths(const std::vector<int> &index) const;
 
     QStringList getPreviewInfo(const std::vector<int> &index) const;
+    /**
+     * return pair[trans_model, trans_camera]
+     */
+    std::pair<Transform, Transform> getTransform(int row) const;
 
     QString index(int row)const;
 

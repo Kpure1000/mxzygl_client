@@ -214,8 +214,9 @@ void VersionWidget::refresh()
     // 找上次选择的repo index
     int _last_selected_repo_index = -1;
     for (const auto &d : data_repo) {
-        ui->comboBox->addItem(d["name"].toString());
-        if (d["id"].toString() == last_selected_repo) {
+        auto dObj = d.toObject();
+        ui->comboBox->addItem(dObj["name"].toString());
+        if (dObj["id"].toString() == last_selected_repo) {
             _last_selected_repo_index = ui->comboBox->count() - 1;
         }
     }
