@@ -11,9 +11,6 @@
 #include <QDockWidget>
 #include <QMessageBox>
 
-#include <QNetworkReply>
-#include <QUrl>
-
 #include "optionwindow.h"
 #include "importwindow.h"
 #include "gui/uicomponent/modelsearchwidget.h"
@@ -27,53 +24,10 @@
 #include "gui/versionwindow.h"
 #include "gui/directorywindow.h"
 #include "gui/scmanagerwindow.h"
+#include "function/usermanager.h"
 
-HomeWindow::HomeWindow(QWidget* parent, QApplication* current_app) : QMainWindow(parent)
+HomeWindow::HomeWindow(QWidget* parent) : QMainWindow(parent)
 {
-    // 授权
-    this->setEnabled(false);
-    auto network_access_manager_authorization = new QNetworkAccessManager(this);
-    connect(network_access_manager_authorization, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply){
-        QByteArray data = reply->readAll();
-        QJsonDocument doc = QJsonDocument::fromJson(data);
-        if (doc.isNull()) {
-            qDebug() << "Failed to create JSON doc.";
-            QMessageBox::critical(this,"错误","鉴权错误！");
-            QCoreApplication::exit(1);
-            return;
-        }
-
-        if (!doc.isObject()) {
-            qDebug() << "JSON is not an object.";
-            QMessageBox::critical(this,"错误","鉴权错误！");
-            QCoreApplication::exit(1);
-            return;
-        }
-
-        QJsonObject obj = doc.object();
-        if (obj.isEmpty()) {
-            qDebug() << "JSON object is empty.";
-            QMessageBox::critical(this,"错误","鉴权错误！");
-            QCoreApplication::exit(1);
-            return;
-        }
-
-        if (obj.contains("code") && obj["code"] == 0){
-            qDebug() << "authorization code is: " << QString::number(obj["code"].toInt());
-            this->setEnabled(true);
-            return;
-        }
-        else{
-            qDebug() << "authorization code is: " << QString::number(obj["code"].toInt());
-            QMessageBox::about(this,"错误","未获授权！");
-            QCoreApplication::exit(1);
-            return;
-        }
-    });
-    QUrl authorization_url("http://localhost:9722/auth?appcode=APP1605&pincode=1234567890");
-    QNetworkRequest authorization_request(authorization_url);
-    network_access_manager_authorization->get(authorization_request);
-
     this->setWindowTitle(tr("主页 - 模型检索"));
 
     setWindowIcon(QIcon(":/assets/assets/icon/icon.jpg"));
@@ -246,6 +200,10 @@ void HomeWindow::makeMenu()
             }
         });
         menu_version->addAction(tr("标准分类目录管理"), this, [=](){
+            if (!UserManager::getInstance()->isAdmin()) {
+                QMessageBox::warning(this, tr("权限不足"), QString(tr("'%1'为非管理员用户, 无法访问目录管理页面")).arg(UserManager::getInstance()->getName()));
+                return;
+            }
             auto winName = "标准分类目录管理";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName, this->isMaximized(), true)){
@@ -253,6 +211,10 @@ void HomeWindow::makeMenu()
             }
         });
         menu_version->addAction(tr("标签目录管理"), this, [=](){
+            if (!UserManager::getInstance()->isAdmin()) {
+                QMessageBox::warning(this, tr("权限不足"), QString(tr("'%1'为非管理员用户, 无法访问目录管理页面")).arg(UserManager::getInstance()->getName()));
+                return;
+            }
             auto winName = "标签目录管理";
             auto fm = FunctionWnidowManager::getInstance();
             if (!fm->show(winName, this->isMaximized(), true)){
@@ -287,6 +249,18 @@ void HomeWindow::makeMenu()
         });
 
         m_top_menubar->addMenu(menu_view);
+    }
+
+    // ----------------账户----------------
+    {
+        auto menu_account = new QMenu(tr("账户"), this);
+
+        // ----------------查看账户信息----------------
+        menu_account->addAction(tr("查看账户信息"), this, [=]() {
+            QMessageBox::information(this, tr("账户信息"), QString("用户名: %1\n是否为管理员: %2").arg(UserManager::getInstance()->getName(), UserManager::getInstance()->isAdmin() ? "是" : "否"));
+        });
+
+        m_top_menubar->addMenu(menu_account);
     }
 
     this->setMenuBar(m_top_menubar);

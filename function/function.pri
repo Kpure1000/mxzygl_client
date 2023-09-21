@@ -8,6 +8,7 @@ HEADERS += \
     $$PWD/scmanager.h \
     $$PWD/tagsmanager.h \
     $$PWD/typemanager.h \
+    $$PWD/usermanager.h \
     $$PWD/versioncontroller.h
 
 include(configer/configer.pri)
@@ -25,4 +26,5 @@ SOURCES += \
     $$PWD/scmanager.cpp \
     $$PWD/tagsmanager.cpp \
     $$PWD/typemanager.cpp \
+    $$PWD/usermanager.cpp \
     $$PWD/versioncontroller.cpp

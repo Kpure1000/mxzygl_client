@@ -5,6 +5,7 @@ SOURCES += \
     $$PWD/model.cpp \
     $$PWD/searchinfo.cpp
 HEADERS += \
+    $$PWD/UserInfo.h \
     $$PWD/assetinfo.h \
     $$PWD/bvh.h \
     $$PWD/effect.h \

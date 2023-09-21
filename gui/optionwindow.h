@@ -7,7 +7,7 @@ class OptionWindow : public IFunctionWindow
 {
     Q_OBJECT
 public:
-    explicit OptionWindow(QWidget *parent = nullptr);
+    explicit OptionWindow(QWidget *parent = nullptr, bool is_logined = true);
 
 signals:
 

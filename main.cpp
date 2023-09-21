@@ -6,7 +6,7 @@
 #include "function/configer/configmanager.h"
 #include "function/renderer/renderapi.h"
 #include "utils/jobsystem.h"
-#include "gui/homewindow.h"
+#include "gui/loginwindow.h"
 #include "utils/qssloader.h"
 
 int main(int argc, char *argv[])
@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
     auto css = QssLoader::getInstance()->loadStyleSheet(":/assets/assets/css/app.css");
     a.setStyleSheet(css);
 
-    auto homeWin = std::make_shared<HomeWindow>(nullptr, &a);
-    homeWin->showMaximized();
-//    homeWin->show();
+    auto loginWin = std::make_shared<LoginWindow>(nullptr);
+    loginWin->show();
+
     return a.exec();
 }

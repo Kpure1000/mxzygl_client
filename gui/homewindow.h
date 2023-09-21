@@ -11,7 +11,7 @@ class HomeWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit HomeWindow(QWidget* parent = nullptr, QApplication* current_app = nullptr);
+    explicit HomeWindow(QWidget* parent = nullptr);
     ~HomeWindow();
 
 protected:

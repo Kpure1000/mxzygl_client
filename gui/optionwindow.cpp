@@ -8,29 +8,35 @@
 #include "gui/uicomponent/optionwidget_render.h"
 #include "function/configer/configmanager.h"
 
-OptionWindow::OptionWindow(QWidget *parent)
+OptionWindow::OptionWindow(QWidget *parent, bool is_logined)
     : IFunctionWindow("选项", {600,500}, true, false, false, parent)
 {
     auto center_widget = centralWidget();
 
     auto ly_total = new QGridLayout(center_widget);
-    auto tabw = new QTabWidget(center_widget);
-    ly_total->addWidget(tabw);
 
-    auto w_server = new OptionWidget_Server(center_widget);
-    tabw->addTab(w_server, "服务器");
+    if (is_logined) {
+        auto tabw = new QTabWidget(center_widget);
+        ly_total->addWidget(tabw);
 
-    auto w_asset = new OptionWidget_Asset(center_widget);
-    tabw->addTab(w_asset, "资源");
+        auto w_server = new OptionWidget_Server(center_widget);
+        tabw->addTab(w_server, "服务器");
 
-    auto w_render = new OptionWidget_Render(center_widget);
-    tabw->addTab(w_render, "渲染");
+        auto w_asset = new OptionWidget_Asset(center_widget);
+        tabw->addTab(w_asset, "资源");
 
-    // 持久化上次打开时候的tab index
-    connect(tabw, &QTabWidget::currentChanged, this, [](int curIndex){
-        ConfigManager::getInstance()->setConfig("OptionWindow/lastTabIndex", curIndex);
-    });
-    auto lastTabIndex = ConfigManager::getInstance()->getConfig("OptionWindow/lastTabIndex", 0).toInt();
-    tabw->setCurrentIndex(lastTabIndex);
+        auto w_render = new OptionWidget_Render(center_widget);
+        tabw->addTab(w_render, "渲染");
+
+        // 持久化上次打开时候的tab index
+        connect(tabw, &QTabWidget::currentChanged, this, [](int curIndex){
+            ConfigManager::getInstance()->setConfig("OptionWindow/lastTabIndex", curIndex);
+        });
+        auto lastTabIndex = ConfigManager::getInstance()->getConfig("OptionWindow/lastTabIndex", 0).toInt();
+        tabw->setCurrentIndex(lastTabIndex);
+    } else {
+        auto w_server = new OptionWidget_Server(center_widget);
+        ly_total->addWidget(w_server);
+    }
 
 }

@@ -82,6 +82,11 @@ public:
         REQUEST_PUSHSC           = 0x0000001A,   // 推送标准分类
         RESPONSE_PUSHSC          = 0x1000001A,
 
+        REQUEST_LOGIN            = 0x0000001B,   // 登录
+        RESPONSE_LOGIN           = 0x1000001B,
+        REQUEST_SIGNUP           = 0x0000001C,   // 注册
+        RESPONSE_SIGNUP          = 0x1000001C,
+
     };
     Q_ENUM(HeaderField)
 

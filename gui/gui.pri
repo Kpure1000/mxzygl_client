@@ -5,6 +5,7 @@ SOURCES += \
     $$PWD/ifunctionwindow.cpp \
     $$PWD/importwindow.cpp \
     $$PWD/indexwindow.cpp \
+    $$PWD/loginwindow.cpp \
     $$PWD/optionwindow.cpp \
     $$PWD/scmanagerwindow.cpp \
     $$PWD/tagsmanagerwindow.cpp \
@@ -18,6 +19,7 @@ HEADERS += \
     $$PWD/ifunctionwindow.h \
     $$PWD/importwindow.h \
     $$PWD/indexwindow.h \
+    $$PWD/loginwindow.h \
     $$PWD/optionwindow.h \
     $$PWD/scmanagerwindow.h \
     $$PWD/tagsmanagerwindow.h \

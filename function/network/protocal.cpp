@@ -53,14 +53,14 @@ QJsonObject Protocal::pack(const QJsonObject &org)
 
 QJsonObject Protocal::unpack(const QJsonObject &packed)
 {
-    auto packed_type    =   packed          [   "type"      ].toInt();
-    auto packed_status  =   packed          [   "status"    ].toString();
     auto packed_models  =   packed          [   "models"    ].toObject();
 
     QJsonObject unpacked;
 
-    unpacked.insert( "type",    packed_type);
-    unpacked.insert( "status",  packed_status);
+    for (QJsonObject::const_iterator it = packed.begin(); it != packed.end(); it++) {
+        if (it.key() != "models")
+            unpacked.insert(it.key(), it.value());
+    }
 
     if (packed_models.size() == 0){
         return unpacked;

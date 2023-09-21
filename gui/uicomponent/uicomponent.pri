@@ -5,6 +5,7 @@ SOURCES += \
     $$PWD/inputdailog.cpp \
     $$PWD/interactivewidget.cpp \
     $$PWD/loggingwidget.cpp \
+    $$PWD/loginwidget.cpp \
     $$PWD/modelsearchwidget.cpp \
     $$PWD/optionwidget_asset.cpp \
     $$PWD/optionwidget_render.cpp \
@@ -24,6 +25,7 @@ HEADERS += \
     $$PWD/inputdailog.h \
     $$PWD/interactivewidget.h \
     $$PWD/loggingwidget.h \
+    $$PWD/loginwidget.h \
     $$PWD/modelsearchwidget.h \
     $$PWD/optionwidget_asset.h \
     $$PWD/optionwidget_render.h \
@@ -43,6 +45,7 @@ FORMS += \
     $$PWD/inputdailog.ui \
     $$PWD/interactivewidget.ui \
     $$PWD/loggingwidget.ui \
+    $$PWD/loginwidget.ui \
     $$PWD/modelsearchwidget.ui \
     $$PWD/optionwidget_asset.ui \
     $$PWD/optionwidget_render.ui \
