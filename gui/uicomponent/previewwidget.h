@@ -8,6 +8,7 @@
 
 class PreviewPane;
 class InfoTableWidget;
+class QMessageBox;
 
 class PreviewWidget : public QWidget
 {
@@ -45,9 +46,11 @@ signals:
     void onPreview(const std::vector<int> &index);
     void onRefresh();
     void onClear();
+    void onLoadedFailed(const QString& assetName);
 
 private slots:
     void doPreviewPrepare(const std::vector<int> &index);
+    void doPreviewFailed(const QString& assetName);
 
 private:
     InfoTableWidget *m_infoTable;
@@ -55,7 +58,7 @@ private:
     int m_previewNum;
     PreviewType m_type;
 //    bool m_info_editable;
-
+    QMessageBox *m_msgBox = nullptr;
 };
 
 #endif // MX_PREVIEWWIDGET_H

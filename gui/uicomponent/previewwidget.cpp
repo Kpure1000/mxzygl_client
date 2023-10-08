@@ -9,6 +9,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QMessageBox>
 
 #include "gui/uicomponent/previewpane.h"
 #include "gui/uicomponent/infotablewidget.h"
@@ -32,6 +33,9 @@ PreviewWidget::PreviewWidget(QJsonObject *info, int row, int column, PreviewType
             auto previewPane = new PreviewPane(panesWidget);
             ly_pane->addWidget(previewPane, r, c);
             m_previewPanes.push_back(previewPane);
+            // response PreviewPane::onPreviewFailed
+            connect(previewPane, &PreviewPane::onPreviewFailed, this, &PreviewWidget::onLoadedFailed, Qt::QueuedConnection);
+            connect(previewPane, &PreviewPane::onPreviewFailed, this, &PreviewWidget::doPreviewFailed, Qt::QueuedConnection);
         }
     }
 
@@ -111,4 +115,22 @@ void PreviewWidget::doPreviewPrepare(const std::vector<int> &index)
         }
     }
     emit onPreview(index);
+}
+
+void PreviewWidget::doPreviewFailed(const QString &assetName)
+{
+    if (nullptr == m_msgBox || m_msgBox->isHidden()) {
+        if (nullptr != m_msgBox)
+            delete m_msgBox;
+        m_msgBox = new QMessageBox(tr("资源加载失败"), "",
+                                      QMessageBox::Warning,
+                                      QMessageBox::Ok,
+                                      QMessageBox::NoButton,
+                                      QMessageBox::NoButton,
+                                      this);
+        m_msgBox->setTextInteractionFlags(m_msgBox->textInteractionFlags() | Qt::TextSelectableByMouse);
+        m_msgBox->open();
+    }
+
+    m_msgBox->setText(m_msgBox->text() + QString(R"(%1"%2")").arg(m_msgBox->text().isEmpty() ? "" : ", ", assetName));
 }
