@@ -87,6 +87,9 @@ public:
         REQUEST_SIGNUP           = 0x0000001C,   // 注册
         RESPONSE_SIGNUP          = 0x1000001C,
 
+        REQUEST_DOWNLOAD         = 0x0000001D,   // 下载
+        RESPONSE_DOWNLOAD        = 0x1000001D,
+
     };
     Q_ENUM(HeaderField)
 

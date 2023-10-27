@@ -25,6 +25,7 @@
 #include "gui/directorywindow.h"
 #include "gui/scmanagerwindow.h"
 #include "function/usermanager.h"
+#include "function/downloader.h"
 
 HomeWindow::HomeWindow(QWidget* parent) : QMainWindow(parent)
 {
@@ -79,6 +80,26 @@ HomeWindow::HomeWindow(QWidget* parent) : QMainWindow(parent)
 
     this->resize(800, 600);
 
+    connect(sw_content->getDownloader(), &Downloader::onResponsing, this, [=](const QString & info, bool is_continue){
+        is_continue ? logging_widget->info(info) : logging_widget->warning(info);
+    });
+    connect(sw_label->getDownloader(), &Downloader::onResponsing, this, [=](const QString & info, bool is_continue){
+        is_continue ? logging_widget->info(info) : logging_widget->warning(info);
+    });
+    connect(sw_type->getDownloader(), &Downloader::onResponsing, this, [=](const QString & info, bool is_continue){
+        is_continue ? logging_widget->info(info) : logging_widget->warning(info);
+    });
+
+
+    auto _downloader = new Downloader(this);
+    connect(_downloader, &Downloader::onDownloadSucceeded, this, [=]() {
+        _downloader->deleteLater();
+    });
+    connect(_downloader, &Downloader::onDownloadFailed, this, [=](const QString & info) {
+        logging_widget->warning(info);
+        _downloader->deleteLater();
+    });
+    _downloader->query();
 }
 
 HomeWindow::~HomeWindow()

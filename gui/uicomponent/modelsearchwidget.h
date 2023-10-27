@@ -10,6 +10,7 @@ class ModelSearchWidget;
 }
 
 class PreviewWidget;
+class Downloader;
 
 class ModelSearchWidget : public QWidget
 {
@@ -20,6 +21,8 @@ public:
     ~ModelSearchWidget();
 
     ModelSearch *getSearcher() const { return m_modelSearch; }
+
+    Downloader *getDownloader() const;
 
 private slots:
     void on_le_input_textChanged(const QString &input);
@@ -33,6 +36,7 @@ private slots:
 private:
     Ui::ModelSearchWidget *ui;
 
+    Downloader *m_downloader;
     ModelSearch *m_modelSearch;
 
     PreviewWidget *m_single_preview, *m_preview;

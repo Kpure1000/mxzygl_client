@@ -12,6 +12,7 @@
 #include "gui/uicomponent/previewpane.h"
 #include "gui/uicomponent/renderwidget.h"
 #include "function/renderer/renderer.h"
+#include "function/downloader.h"
 
 ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget *parent) :
     QWidget(parent), ui(new Ui::ModelSearchWidget), m_single_preview(nullptr)
@@ -19,6 +20,15 @@ ModelSearchWidget::ModelSearchWidget(ModelSearch::SearchType searchType, QWidget
     ui->setupUi(this);
 
     ui->bt_export->setEnabled(false);
+
+    m_downloader = new Downloader(this);
+
+    connect(m_downloader, &Downloader::onDownloadSucceeded, this, [=]() {
+        //
+    });
+    connect(m_downloader, &Downloader::onDownloadFailed, this, [=](const QString & info) {
+        //
+    });
 
     m_modelSearch = new ModelSearch(searchType, this);
     connect(m_modelSearch, &ModelSearch::onResultUpdate, this, [=](){
@@ -170,5 +180,12 @@ void ModelSearchWidget::on_bt_export_clicked()
     }
 
     exportDia->show();
+
+    m_downloader->download();
+}
+
+Downloader *ModelSearchWidget::getDownloader() const
+{
+    return m_downloader;
 }
 
