@@ -153,7 +153,8 @@ void ModelSearchWidget::on_bt_export_clicked()
     auto exportDia = new QDialog(this);
     exportDia->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
     exportDia->setAttribute(Qt::WA_DeleteOnClose, true);
-    exportDia->setWindowTitle(tr("导出模型路径列表"));
+    exportDia->setWindowModality(Qt::ApplicationModal);
+    exportDia->setWindowTitle(tr("下载模型路径列表"));
 
     auto ly_total = new QGridLayout(exportDia);
 
