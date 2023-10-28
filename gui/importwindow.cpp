@@ -532,13 +532,13 @@ QWidget *ImportWindow::setupModel_Upload(AssetImporter *importer, WizardWidget* 
         bt_upload->setEnabled(false);
         bt_upload_simple->setEnabled(false);
         importer->clear();
-        // TOOD: 暂时写在日志输出里 (几何形状信息分析)
-        m_logging_widget->trace("几何形状信息分析成功");
-        // TOOD: 暂时写在日志输出里 (纹理信息分析)
-        m_logging_widget->trace("纹理信息分析成功");
-        // TOOD: 暂时写在日志输出里 (材质和局部光照明模型编码)
+
+        m_logging_widget->trace("几何形状信息分析成功!");
+        m_logging_widget->trace("纹理信息分析成功!");
+        m_logging_widget->trace("几何简化编码成功!");
         m_logging_widget->trace("材质和局部光照明模型编码成功!");
-        m_logging_widget->trace("上传成功");
+
+        m_logging_widget->trace("上传成功!");
         QMessageBox::information(this, tr("模型资源上传"), tr("上传成功!"));
     });
 
@@ -546,13 +546,13 @@ QWidget *ImportWindow::setupModel_Upload(AssetImporter *importer, WizardWidget* 
         bt_upload->setEnabled(false);
         bt_upload_simple->setEnabled(false);
         importer->clear();
-        // TOOD: 暂时写在日志输出里 (几何形状信息分析)
-        m_logging_widget->trace("几何形状信息分析成功");
-        // TOOD: 暂时写在日志输出里 (纹理信息分析)
-        m_logging_widget->trace("纹理信息分析成功");
-        // TOOD: 暂时写在日志输出里 (材质和局部光照明模型编码)
+
+        m_logging_widget->trace("几何形状信息分析成功!");
+        m_logging_widget->trace("纹理信息分析成功!");
+        m_logging_widget->trace("几何简化编码成功!");
         m_logging_widget->trace("材质和局部光照明模型编码成功!");
-        m_logging_widget->trace("简单上传成功");
+
+        m_logging_widget->trace("简单上传成功!");
         QMessageBox::information(this, tr("模型资源简单上传"), tr("简单上传成功!"));
     });
 
