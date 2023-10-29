@@ -32,7 +32,6 @@ Downloader::Downloader(QObject *parent) : QObject(parent)
 
 void Downloader::download()
 {
-    qDebug() << "Downloader::download";
     emit onResponsing(tr("开始下载"), true);
     QJsonObject data = {{
         {"type",       static_cast<int>(Protocal::HeaderField::REQUEST_DOWNLOAD)},
@@ -45,13 +44,12 @@ void Downloader::download()
 
 void Downloader::query()
 {
-    qDebug() << "Downloader::query";
     emit onResponsing(tr("开始查询"), true);
-  QJsonObject data = {{
+    QJsonObject data = {{
       {"type",       static_cast<int>(Protocal::HeaderField::REQUEST_DOWNLOAD)},
       {"is_query",      true},
       {"headers",    QJsonArray() << QJsonObject()},
       {"data",       QJsonArray() << QJsonObject()}
-  }};
-  m_client->sendData(data);
+    }};
+    m_client->sendData(data);
 }

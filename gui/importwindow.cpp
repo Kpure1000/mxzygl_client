@@ -192,6 +192,19 @@ QWidget *ImportWindow::setupBrowseWidget(AssetImporter *importer, WizardWidget* 
         });
     }
 
+    connect(importer, &AssetImporter::onSingleSizeOutofLimit, totalWidget, [=](qint64 singleSize, qint64 limit) {
+        double singleSize_mb = static_cast<double>(singleSize) / 1024.0f / 1024.0f;
+        double limit_mb = static_cast<double>(limit) / 1024.0f / 1024.0f;
+        QMessageBox::warning(this, tr("添加文件错误"), QString(tr("单个资源大小不能超过 %1 MB, 当前资源大小为: %2 MB")).arg(limit_mb).arg(singleSize_mb));
+    });
+
+    connect(importer, &AssetImporter::onTotalSizeOutofLimit, totalWidget, [=](qint64 totalSize, qint64 newTotalSize, qint64 limit) {
+        double totalSize_mb = static_cast<double>(totalSize) / (1024. * 1024.);
+        double newTotalSize_mb = static_cast<double>(newTotalSize) / (1024. * 1024.);
+        double limit_mb = static_cast<double>(limit) / (1024. * 1024.);
+        QMessageBox::warning(this, tr("添加文件错误"), QString(tr("总资源大小不能超过 %1 MB, 当前总资源大小为: %2 MB, 新增后大小为: %3 MB")).arg(limit_mb).arg(totalSize_mb).arg(newTotalSize_mb));
+    });
+
     connect(importer, &AssetImporter::onAddPaths, totalWidget, [=]() {
         wizard->setNextButtonEnable(true);
         previewWidget->refreshInfo();
@@ -231,10 +244,14 @@ QWidget *ImportWindow::setupBrowseWidget(AssetImporter *importer, WizardWidget* 
         }
         QString open_dir = ConfigManager::getInstance()->getConfig(config_key).toString();
         selectedFiles = QFileDialog::getOpenFileNames(totalWidget, open_title, open_dir, open_option);
+
+        if (importer->addPathsNotExist(selectedFiles)) {
+            ConfigManager::getInstance()->setConfig(config_key, QFileInfo(selectedFiles[0]).absolutePath());
+        }
+
         if (selectedFiles.size() > 0)
             ConfigManager::getInstance()->setConfig(config_key, QFileInfo(selectedFiles[0]).absolutePath());
 
-        importer->addPathsNotExist(selectedFiles);
         previewWidget->selectGroup(0);
     });
 

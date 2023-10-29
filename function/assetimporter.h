@@ -25,7 +25,7 @@ public:
     explicit AssetImporter(ImportType type, QObject *parent = nullptr);
     ~AssetImporter();
 
-    void addPathsNotExist(const QStringList &filePaths);
+    bool addPathsNotExist(const QStringList &filePaths);
 
     void clear();
 
@@ -61,6 +61,8 @@ public:
     QJsonObject *getInfoRef() { return &m_info; }
 
 signals:
+    void onSingleSizeOutofLimit(qint64 singleSize, qint64 limit);
+    void onTotalSizeOutofLimit(qint64 totalSize, qint64 newTotalSize, qint64 limit);
     void onAddPaths();
     void onClear();
 
@@ -95,6 +97,9 @@ private:
     std::atomic_int m_saveCount = 0;
 
     std::chrono::steady_clock::time_point m_upload_start;
+
+    qint64 m_totalSize = 0ll;
+    qint64 m_singleSizeLimit, m_totalSizeLimit;
 
 };
 

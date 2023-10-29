@@ -18,6 +18,9 @@ public:
 private:
     Ui::OptionWidget_Asset *ui;
 
+    double m_single_size_limit;
+    double m_total_size_limit;
+
     double m_cache_timeout;
     double m_cache_timeout_retry;
 };

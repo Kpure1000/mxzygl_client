@@ -12,10 +12,22 @@
 #include "function/assetloader/modelconverter.h"
 #include "utils/jobsystem.h"
 #include "function/versioncontroller.h"
+#include "function/configer/configmanager.h"
 
 AssetImporter::AssetImporter(ImportType type, QObject *parent)
     : QObject{parent}, m_type(type)
 {
+    auto _singleLim = ConfigManager::getInstance()->getConfig("Asset/SingleSizeLimit", 100.f).toDouble();
+    auto _totalLim = ConfigManager::getInstance()->getConfig("Asset/TotalSizeLimit", 1024.f).toDouble();
+    m_singleSizeLimit = static_cast<qint64>(_singleLim * 1024. * 1024.);
+    m_totalSizeLimit = static_cast<qint64>(_totalLim * 1024. * 1024.);
+
+    connect(ConfigManager::getInstance(), &ConfigManager::onConfModified, this, [=](){
+        auto sizeLim_raw = ConfigManager::getInstance()->getConfigs({"Asset/SingleSizeLimit", "Asset/TotalSizeLimit"});
+        m_singleSizeLimit = static_cast<qint64>(sizeLim_raw[0].toDouble() * 1024.f * 1024.f);
+        m_totalSizeLimit = static_cast<qint64>(sizeLim_raw[1].toDouble() * 1024.f * 1024.f);
+    });
+
     m_client = new Client(this);
 
     connect(m_client, &Client::onSendingStateChanged, this, &AssetImporter::onResponsing);
@@ -98,16 +110,30 @@ AssetImporter::~AssetImporter()
 //    qDebug() << "AssetImporter::~AssetImporter";
 }
 
-void AssetImporter::addPathsNotExist(const QStringList &filePaths)
+bool AssetImporter::addPathsNotExist(const QStringList &filePaths)
 {
+    if (filePaths.isEmpty())
+        return false;
     int addition_count = 0;
+    auto data = m_info["data"].toArray();
     for (const auto &filePath : filePaths) {
         if (!has(filePath)) {
+            // TODO: check single size
+            auto fileInfo = QFileInfo(filePath);
+            qint64 singleSize = fileInfo.size();
+            if (singleSize > m_singleSizeLimit) {
+                emit onSingleSizeOutofLimit(singleSize, m_singleSizeLimit);
+                return false;
+            }
+            if (m_totalSize + singleSize > m_totalSizeLimit) {
+                emit onTotalSizeOutofLimit(m_totalSize, m_totalSize + singleSize, m_totalSizeLimit);
+                return false;
+            }
+            m_totalSize += singleSize;
+
             m_filePathDict.insert(filePath.toStdString());
             m_filePaths << filePath;
-            auto data = m_info["data"].toArray();
 
-            auto fileInfo = QFileInfo(filePath);
             QJsonObject item;
             item.insert("name", fileInfo.baseName());
 
@@ -121,13 +147,15 @@ void AssetImporter::addPathsNotExist(const QStringList &filePaths)
             item.insert("path", filePath);
 
             data << item;
-            m_info["data"] = data;
             addition_count++;
         }
     }
-//    qDebug() << m_info;
-    if (addition_count)
+    m_info["data"] = data;
+
+    if (addition_count) {
         emit onAddPaths();
+    }
+    return true;
 }
 
 void AssetImporter::clear()
@@ -135,6 +163,7 @@ void AssetImporter::clear()
     m_filePathDict.clear();
     m_filePaths.clear();
     m_info["data"] = QJsonArray();
+    m_totalSize = 0ll;
     emit onClear();
 }
 

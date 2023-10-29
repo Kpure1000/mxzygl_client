@@ -13,7 +13,44 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0">
+   <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>资源导入设置</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>总资源大小限制(MB)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="spinb_singleLim">
+        <property name="maximum">
+         <double>9999.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>单个资源大小限制(MB)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="spinb_totalLim">
+        <property name="maximum">
+         <double>999999.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
